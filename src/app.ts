@@ -3,6 +3,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import appRoute from "./routes/route";
 
 // dotenv
 dotenv.config();
@@ -22,10 +23,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// sample route
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
-});
+// routes
+app.use("/", appRoute);
 
 // export app
 export default app;
