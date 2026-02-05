@@ -1,0 +1,27 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// enum role 
+enum Role {
+  wakil_dekan_1
+  kaprodi
+  tim_akreditasi
+}
+
+// model user
+model User {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
