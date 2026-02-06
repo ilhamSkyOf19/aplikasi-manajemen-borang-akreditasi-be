@@ -2,6 +2,7 @@ import prisma from "../libs/prisma";
 import {
   CreateUserType,
   LoginUserType,
+  PayloadUserType,
   ResponseUserType,
   toUserResponse,
 } from "../models/user.model";
@@ -70,6 +71,31 @@ export class UserService {
         role: user.role as UserRole,
       }),
       password: user.password,
+    };
+  }
+
+  // find user by id
+  static async findUserById(id: number): Promise<PayloadUserType | null> {
+    const user = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    // check
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      nama: user.nama,
+      email: user.email,
+      role: user.role as UserRole,
     };
   }
 }

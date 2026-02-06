@@ -3,6 +3,7 @@ import { AuthController } from "../controllers/auth.controller";
 import { zodValidation } from "../middlewares/validation.middleware";
 import { CreateUserType, LoginUserType } from "../models/user.model";
 import { UserValidation } from "../validations/user.validation";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const authRoute: Router = Router();
 
@@ -19,5 +20,8 @@ authRoute.post(
   zodValidation<CreateUserType>(UserValidation.CREATE),
   AuthController.register,
 );
+
+// me
+authRoute.get("/me", authMiddleware, AuthController.me);
 
 export default authRoute;

@@ -2,12 +2,14 @@ import { NextFunction, Request, Response } from "express";
 import {
   CreateUserType,
   LoginUserType,
+  PayloadUserType,
   ResponseUserType,
 } from "../models/user.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { UserService } from "../services/user.service";
 import argon2 from "argon2";
 import { generateAccessToken } from "../utils/jwt";
+import { AuthRequest } from "../types/authRequest";
 
 export class AuthController {
   // register
@@ -97,6 +99,34 @@ export class AuthController {
 
       // return success
       return ResponseResult.success<null>(null, res, 200, "success login user");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // auth me
+  static async me(
+    req: AuthRequest,
+    res: Response<ResponseStructure<PayloadUserType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get res data
+      const data = req.data;
+
+      // cek data
+      if (!data) return ResponseResult.unauthorized(res, "Token not found");
+
+      // call service
+      const service = await UserService.findUserById(data.id);
+
+      // return success
+      return ResponseResult.success<PayloadUserType | null>(
+        service,
+        res,
+        200,
+        "success login user",
+      );
     } catch (error) {
       next(error);
     }
