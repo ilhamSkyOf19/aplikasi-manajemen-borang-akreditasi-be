@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import appRoute from "./routes/route";
+import { errorMiddleware } from "./middlewares/error.middleware";
 
 // dotenv
 dotenv.config();
@@ -25,6 +26,9 @@ app.use(cookieParser());
 
 // routes
 app.use("/", appRoute);
+
+// erro handle
+app.use(errorMiddleware);
 
 // export app
 export default app;
