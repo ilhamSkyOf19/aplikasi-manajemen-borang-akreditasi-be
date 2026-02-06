@@ -1,6 +1,7 @@
 import prisma from "../libs/prisma";
 import {
   CreateUserType,
+  LoginUserType,
   ResponseUserType,
   toUserResponse,
 } from "../models/user.model";
@@ -28,5 +29,47 @@ export class UserService {
       ...result,
       role: result.role as UserRole,
     });
+  }
+
+  // find user by email or name & password
+  static async findUser({
+    identifier,
+  }: Omit<LoginUserType, "password">): Promise<
+    (ResponseUserType & { password: string }) | null
+  > {
+    // find user by email or name
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          {
+            email: identifier,
+          },
+          {
+            nama: identifier,
+          },
+        ],
+      },
+
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        role: true,
+        password: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    // check
+    if (!user) return null;
+
+    return {
+      ...toUserResponse({
+        ...user,
+        role: user.role as UserRole,
+      }),
+      password: user.password,
+    };
   }
 }

@@ -1,8 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { CreateUserType, ResponseUserType } from "../models/user.model";
+import {
+  CreateUserType,
+  LoginUserType,
+  ResponseUserType,
+} from "../models/user.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { UserService } from "../services/user.service";
 import argon2 from "argon2";
+import { generateAccessToken } from "../utils/jwt";
 
 export class AuthController {
   // register
@@ -35,6 +40,63 @@ export class AuthController {
         201,
         "success register user",
       );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // login
+  static async login(
+    req: Request<{}, {}, LoginUserType>,
+    res: Response<ResponseStructure<null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get body
+      const body = req.body;
+
+      console.log("body:", req.body);
+
+      // call service
+      const service = await UserService.findUser({
+        identifier: body.identifier.trim(),
+      });
+
+      // cek user
+      if (!service)
+        return ResponseResult.error(
+          res,
+          400,
+          "Email or nama or password is wrong",
+        );
+
+      // compare
+      const isMatch = await argon2.verify(
+        service.password,
+        body.password.trim(),
+      );
+
+      // cek
+      if (!isMatch)
+        return ResponseResult.error(
+          res,
+          400,
+          "Email or nama or password is wrong",
+        );
+
+      // generate token
+      const token = generateAccessToken(service);
+
+      // set cookie
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict" as const,
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+
+      // return success
+      return ResponseResult.success<null>(null, res, 200, "success login user");
     } catch (error) {
       next(error);
     }

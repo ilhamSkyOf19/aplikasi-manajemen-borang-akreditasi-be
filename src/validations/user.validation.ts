@@ -1,5 +1,5 @@
 import z from "zod";
-import { CreateUserType } from "../models/user.model";
+import { CreateUserType, LoginUserType } from "../models/user.model";
 
 export class UserValidation {
   // only char schema
@@ -14,6 +14,19 @@ export class UserValidation {
       .min(min, `${field} minimal ${min} karakter`)
       .max(max, `${field} maksimal ${max} karakter`)
       .regex(/^[A-Za-z\s]+$/, `${field} hanya boleh berisi huruf`);
+  }
+
+  // string schema
+  private static stringSchema(
+    field: string,
+    min: number = 1,
+    max: number = 100,
+  ) {
+    return z
+      .string(`${field} harus berupa karakter`)
+      .trim()
+      .min(min, `${field} minimal ${min} karakter`)
+      .max(max, `${field} maksimal ${max} karakter`);
   }
 
   // email schema
@@ -38,4 +51,12 @@ export class UserValidation {
       password: this.passwordSchema(),
     })
     .strict() satisfies z.ZodType<CreateUserType>;
+
+  // login
+  static readonly LOGIN = z
+    .object({
+      identifier: this.stringSchema("identifier"),
+      password: this.passwordSchema(),
+    })
+    .strict() satisfies z.ZodType<LoginUserType>;
 }
