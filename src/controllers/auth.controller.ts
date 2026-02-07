@@ -131,4 +131,26 @@ export class AuthController {
       next(error);
     }
   }
+
+  // logout
+  static async logout(
+    _req: Request,
+    res: Response<ResponseStructure<null>>,
+    next: NextFunction,
+  ) {
+    try {
+      const isProduction = process.env.NODE_ENV === "production";
+
+      // Clear cookie
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+      });
+
+      return ResponseResult.success<null>(null, res, 200, "success logout");
+    } catch (error) {
+      next(error);
+    }
+  }
 }
