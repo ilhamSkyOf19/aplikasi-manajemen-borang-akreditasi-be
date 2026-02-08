@@ -14,7 +14,7 @@ export class UserService {
     const result = await prisma.user.create({
       data: {
         ...req,
-        role: "wakil_dekan_1",
+        role: req.role,
       },
       select: {
         id: true,

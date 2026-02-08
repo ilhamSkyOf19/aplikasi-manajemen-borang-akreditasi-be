@@ -26,3 +26,13 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// kriteria 
+model Kriteria {
+  id           Int      @id @default(autoincrement())
+  kriteria     Int      @unique
+  namaKriteria String
+  revisi       Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

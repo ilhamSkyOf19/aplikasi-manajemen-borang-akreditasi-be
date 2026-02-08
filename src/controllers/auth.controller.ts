@@ -33,6 +33,7 @@ export class AuthController {
         nama: body.nama.trim(),
         email: body.email.trim(),
         password: hashedPassword,
+        role: body.role,
       });
 
       // response success

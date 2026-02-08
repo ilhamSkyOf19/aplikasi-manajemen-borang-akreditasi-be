@@ -13,7 +13,7 @@ export interface IUser {
 // create user model
 export interface CreateUserType extends Omit<
   IUser,
-  "id" | "createdAt" | "updatedAt" | "role"
+  "id" | "createdAt" | "updatedAt"
 > {}
 
 // login type

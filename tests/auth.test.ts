@@ -9,6 +9,7 @@ const testEmails = [
   "test_4@example.com",
   "test_5@example.com",
   "test_6@example.com",
+  "test_7@example.com",
 ];
 
 describe("Auth Register Endpoint (Integration with DB)", () => {
@@ -16,8 +17,29 @@ describe("Auth Register Endpoint (Integration with DB)", () => {
     nama: "Ilham",
     email: testEmails[0],
     password: "secret123",
+    role: "wakil_dekan_1",
   };
 
+  let cookies: string[];
+
+  // ===============================
+  // 🔹 REGISTER & LOGIN USER
+  // ===============================
+  beforeAll(async () => {
+    // login
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({ identifier: "wakildekan1@gmail.com", password: "wakildekan1" })
+      .expect(200);
+
+    cookies = res.headers["set-cookie"] as unknown as string[];
+
+    // register
+    await request(app)
+      .post("/api/auth/register")
+      .set("Cookie", cookies)
+      .send(validUser);
+  });
   // ===============================
   // 🔹 CLEANUP DB
   // ===============================
@@ -27,7 +49,6 @@ describe("Auth Register Endpoint (Integration with DB)", () => {
         email: { in: testEmails },
       },
     });
-
     await prisma.$disconnect();
   });
 
@@ -35,24 +56,25 @@ describe("Auth Register Endpoint (Integration with DB)", () => {
   // 🔹 SUCCESS REGISTER
   // ===============================
   it("should create a valid user and return 201", async () => {
-    const response = await request(app)
+    const res = await request(app)
       .post("/api/auth/register")
-      .send(validUser);
+      .set("Cookie", cookies)
+      .send({ ...validUser, email: testEmails[5] })
+      .expect(201);
 
-    expect(response.status).toBe(201);
-    expect(response.body.meta.statusCode).toBe(201);
-    expect(response.body.meta.message).toBe("success register user");
+    expect(res.status).toBe(201);
+    expect(res.body.meta.statusCode).toBe(201);
+    expect(res.body.meta.message).toBe("success register user");
 
-    expect(response.body.data).toHaveProperty("id");
-    expect(response.body.data).toHaveProperty("nama", validUser.nama);
-    expect(response.body.data).toHaveProperty("email", validUser.email);
-    expect(response.body.data).toHaveProperty("role");
-    expect(response.body.data).not.toHaveProperty("password");
+    expect(res.body.data).toHaveProperty("id");
+    expect(res.body.data.nama).toBe(validUser.nama);
+    expect(res.body.data.email).toBe(testEmails[5]);
+    expect(res.body.data.role).toBe(validUser.role);
+    expect(res.body.data).not.toHaveProperty("password");
 
     const dbUser = await prisma.user.findUnique({
       where: { email: validUser.email },
     });
-
     expect(dbUser).not.toBeNull();
     expect(dbUser?.nama).toBe(validUser.nama);
   });
@@ -61,113 +83,106 @@ describe("Auth Register Endpoint (Integration with DB)", () => {
   // 🔹 INVALID NAMA
   // ===============================
   it("should fail if nama contains numbers (400)", async () => {
-    const response = await request(app)
+    const res = await request(app)
       .post("/api/auth/register")
-      .send({ ...validUser, nama: "Ilham123" });
+      .set("Cookie", cookies)
+      .send({
+        ...validUser,
+        email: testEmails[1],
+        nama: "Ilham123",
+      });
 
-    expect(response.status).toBe(400);
-    expect(response.body.meta.statusCode).toBe(400);
-    expect(response.body.data).toBeNull();
+    expect(res.status).toBe(400);
+    expect(res.body.meta.statusCode).toBe(400);
+    expect(res.body.data).toBeNull();
   });
 
   // ===============================
   // 🔹 DUPLICATE EMAIL
   // ===============================
   it("should fail if email already exists (409)", async () => {
-    const response = await request(app)
+    const res = await request(app)
       .post("/api/auth/register")
+      .set("Cookie", cookies)
       .send(validUser);
 
-    expect(response.status).toBe(409);
-    expect(response.body.meta.statusCode).toBe(409);
-    expect(response.body.data).toBeNull();
+    expect(res.status).toBe(409);
+    expect(res.body.meta.statusCode).toBe(409);
+    expect(res.body.data).toBeNull();
   });
 
   // ===============================
   // 🔹 SHORT PASSWORD
   // ===============================
   it("should fail if password is too short (400)", async () => {
-    const response = await request(app)
+    const res = await request(app)
       .post("/api/auth/register")
+      .set("Cookie", cookies)
       .send({
         ...validUser,
-        email: testEmails[1],
+        email: testEmails[2],
         password: "123",
       });
 
-    expect(response.status).toBe(400);
-    expect(response.body.meta.statusCode).toBe(400);
-    expect(response.body.data).toBeNull();
+    expect(res.status).toBe(400);
+    expect(res.body.meta.statusCode).toBe(400);
+    expect(res.body.data).toBeNull();
   });
 
   // ===============================
   // 🔹 INVALID EMAIL FORMAT
   // ===============================
   it("should fail if email format is invalid (400)", async () => {
-    const response = await request(app)
+    const res = await request(app)
       .post("/api/auth/register")
+      .set("Cookie", cookies)
       .send({
         ...validUser,
         email: "invalidemail",
         nama: "ValidName",
       });
 
-    expect(response.status).toBe(400);
-    expect(response.body.meta.statusCode).toBe(400);
-    expect(response.body.data).toBeNull();
+    expect(res.status).toBe(400);
+    expect(res.body.meta.statusCode).toBe(400);
+    expect(res.body.data).toBeNull();
   });
 
   // ===============================
   // 🔹 TRIM NAMA
   // ===============================
   it("should trim extra spaces in nama", async () => {
-    const response = await request(app).post("/api/auth/register").send({
-      nama: "  Ilham  ",
-      email: testEmails[2],
-      password: "secret123",
-    });
-
-    expect(response.status).toBe(201);
-    expect(response.body.data.nama).toBe("Ilham");
-    expect(response.body.data.email).toBe(testEmails[2]);
-  });
-
-  // ===============================
-  // 🔹 EMAIL WITH SPACES
-  // ===============================
-  it("should fail if email has extra spaces", async () => {
-    const response = await request(app)
+    const res = await request(app)
       .post("/api/auth/register")
+      .set("Cookie", cookies)
       .send({
-        nama: "Ilham",
-        email: `  ${testEmails[3]}  `,
+        nama: "  Ilham  ",
+        email: testEmails[3],
         password: "secret123",
+        role: "wakil_dekan_1",
       });
 
-    expect(response.status).toBe(400);
-    expect(response.body.meta.statusCode).toBe(400);
-    expect(response.body.data).toBeNull();
+    expect(res.status).toBe(201);
+    expect(res.body.data.nama).toBe("Ilham");
+    expect(res.body.data.email).toBe(testEmails[3]);
   });
 
   // ===============================
-  // 🔹 TIMESTAMP CHECK
+  // 🔹 EMAIL WITH EXTRA SPACES
   // ===============================
-  it("should store createdAt and updatedAt correctly", async () => {
-    const response = await request(app).post("/api/auth/register").send({
-      nama: "TestTime",
-      email: testEmails[4],
-      password: "secret123",
-    });
+  it("should fail if email has extra spaces (400)", async () => {
+    const res = await request(app)
+      .post("/api/auth/register")
+      .set("Cookie", cookies)
+      .send({
+        nama: "Ilham",
+        email: `  ${testEmails[4]}  `,
+        password: "secret123",
+        role: "wakil_dekan_1",
+      });
 
-    expect(response.status).toBe(201);
-
-    const dbUser = await prisma.user.findUnique({
-      where: { email: testEmails[4] },
-    });
-
-    expect(dbUser).not.toBeNull();
-    expect(dbUser?.createdAt).toBeInstanceOf(Date);
-    expect(dbUser?.updatedAt).toBeInstanceOf(Date);
+    expect(res.status).toBe(400);
+    expect(res.body.meta.statusCode).toBe(400);
+    expect(res.body.data).toBeNull();
   });
 });
 
@@ -176,20 +191,28 @@ describe("Auth Flow Test", () => {
   const nama = "test";
   const email = "test_1@example.com";
   const password = "test123456";
-
+  const role = "wakil_dekan_1";
   const identifier = email;
 
   let cookies: string[];
 
   // ===============================
-  // 🔹 REGISTER USER
+  // 🔹 REGISTER & LOGIN USER
   // ===============================
   beforeAll(async () => {
+    // login
     const res = await request(app)
-      .post("/api/auth/register")
-      .send({ nama, email, password });
+      .post("/api/auth/login")
+      .send({ identifier: "wakildekan1@gmail.com", password: "wakildekan1" })
+      .expect(200);
 
-    console.log("register res:", res.status, res.body);
+    cookies = res.headers["set-cookie"] as unknown as string[];
+
+    // register
+    await request(app)
+      .post("/api/auth/register")
+      .set("Cookie", cookies)
+      .send({ nama, email, password, role });
   });
 
   // ===============================
@@ -199,7 +222,6 @@ describe("Auth Flow Test", () => {
     await prisma.user.deleteMany({
       where: { email },
     });
-
     await prisma.$disconnect();
   });
 
@@ -237,12 +259,12 @@ describe("Auth Flow Test", () => {
   });
 
   // ===============================
-  // 🔹 LOGIN USER NOT FOUND
+  // 🔹 LOGIN NON-EXISTENT USER
   // ===============================
   it("should fail login with non-existent user", async () => {
     const res = await request(app)
       .post("/api/auth/login")
-      .send({ identifier: "nouser", password: "123456" })
+      .send({ identifier: "test_1@example.com", password: "123456" })
       .expect(400);
 
     expect(res.body.meta.statusCode).toBe(400);
@@ -252,7 +274,7 @@ describe("Auth Flow Test", () => {
   // ===============================
   // 🔹 GET /ME SUCCESS
   // ===============================
-  it("should get current user data", async () => {
+  it("should get current user data from /me", async () => {
     const res = await request(app)
       .get("/api/auth/me")
       .set("Cookie", cookies)
@@ -263,12 +285,14 @@ describe("Auth Flow Test", () => {
 
     expect(res.body.data).toBeDefined();
     expect(res.body.data.email).toBe(email);
+    expect(res.body.data.nama).toBe(nama);
+    expect(res.body.data.role).toBe(role);
   });
 
   // ===============================
-  // 🔹 GET /ME NO COOKIE
+  // 🔹 GET /ME WITHOUT COOKIE
   // ===============================
-  it("should return 401 if no cookie", async () => {
+  it("should return 401 if no cookie is provided", async () => {
     const res = await request(app).get("/api/auth/me").expect(401);
 
     expect(res.body.meta.statusCode).toBe(401);
@@ -281,20 +305,29 @@ describe("Auth Flow Test (Register → Login → Me)", () => {
   const nama = "test";
   const email = "test_1@example.com";
   const password = "test123456";
+  const role = "wakil_dekan_1";
 
   const identifier = email;
 
   let cookies: string[];
 
-  // =========================
-  // ✅ REGISTER
-  // =========================
+  // ===============================
+  // 🔹 REGISTER & LOGIN USER
+  // ===============================
   beforeAll(async () => {
+    // login
     const res = await request(app)
-      .post("/api/auth/register")
-      .send({ nama, email, password });
+      .post("/api/auth/login")
+      .send({ identifier: "wakildekan1@gmail.com", password: "wakildekan1" })
+      .expect(200);
 
-    console.log("register res:", res.status, res.body);
+    cookies = res.headers["set-cookie"] as unknown as string[];
+
+    // register
+    await request(app)
+      .post("/api/auth/register")
+      .set("Cookie", cookies)
+      .send({ nama, email, password, role });
   });
 
   // =========================

@@ -4,6 +4,7 @@ import { zodValidation } from "../middlewares/validation.middleware";
 import { CreateUserType, LoginUserType } from "../models/user.model";
 import { UserValidation } from "../validations/user.validation";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { aclMiddleware } from "../middlewares/acl.middleware";
 
 const authRoute: Router = Router();
 
@@ -17,6 +18,7 @@ authRoute.post(
 // register
 authRoute.post(
   "/register",
+  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   zodValidation<CreateUserType>(UserValidation.CREATE),
   AuthController.register,
 );
