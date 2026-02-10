@@ -25,6 +25,9 @@ model User {
   role      Role     @default(tim_akreditasi)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // tims 
+  tims User_Tim_Akreditasi[]
 }
 
 // kriteria 
@@ -35,4 +38,29 @@ model Kriteria {
   revisi       Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+// anggota 
+model Tim_Akreditasi {
+  id                Int      @id @default(autoincrement())
+  namaTimAkreditasi String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // anggota 
+  user User_Tim_Akreditasi[]
+}
+
+// pivot table 
+model User_Tim_Akreditasi {
+  userId          Int
+  timAkreditasiId Int
+
+  // user
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // tim akreditasi
+  timAkreditasi Tim_Akreditasi @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
+
+  @@id([timAkreditasiId, userId])
 }

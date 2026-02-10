@@ -1,5 +1,4 @@
 import z from "zod";
-import { CreateUserType, LoginUserType } from "../models/user.model";
 import {
   CreateKriteriaType,
   UpdateKriteriaType,

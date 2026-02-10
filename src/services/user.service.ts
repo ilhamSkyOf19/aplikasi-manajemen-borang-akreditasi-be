@@ -98,4 +98,28 @@ export class UserService {
       role: user.role as UserRole,
     };
   }
+
+  // read users id
+  static async findUserManyById(ids: number[]): Promise<PayloadUserType[]> {
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    return users.map((user) => ({
+      id: user.id,
+      nama: user.nama,
+      email: user.email,
+      role: user.role as UserRole,
+    }));
+  }
 }

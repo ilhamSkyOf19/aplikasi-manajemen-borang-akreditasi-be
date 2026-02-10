@@ -3,3 +3,10 @@ export enum UserRole {
   kaprodi = "kaprodi",
   tim_akreditasi = "tim_akreditasi",
 }
+
+export interface MetaType {
+  totalData: number;
+  currentPage: number;
+  totalPage: number;
+  limit: number;
+}
