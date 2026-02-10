@@ -128,7 +128,7 @@ describe("Tim Akreditasi Test", () => {
           .set("Cookie", cookies)
           .send({
             namaTimAkreditasi: "Tim Akreditasi E",
-            user: "not-a-json",
+            users: "not-a-json",
           });
 
         expect(res.status).toBe(400);
@@ -140,7 +140,7 @@ describe("Tim Akreditasi Test", () => {
           .set("Cookie", cookies)
           .send({
             namaTimAkreditasi: "Tim Akreditasi F",
-            user: 1,
+            users: 1,
           });
 
         expect(res.status).toBe(400);
@@ -152,7 +152,7 @@ describe("Tim Akreditasi Test", () => {
           .set("Cookie", cookies)
           .send({
             namaTimAkreditasi: "Tim Akreditasi G",
-            user: [10.1, 11.3],
+            users: [10.1, 11.3],
           });
 
         expect(res.status).toBe(400);
@@ -168,7 +168,7 @@ describe("Tim Akreditasi Test", () => {
         const res = await request(app)
           .post("/api/tim-akreditasi/create")
           .set("Cookie", cookies)
-          .send({ user: [testUserIds[0]] });
+          .send({ users: [testUserIds[0]] });
 
         expect(res.status).toBe(400);
       });
@@ -188,7 +188,7 @@ describe("Tim Akreditasi Test", () => {
         .post("/api/tim-akreditasi/create")
         .send({
           namaTimAkreditasi: "Tim Akreditasi J",
-          user: [testUserIds[0]],
+          users: [testUserIds[0]],
         });
 
       expect(res.status).toBe(401);
@@ -509,7 +509,7 @@ describe("Tim Akreditasi Test", () => {
       });
 
       it("should update user array successfully (partial replacement + addition)", async () => {
-        // Buat tim awal dengan 3 user: a, b, c
+        // Buat tim awal dengan 3 users: a, b, c
         const timRes = await helpers.createTim("Tim Update user", [
           testUserIds[0], // a
           testUserIds[1], // b
@@ -523,7 +523,7 @@ describe("Tim Akreditasi Test", () => {
         const res = await request(app)
           .patch(`/api/tim-akreditasi/update/${timId}`)
           .set("Cookie", cookies)
-          .send({ user: updateduser });
+          .send({ users: updateduser });
 
         expect(res.status).toBe(200);
         expect(res.body.data.user).toBeInstanceOf(Array);
@@ -549,7 +549,7 @@ describe("Tim Akreditasi Test", () => {
       });
 
       it("should allow partial update (only user, replace one)", async () => {
-        // Create tim awal dengan 3 user: a, b, c
+        // Create tim awal dengan 3 users: a, b, c
         const timRes = await helpers.createTim("Tim Partial user Replace", [
           testUserIds[0], // a
           testUserIds[1], // b
@@ -563,7 +563,7 @@ describe("Tim Akreditasi Test", () => {
         const res = await request(app)
           .patch(`/api/tim-akreditasi/update/${timId}`)
           .set("Cookie", cookies)
-          .send({ user: updateduser });
+          .send({ users: updateduser });
 
         expect(res.status).toBe(200);
 
@@ -593,7 +593,7 @@ describe("Tim Akreditasi Test", () => {
         const res = await request(app)
           .patch(`/api/tim-akreditasi/update/${timId}`)
           .set("Cookie", cookies)
-          .send({ user: "not a json" });
+          .send({ users: "not a json" });
 
         expect(res.status).toBe(400);
         expect(res.body.meta.message).toMatch(/invalid input/i);
@@ -608,7 +608,7 @@ describe("Tim Akreditasi Test", () => {
         const res = await request(app)
           .patch(`/api/tim-akreditasi/update/${timId}`)
           .set("Cookie", cookies)
-          .send({ user: [999999] });
+          .send({ users: [999999] });
 
         expect(res.status).toBe(404);
         expect(res.body.meta.message).toMatch(/Resource not found/i);
