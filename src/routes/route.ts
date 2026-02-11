@@ -3,11 +3,15 @@ import globalRoute from "./global.route";
 import authRoute from "./auth.route";
 import kriteriaRouter from "./kriteria.route";
 import timAkreditasiRoute from "./timAkreditasi.route";
+import LimiterMiddleware from "../middlewares/limiter.middleware";
 
 const appRoute: Router = Router();
 
 // global route
 appRoute.use("/", globalRoute);
+
+// middleate limiter
+appRoute.use(LimiterMiddleware.apiRegular());
 
 // auth router
 appRoute.use("/api/auth", authRoute);

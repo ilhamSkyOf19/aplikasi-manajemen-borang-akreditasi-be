@@ -5,12 +5,14 @@ import { CreateUserType, LoginUserType } from "../models/user.model";
 import { UserValidation } from "../validations/user.validation";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
+import LimiterMiddleware from "../middlewares/limiter.middleware";
 
 const authRoute: Router = Router();
 
 // login
 authRoute.post(
   "/login",
+  LimiterMiddleware.login(),
   zodValidation<LoginUserType>(UserValidation.LOGIN),
   AuthController.login,
 );
