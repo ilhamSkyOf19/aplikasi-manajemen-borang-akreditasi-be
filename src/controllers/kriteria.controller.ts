@@ -8,6 +8,7 @@ import {
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { KriteriaService } from "../services/kriteira.service";
 import { PaginationType } from "../types/pagination";
+import { checkQueryPagination } from "../utils/checkQueryPagination";
 
 export class KriteriaController {
   // create
@@ -76,21 +77,15 @@ export class KriteriaController {
     next: NextFunction,
   ) {
     try {
-      // get pagination from query
-      const { page, limit, search, status } = req.query;
+      // get params
+      const { limit, page, search, status } = req.query;
 
-      // validasi page & limit jika ada
-      if (page || limit) {
-        const pageNumber = Number(page);
-        const limitNumber = Number(limit);
+      // check query
+      const checkQuery = checkQueryPagination(page, limit);
 
-        if (isNaN(pageNumber) || isNaN(limitNumber)) {
-          return ResponseResult.error(
-            res,
-            400,
-            "page and limit must be numbers",
-          );
-        }
+      // check query
+      if (!checkQuery?.status) {
+        return ResponseResult.error(res, 400, "page and limit must be numbers");
       }
 
       // check query status

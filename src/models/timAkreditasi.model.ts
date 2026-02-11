@@ -4,7 +4,7 @@ import { ResponseUserType } from "./user.model";
 export interface ITimAkreditasi {
   id: number;
   namaTimAkreditasi: string;
-  user: Omit<ResponseUserType, "password">[];
+  user: Omit<ResponseUserType, "password" | "tims">[];
   createdAt: Date;
   updatedAt: Date;
 }

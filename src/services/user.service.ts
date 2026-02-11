@@ -4,8 +4,10 @@ import {
   LoginUserType,
   PayloadUserType,
   ResponseUserType,
+  ResponseUserWithMetaType,
   toUserResponse,
 } from "../models/user.model";
+import { PaginationType } from "../types/pagination";
 import { UserRole } from "../utils/contstanst";
 
 export class UserService {
@@ -23,11 +25,24 @@ export class UserService {
         role: true,
         createdAt: true,
         updatedAt: true,
+        tims: {
+          select: {
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
       },
     });
 
     return toUserResponse({
       ...result,
+      tims: result.tims.map((tim) => tim.timAkreditasi),
       role: result.role as UserRole,
     });
   }
@@ -36,7 +51,7 @@ export class UserService {
   static async findUser({
     identifier,
   }: Omit<LoginUserType, "password">): Promise<
-    (ResponseUserType & { password: string }) | null
+    (PayloadUserType & { password: string }) | null
   > {
     // find user by email or name
     const user = await prisma.user.findFirst({
@@ -66,10 +81,10 @@ export class UserService {
     if (!user) return null;
 
     return {
-      ...toUserResponse({
-        ...user,
-        role: user.role as UserRole,
-      }),
+      id: user.id,
+      nama: user.nama,
+      email: user.email,
+      role: user.role as UserRole,
       password: user.password,
     };
   }
@@ -121,5 +136,93 @@ export class UserService {
       email: user.email,
       role: user.role as UserRole,
     }));
+  }
+
+  // read all user
+  static async readAll(
+    query: PaginationType & {
+      role?: UserRole;
+    },
+  ): Promise<ResponseUserWithMetaType | null> {
+    // call db
+    const { limit = 8, page = 1, search, role } = query;
+
+    // get current page
+    const currentPage = page < 1 ? 1 : page;
+
+    // conditional
+    const conditional = {
+      where: {
+        AND: [
+          search
+            ? {
+                nama: {
+                  contains: search,
+                },
+                email: {
+                  contains: search,
+                },
+              }
+            : {},
+          role
+            ? {
+                role: role,
+              }
+            : {},
+        ],
+      },
+    };
+
+    // get count data
+    const totalData = await prisma.user.count(conditional);
+
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
+
+    // get data
+    const result = await prisma.user.findMany({
+      ...conditional,
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+        tims: {
+          select: {
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
+      },
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return {
+      data: result.map((user) =>
+        toUserResponse({
+          ...user,
+          tims: user.tims.map((tim) => tim.timAkreditasi),
+          role: user.role as UserRole,
+        }),
+      ),
+      meta: {
+        totalData,
+        currentPage,
+        totalPage,
+        limit,
+      },
+    };
   }
 }
