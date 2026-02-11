@@ -71,13 +71,13 @@ export class KriteriaController {
 
   //   read all
   static async readAll(
-    req: Request<{}, {}, {}, PaginationType>,
+    req: Request<{}, {}, {}, PaginationType & { status?: "baru" | "revisi" }>,
     res: Response<ResponseStructure<ResponseKriteriaWithMetaType | null>>,
     next: NextFunction,
   ) {
     try {
       // get pagination from query
-      const { page, limit, search } = req.query;
+      const { page, limit, search, status } = req.query;
 
       // validasi page & limit jika ada
       if (page || limit) {
@@ -93,11 +93,23 @@ export class KriteriaController {
         }
       }
 
+      // check query status
+      if (status) {
+        if (status !== "baru" && status !== "revisi") {
+          return ResponseResult.error(
+            res,
+            400,
+            "status must be baru or revisi",
+          );
+        }
+      }
+
       // call service
       const service = await KriteriaService.readAll({
         page: Number(page || 1),
         limit: Number(limit || 8),
         search,
+        status,
       });
 
       // return

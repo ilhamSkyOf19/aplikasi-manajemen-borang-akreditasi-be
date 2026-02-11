@@ -1,3 +1,4 @@
+import { startsWith } from "zod";
 import prisma from "../libs/prisma";
 import {
   CreateKriteriaType,
@@ -43,30 +44,45 @@ export class KriteriaService {
     page = 1,
     limit = 8,
     search,
-  }: PaginationType): Promise<ResponseKriteriaWithMetaType | null> {
+    status,
+  }: PaginationType & {
+    status?: "baru" | "revisi";
+  }): Promise<ResponseKriteriaWithMetaType | null> {
     // current page
     const currentPage = page < 1 ? 1 : page;
 
-    // get count data
-    const totalData = await prisma.kriteria.count({
+    // conditional
+    const revisiFilter =
+      status === "baru"
+        ? { revisi: 0 }
+        : status === "revisi"
+          ? { revisi: { gt: 0 } }
+          : {};
+
+    const conditional = {
       where: {
-        namaKriteria: {
-          contains: search,
-          startsWith: search,
-        },
+        AND: [
+          search
+            ? {
+                namaKriteria: {
+                  contains: search,
+                },
+              }
+            : {},
+          revisiFilter ?? {},
+        ],
       },
-    });
+    };
+
+    // get count data
+    const totalData = await prisma.kriteria.count(conditional);
 
     // get total page
     const totalPage = Math.ceil(totalData / limit);
 
     // call db
     const result = await prisma.kriteria.findMany({
-      where: {
-        namaKriteria: {
-          contains: search,
-        },
-      },
+      ...conditional,
       skip: (currentPage - 1) * limit,
       take: limit,
       orderBy: {
