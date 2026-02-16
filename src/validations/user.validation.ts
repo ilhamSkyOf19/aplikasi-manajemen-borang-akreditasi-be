@@ -40,12 +40,16 @@ export class UserValidation {
   }
 
   // password schema
-  private static passwordSchema(min: number = 6, max: number = 50) {
+  private static passwordSchema(
+    field: string = "Password",
+    min: number = 6,
+    max: number = 50,
+  ) {
     return z
-      .string(`Password harus berupa karakter`)
+      .string(`${field} harus diisi`)
       .trim()
-      .min(min, `Password minimal ${min} karakter`)
-      .max(max, `Password maksimal ${max} karakter`);
+      .min(min, `${field} minimal ${min} karakter`)
+      .max(max, `${field} maksimal ${max} karakter`);
   }
 
   // create user schema
@@ -54,7 +58,7 @@ export class UserValidation {
       nama: this.onlyCharSchema("Nama"),
       email: this.emailSchema(),
       password: this.passwordSchema(),
-      confirmPassword: this.passwordSchema(),
+      confirmPassword: this.passwordSchema("Konfirmasi Password"),
       role: z.enum(
         ["wakil_dekan_1", "kaprodi", "tim_akreditasi"] as UserRole[],
         "Role harus WAKIL DEKAN atau KAPRODI atau TIM AKREDITASI",

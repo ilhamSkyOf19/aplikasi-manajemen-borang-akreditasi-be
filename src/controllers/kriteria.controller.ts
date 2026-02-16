@@ -9,6 +9,7 @@ import { ResponseResult, ResponseStructure } from "../types/response";
 import { KriteriaService } from "../services/kriteira.service";
 import { PaginationType } from "../types/pagination";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
+import checkParamsId from "../utils/checkParamsId";
 
 export class KriteriaController {
   // create
@@ -44,14 +45,13 @@ export class KriteriaController {
   ) {
     try {
       // parse id
-      const id = Number(req.params.id);
+      const id = req.params.id;
 
-      if (isNaN(id)) {
-        return ResponseResult.error(res, 400, "Bad request");
-      }
+      //check id
+      const checkId = checkParamsId(res, id);
 
       // call service
-      const service = await KriteriaService.readById(Number(id));
+      const service = await KriteriaService.readById(checkId as number);
 
       //   check
       if (!service) {
@@ -127,14 +127,13 @@ export class KriteriaController {
   ) {
     try {
       // parse id
-      const id = Number(req.params.id);
+      const id = req.params.id;
 
-      if (isNaN(id)) {
-        return ResponseResult.error(res, 400, "Bad request");
-      }
+      //check id
+      const checkId = checkParamsId(res, id);
 
       // find kriteria by id
-      const kriteria = await KriteriaService.readById(id);
+      const kriteria = await KriteriaService.readById(checkId as number);
 
       // check kriteria
       if (!kriteria)

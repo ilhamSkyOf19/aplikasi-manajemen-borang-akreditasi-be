@@ -10,3 +10,10 @@ export interface MetaType {
   totalPage: number;
   limit: number;
 }
+
+// enum status
+export enum Status {
+  menunggu = "menunggu",
+  revisi = "revisi",
+  disetujui = "disetujui",
+}

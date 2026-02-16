@@ -5,6 +5,7 @@ import kriteriaRouter from "./kriteria.route";
 import timAkreditasiRoute from "./timAkreditasi.route";
 import LimiterMiddleware from "../middlewares/limiter.middleware";
 import userRoute from "./user.route";
+import kebutuhanDokumenRoute from "./kebutuhanDokumen.route";
 
 const appRoute: Router = Router();
 
@@ -22,6 +23,9 @@ appRoute.use("/api/user", userRoute);
 
 // kriteria router
 appRoute.use("/api/kriteria", kriteriaRouter);
+
+// kebutuhan dokumen
+appRoute.use("/api/kebutuhan-dokumen", kebutuhanDokumenRoute);
 
 // tim akreditasi router
 appRoute.use("/api/tim-akreditasi", timAkreditasiRoute);

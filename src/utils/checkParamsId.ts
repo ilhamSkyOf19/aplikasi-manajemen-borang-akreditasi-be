@@ -8,7 +8,7 @@ const checkParamsId = (
   const id = Number(value);
 
   if (isNaN(id)) {
-    return ResponseResult.error(res, 400, "Bad request");
+    return ResponseResult.error(res, 400, "Id tidak valid");
   }
 
   return id; // kalau valid, kembalikan ID

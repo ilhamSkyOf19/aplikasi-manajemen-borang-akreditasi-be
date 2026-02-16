@@ -16,6 +16,13 @@ enum Role {
   tim_akreditasi
 }
 
+// enum status
+enum Status {
+  menunggu
+  revisi
+  disetujui
+}
+
 // model user
 model User {
   id        Int      @id @default(autoincrement())
@@ -28,6 +35,7 @@ model User {
 
   // tims 
   tims User_Tim_Akreditasi[]
+  pic  Pic[]
 }
 
 // kriteria 
@@ -38,6 +46,18 @@ model Kriteria {
   revisi       Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  // relation kebutuhan dokumen
+  dokumen Kebutuhan_Dokumen[]
+}
+
+model pendekatan {
+  id         Int    @id @default(autoincrement())
+  tahap      String
+  keterangan String @unique
+
+  // relation dokumen
+  dokumen Kebutuhan_Dokumen[]
 }
 
 // anggota 
@@ -49,9 +69,48 @@ model Tim_Akreditasi {
 
   // anggota 
   user User_Tim_Akreditasi[]
+  pic  Pic[]
 }
 
-// pivot table 
+// kebutuhan dokumen
+model Kebutuhan_Dokumen {
+  id          Int    @id @default(autoincrement())
+  namaDokumen String @unique
+  keterangan  String
+
+  // relation kriteria
+  kriteriaId   Int
+  pendekatanId Int
+
+  kriteria   Kriteria   @relation(fields: [kriteriaId], references: [id], onDelete: Cascade)
+  pendekatan pendekatan @relation(fields: [pendekatanId], references: [id], onDelete: Cascade)
+
+  pic Pic[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// // ===== PIVOT TABLES ===== //
+
+// tim & kebutuhan dokumen
+model Pic {
+  timAkreditasiId    Int
+  kebutuhanDokumenId Int
+
+  pjId Int
+
+  // relation 
+  timAkreditasi    Tim_Akreditasi    @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
+  kebutuhanDokumen Kebutuhan_Dokumen @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
+
+  pj User @relation(fields: [pjId], references: [id], onDelete: Cascade)
+
+  status Status
+
+  @@id([timAkreditasiId, kebutuhanDokumenId])
+}
+
 model User_Tim_Akreditasi {
   userId          Int
   timAkreditasiId Int

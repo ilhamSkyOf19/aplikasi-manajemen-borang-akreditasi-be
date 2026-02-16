@@ -1,0 +1,269 @@
+import { NextFunction, Request, Response } from "express";
+import { ResponseResult, ResponseStructure } from "../types/response";
+import { KriteriaService } from "../services/kriteira.service";
+import {
+  CreateKebutuhanDokumenType,
+  ResponseKebutuhanDokumenType,
+  ResponseKebutuhanDokumenWithMetaType,
+  UpdateKebutuhanDokumenType,
+} from "../models/kebutuhanDokumen.model";
+import { PendekatanService } from "../services/pendekatan.service";
+import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
+import checkParamsId from "../utils/checkParamsId";
+import { PaginationType } from "../types/pagination";
+import { checkQueryPagination } from "../utils/checkQueryPagination";
+import { Status } from "../utils/contstanst";
+
+export class kebutuhanDokumenController {
+  // create
+  static async create(
+    req: Request<{}, {}, CreateKebutuhanDokumenType>,
+    res: Response<ResponseStructure<ResponseKebutuhanDokumenType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get body
+      const { keterangan, kriteriaId, namaDokumen, pendekatanId } = req.body;
+
+      // check kriteria
+      const checkKriteria = await KriteriaService.readById(kriteriaId);
+
+      if (!checkKriteria)
+        return ResponseResult.error(res, 404, "kriteria not found");
+
+      // check pendekatan id
+      const checkPendekatan = await PendekatanService.readById(pendekatanId);
+
+      if (!checkPendekatan)
+        return ResponseResult.error(res, 404, "pendekatan not found");
+
+      //   call service
+      const service = await KebutuhanDokumenService.create({
+        keterangan,
+        kriteriaId,
+        namaDokumen,
+        pendekatanId,
+      });
+
+      // check
+      if (!service)
+        return ResponseResult.error(
+          res,
+          500,
+          "gagal membuat kebutuhan dokumen",
+        );
+
+      // return success
+      return ResponseResult.success<ResponseKebutuhanDokumenType | null>(
+        service,
+        res,
+        200,
+        "success create kebutuhan dokumen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  //   read by id
+  static async readById(
+    req: Request<{ id: string }>,
+    res: Response<ResponseStructure<ResponseKebutuhanDokumenType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // parse id
+      const id = req.params.id;
+
+      //check id
+      const checkId = checkParamsId(res, id);
+
+      //   call service
+      const service = await KebutuhanDokumenService.readById(checkId as number);
+
+      // check
+      if (!service)
+        return ResponseResult.error(res, 404, "kebutuhan dokumen not found");
+
+      // return success
+      return ResponseResult.success<ResponseKebutuhanDokumenType | null>(
+        service,
+        res,
+        200,
+        "success read kebutuhan dokumen by id",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // read all
+  static async readAll(
+    req: Request<
+      {},
+      {},
+      {},
+      PaginationType & {
+        kriteria: string;
+        status: Status;
+      }
+    >,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumenWithMetaType | null>
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { limit, page, search, status, kriteria } = req.query;
+
+      // check query
+      const checkQuery = checkQueryPagination(page, limit);
+
+      //   check
+      if (!checkQuery?.status) {
+        return ResponseResult.error(res, 400, "page and limit must be numbers");
+      }
+
+      //   check status
+      if (status) {
+        if (
+          status !== Status.menunggu &&
+          status !== Status.revisi &&
+          status !== Status.disetujui
+        ) {
+          return ResponseResult.error(
+            res,
+            400,
+            "status must be baru or revisi",
+          );
+        }
+      }
+
+      // call service
+      const service = await KebutuhanDokumenService.readAll({
+        page: checkQuery.page,
+        limit: checkQuery.limit,
+        kriteria,
+        search,
+        status: status as Status,
+      });
+
+      // check
+      if (!service) {
+        return ResponseResult.error(
+          res,
+          500,
+          "gagal membaca kebutuhan dokumen",
+        );
+      }
+
+      // return
+      return ResponseResult.success<ResponseKebutuhanDokumenWithMetaType | null>(
+        service,
+        res,
+        200,
+        "success read all kebutuhan dokumen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  //   update
+  static async update(
+    req: Request<{ id: string }, {}, UpdateKebutuhanDokumenType>,
+    res: Response<ResponseStructure<ResponseKebutuhanDokumenType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // parse id
+      const id = req.params.id;
+
+      //check id
+      const checkId = checkParamsId(res, id);
+
+      //   find data
+      const findData = await KebutuhanDokumenService.readById(
+        checkId as number,
+      );
+
+      // check data
+      if (!findData)
+        return ResponseResult.error(res, 404, "kebutuhan dokumen not found");
+
+      // get body
+      const { keterangan, kriteriaId, namaDokumen, pendekatanId } = req.body;
+
+      // check kriteria id
+      if (kriteriaId) {
+        const checkKriteria = await KriteriaService.readById(kriteriaId);
+
+        if (!checkKriteria)
+          return ResponseResult.error(res, 404, "kriteria not found");
+      }
+
+      // check pendekatan id
+      if (pendekatanId) {
+        const checkPendekatan = await PendekatanService.readById(pendekatanId);
+
+        if (!checkPendekatan)
+          return ResponseResult.error(res, 404, "pendekatan not found");
+      }
+
+      // call service
+      const service = await KebutuhanDokumenService.update(findData.id, {
+        keterangan,
+        kriteriaId,
+        namaDokumen,
+        pendekatanId,
+      });
+
+      // check service
+      if (!service)
+        return ResponseResult.error(res, 500, "gagal update kebutuhan dokumen");
+
+      // return
+      return ResponseResult.success<ResponseKebutuhanDokumenType | null>(
+        service,
+        res,
+        200,
+        "success update kebutuhan dokumen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  //   delete
+  static async delete(
+    req: Request<{ id: string }>,
+    res: Response<ResponseStructure<null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // parse id
+      const id = req.params.id;
+
+      //check id
+      const checkId = checkParamsId(res, id);
+
+      // call service
+      const service = await KebutuhanDokumenService.delete(checkId as number);
+
+      // check service
+      if (!service)
+        return ResponseResult.error(res, 500, "gagal delete kebutuhan dokumen");
+
+      // return
+      return ResponseResult.success<null>(
+        null,
+        res,
+        200,
+        "success delete kebutuhan dokumen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+}
