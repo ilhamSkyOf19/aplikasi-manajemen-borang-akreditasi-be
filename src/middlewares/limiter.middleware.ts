@@ -40,7 +40,7 @@ export default class LimiterMiddleware {
   static apiRegular() {
     return rateLimit({
       windowMs: 60 * 60 * 1000, // 1 hour
-      max: 100,
+      max: 1000,
       standardHeaders: true,
       legacyHeaders: false,
       handler: (req: Request, res: Response<ResponseStructure<null>>) => {

@@ -1,3 +1,4 @@
+import { startsWith } from "zod";
 import prisma from "../libs/prisma";
 import {
   CreateUserType,
@@ -6,13 +7,16 @@ import {
   ResponseUserType,
   ResponseUserWithMetaType,
   toUserResponse,
+  UpdateUserType,
 } from "../models/user.model";
 import { PaginationType } from "../types/pagination";
 import { UserRole } from "../utils/contstanst";
 
 export class UserService {
   // create
-  static async create(req: CreateUserType): Promise<ResponseUserType | null> {
+  static async create(
+    req: Omit<CreateUserType, "confirmPassword">,
+  ): Promise<ResponseUserType | null> {
     const result = await prisma.user.create({
       data: {
         ...req,
@@ -156,19 +160,13 @@ export class UserService {
         AND: [
           search
             ? {
-                nama: {
-                  contains: search,
-                },
-                email: {
-                  contains: search,
-                },
+                OR: [
+                  { nama: { contains: search } },
+                  { email: { contains: search } },
+                ],
               }
             : {},
-          role
-            ? {
-                role: role,
-              }
-            : {},
+          role ? { role } : {},
         ],
       },
     };
@@ -224,5 +222,61 @@ export class UserService {
         limit,
       },
     };
+  }
+
+  // update by id
+  static async update(
+    id: number,
+    req: UpdateUserType,
+  ): Promise<PayloadUserType | null> {
+    // call db
+    const result = await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        ...req,
+        role: req.role,
+      },
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      id: result.id,
+      nama: result.nama,
+      email: result.email,
+      role: result.role as UserRole,
+    };
+  }
+
+  // delete by id
+  static async delete(id: number): Promise<boolean> {
+    // call db
+    const result = await prisma.user.delete({
+      where: {
+        id,
+      },
+    });
+
+    // check
+    if (!result) return false;
+
+    return true;
+  }
+
+  // find count role
+  static async findCountRole(role: UserRole): Promise<number> {
+    return await prisma.user.count({
+      where: {
+        role: role,
+      },
+    });
   }
 }

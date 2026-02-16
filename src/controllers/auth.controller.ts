@@ -4,16 +4,13 @@ import {
   LoginUserType,
   PayloadUserType,
   ResponseUserType,
-  ResponseUserWithMetaType,
 } from "../models/user.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { UserService } from "../services/user.service";
 import argon2 from "argon2";
 import { generateAccessToken } from "../utils/jwt";
 import { AuthRequest } from "../types/authRequest";
-import { PaginationType } from "../types/pagination";
 import { UserRole } from "../utils/contstanst";
-import { checkQueryPagination } from "../utils/checkQueryPagination";
 
 export class AuthController {
   // register
@@ -25,6 +22,20 @@ export class AuthController {
     try {
       // get body
       const body = req.body;
+
+      // check role
+      if (body.role === UserRole.wakil_dekan_1) {
+        return ResponseResult.error(
+          res,
+          400,
+          "Wakil Dekan 1 tidak boleh didaftarkan",
+        );
+      }
+
+      // check password & confirm password 
+      if (body.password !== body.confirmPassword) {
+        return ResponseResult.error(res, 400, "Password not match");
+      }
 
       // hash password
       const hashedPassword = await argon2.hash(body.password.trim(), {
@@ -131,59 +142,6 @@ export class AuthController {
         res,
         200,
         "success login user",
-      );
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // read all
-  static async readAll(
-    req: Request<{}, {}, {}, PaginationType & { role?: string }>,
-    res: Response<ResponseStructure<ResponseUserWithMetaType | null>>,
-    next: NextFunction,
-  ) {
-    try {
-      // get params
-      const { limit, page, search, role } = req.query;
-
-      // check query
-      const checkQuery = checkQueryPagination(page, limit);
-
-      // check query
-      if (!checkQuery?.status) {
-        return ResponseResult.error(res, 400, "page and limit must be numbers");
-      }
-
-      // check query status
-      if (role) {
-        if (
-          role !== UserRole.wakil_dekan_1 &&
-          role !== UserRole.kaprodi &&
-          role !== UserRole.tim_akreditasi
-        ) {
-          return ResponseResult.error(
-            res,
-            400,
-            "status must be baru or revisi",
-          );
-        }
-      }
-
-      // call service
-      const service = await UserService.readAll({
-        limit: checkQuery.limit,
-        page: checkQuery.page,
-        search,
-        role: role as UserRole,
-      });
-
-      // return success
-      return ResponseResult.success<ResponseUserWithMetaType | null>(
-        service,
-        res,
-        200,
-        "success read user",
       );
     } catch (error) {
       next(error);

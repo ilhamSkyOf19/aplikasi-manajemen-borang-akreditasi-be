@@ -17,13 +17,6 @@ authRoute.post(
   AuthController.login,
 );
 
-// find all
-authRoute.get(
-  "/read-all",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
-  AuthController.readAll,
-);
-
 // register
 authRoute.post(
   "/register",

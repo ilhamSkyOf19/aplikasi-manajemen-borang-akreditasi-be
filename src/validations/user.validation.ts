@@ -1,5 +1,9 @@
 import z from "zod";
-import { CreateUserType, LoginUserType } from "../models/user.model";
+import {
+  CreateUserType,
+  LoginUserType,
+  UpdateUserType,
+} from "../models/user.model";
 import { UserRole } from "../utils/contstanst";
 
 export class UserValidation {
@@ -50,10 +54,15 @@ export class UserValidation {
       nama: this.onlyCharSchema("Nama"),
       email: this.emailSchema(),
       password: this.passwordSchema(),
+      confirmPassword: this.passwordSchema(),
       role: z.enum(
         ["wakil_dekan_1", "kaprodi", "tim_akreditasi"] as UserRole[],
         "Role harus WAKIL DEKAN atau KAPRODI atau TIM AKREDITASI",
       ),
+    })
+    .superRefine((data, ctx) => {
+      if (data.password !== data.confirmPassword)
+        ctx.addIssue({ code: "custom", message: "password tidak sama" });
     })
     .strict() satisfies z.ZodType<CreateUserType>;
 
@@ -64,4 +73,20 @@ export class UserValidation {
       password: this.passwordSchema(),
     })
     .strict() satisfies z.ZodType<LoginUserType>;
+
+  // update
+  static readonly UPDATE = z
+    .object({
+      nama: this.onlyCharSchema("Nama").optional(),
+      email: this.emailSchema().optional(),
+      password: this.passwordSchema().optional(),
+      role: z
+        .enum(
+          ["kaprodi", "tim_akreditasi"] as Exclude<UserRole, "wakil_dekan_1">[],
+
+          "Role KAPRODI atau TIM AKREDITASI",
+        )
+        .optional(),
+    })
+    .strict() satisfies z.ZodType<UpdateUserType>;
 }

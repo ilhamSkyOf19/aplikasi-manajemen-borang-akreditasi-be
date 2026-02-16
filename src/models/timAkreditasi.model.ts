@@ -1,10 +1,10 @@
 import { MetaType } from "../utils/contstanst";
-import { ResponseUserType } from "./user.model";
+import { PayloadUserType, ResponseUserType } from "./user.model";
 
 export interface ITimAkreditasi {
   id: number;
   namaTimAkreditasi: string;
-  user: Omit<ResponseUserType, "password" | "tims">[];
+  user: PayloadUserType[];
   createdAt: Date;
   updatedAt: Date;
 }
