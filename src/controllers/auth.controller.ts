@@ -32,7 +32,7 @@ export class AuthController {
         );
       }
 
-      // check password & confirm password 
+      // check password & confirm password
       if (body.password !== body.confirmPassword) {
         return ResponseResult.error(res, 400, "Password not match");
       }

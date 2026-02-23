@@ -1,4 +1,4 @@
-import { MetaType } from "../utils/contstanst";
+import { MetaType, Status } from "../utils/contstanst";
 import { ResponseKriteriaType } from "./kriteria.model";
 import { IPendekatan } from "./pendekatan.model";
 
@@ -11,12 +11,19 @@ export interface IKebutuhanDokumen {
   //   pic: [];
   createdAt: Date;
   updatedAt: Date;
+  status: Status;
 }
 
 // create
 export interface CreateKebutuhanDokumenType extends Omit<
   IKebutuhanDokumen,
-  "id" | "pic" | "kriteria" | "pendekatan" | "createdAt" | "updatedAt"
+  | "id"
+  | "pic"
+  | "kriteria"
+  | "pendekatan"
+  | "createdAt"
+  | "updatedAt"
+  | "status"
 > {
   kriteriaId: number;
   pendekatanId: number;

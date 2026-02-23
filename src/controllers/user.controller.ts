@@ -127,7 +127,7 @@ export class UserController {
       }
 
       // update user
-      const service = await UserService.update(findUser.id, req.body);
+      const service = await UserService.update(findUser.id, body);
 
       // check service
       if (!service) {

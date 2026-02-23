@@ -23,6 +23,13 @@ enum Status {
   disetujui
 }
 
+// enum jenis revisi
+enum JenisRevisi {
+  kebutuhan_dokumen
+  dokumen_borang
+  pic
+}
+
 // model user
 model User {
   id        Int      @id @default(autoincrement())
@@ -35,7 +42,7 @@ model User {
 
   // tims 
   tims User_Tim_Akreditasi[]
-  pic  Pic[]
+  pics Pic_pj[]
 }
 
 // kriteria 
@@ -74,18 +81,45 @@ model Tim_Akreditasi {
 
 // kebutuhan dokumen
 model Kebutuhan_Dokumen {
-  id          Int    @id @default(autoincrement())
-  namaDokumen String @unique
-  keterangan  String
-
-  // relation kriteria
+  id           Int    @id @default(autoincrement())
+  namaDokumen  String @unique
+  keterangan   String @db.VarChar(1000)
   kriteriaId   Int
   pendekatanId Int
+  status       Status @default(menunggu)
 
+  // relation kriteria
   kriteria   Kriteria   @relation(fields: [kriteriaId], references: [id], onDelete: Cascade)
   pendekatan pendekatan @relation(fields: [pendekatanId], references: [id], onDelete: Cascade)
 
-  pic Pic[]
+  pic     Pic[]
+  riwayat Riwayat[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// model riwayat 
+model Riwayat {
+  id Int @id @default(autoincrement())
+
+  jenis      JenisRevisi
+  keterangan String      @db.VarChar(1000)
+
+  status Status @default(menunggu)
+
+  // ===== OPTIONAL RELATIONS =====
+
+  kebutuhanDokumenId Int?
+  kebutuhanDokumen   Kebutuhan_Dokumen? @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
+
+  // dokumenBorangId Int?
+  // dokumenBorang   Dokumen_Borang? @relation(fields: [dokumenBorangId], references: [id], onDelete: Cascade)
+
+  timAkreditasiId       Int?
+  kebutuhanDokumenPicId Int?
+
+  pic Pic? @relation(fields: [timAkreditasiId, kebutuhanDokumenPicId], references: [timAkreditasiId, kebutuhanDokumenId], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -95,20 +129,38 @@ model Kebutuhan_Dokumen {
 
 // tim & kebutuhan dokumen
 model Pic {
+  id                 Int    @id @default(autoincrement())
   timAkreditasiId    Int
   kebutuhanDokumenId Int
-
-  pjId Int
+  status             Status @default(menunggu)
+  keterangan         String @db.VarChar(1000)
 
   // relation 
+
   timAkreditasi    Tim_Akreditasi    @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
   kebutuhanDokumen Kebutuhan_Dokumen @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
 
-  pj User @relation(fields: [pjId], references: [id], onDelete: Cascade)
+  pj      Pic_pj[]
+  riwayat Riwayat[]
 
-  status Status
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@id([timAkreditasiId, kebutuhanDokumenId])
+  @@unique([timAkreditasiId, kebutuhanDokumenId])
+}
+
+model Pic_pj {
+  picId  Int
+  userId Int
+
+  pic Pic @relation(fields: [picId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([picId, userId])
 }
 
 model User_Tim_Akreditasi {

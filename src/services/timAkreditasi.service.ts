@@ -6,6 +6,7 @@ import {
   toResponseTimAkreditasiType,
   UpdateTimAkreditasiType,
 } from "../models/timAkreditasi.model";
+import { PayloadUserType } from "../models/user.model";
 import { PaginationType } from "../types/pagination";
 import { UserRole } from "../utils/contstanst";
 

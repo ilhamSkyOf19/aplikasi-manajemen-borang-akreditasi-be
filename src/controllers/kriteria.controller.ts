@@ -101,8 +101,8 @@ export class KriteriaController {
 
       // call service
       const service = await KriteriaService.readAll({
-        page: Number(page || 1),
-        limit: Number(limit || 8),
+        limit: checkQuery.limit,
+        page: checkQuery.page,
         search,
         status,
       });

@@ -3,6 +3,7 @@ import {
   CreateKebutuhanDokumenType,
   UpdateKebutuhanDokumenType,
 } from "../models/kebutuhanDokumen.model";
+import { Status } from "../utils/contstanst";
 
 export class KebutuhanDokumenValidation {
   // schema
@@ -48,6 +49,10 @@ export class KebutuhanDokumenValidation {
       keterangan: this.stringSchema("keterangan").optional(),
       kriteriaId: this.onlyNumberSchema("kriteria", 1, 99999).optional(),
       pendekatanId: this.onlyNumberSchema("pendekatan", 1, 99999).optional(),
+      // status: z.enum(
+      //   ["menunggu", "revisi", "disetujui"] as Status[],
+      //   "Role tidak valid",
+      // ),
     })
     .strict() satisfies z.ZodType<UpdateKebutuhanDokumenType>;
 }

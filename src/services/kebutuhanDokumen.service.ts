@@ -20,6 +20,7 @@ export class KebutuhanDokumenService {
       data: {
         namaDokumen: req.namaDokumen,
         keterangan: req.keterangan,
+        status: "menunggu",
         kriteria: {
           connect: {
             id: req.kriteriaId,
@@ -37,6 +38,7 @@ export class KebutuhanDokumenService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        status: true,
         kriteria: {
           select: {
             id: true,
@@ -54,7 +56,10 @@ export class KebutuhanDokumenService {
       },
     });
 
-    return toResponseKebutuhanDokumenType(result);
+    return toResponseKebutuhanDokumenType({
+      ...result,
+      status: result.status as Status,
+    });
   }
 
   // read by id
@@ -72,6 +77,7 @@ export class KebutuhanDokumenService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        status: true,
         kriteria: {
           select: {
             id: true,
@@ -92,14 +98,17 @@ export class KebutuhanDokumenService {
     // check
     if (!result) return null;
 
-    return toResponseKebutuhanDokumenType(result);
+    return toResponseKebutuhanDokumenType({
+      ...result,
+      status: result.status as Status,
+    });
   }
 
   //   read all
   static async readAll(
     query: PaginationType & {
-      kriteria: string;
-      status: Status;
+      kriteria?: string;
+      status?: Status;
     },
   ): Promise<ResponseKebutuhanDokumenWithMetaType | null> {
     const { limit = 8, page = 1, search, kriteria, status } = query;
@@ -137,6 +146,7 @@ export class KebutuhanDokumenService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        status: true,
         kriteria: {
           select: {
             id: true,
@@ -161,7 +171,12 @@ export class KebutuhanDokumenService {
 
     // return
     return toResponseKebutuhanDokumenWithMetaType({
-      data: result.map((item) => toResponseKebutuhanDokumenType(item)),
+      data: result.map((item) =>
+        toResponseKebutuhanDokumenType({
+          ...item,
+          status: item.status as Status,
+        }),
+      ),
       meta: {
         totalData,
         totalPage,
@@ -188,6 +203,7 @@ export class KebutuhanDokumenService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        status: true,
         kriteria: {
           select: {
             id: true,
@@ -205,7 +221,10 @@ export class KebutuhanDokumenService {
       },
     });
 
-    return toResponseKebutuhanDokumenType(result);
+    return toResponseKebutuhanDokumenType({
+      ...result,
+      status: result.status as Status,
+    });
   }
 
   //   delete

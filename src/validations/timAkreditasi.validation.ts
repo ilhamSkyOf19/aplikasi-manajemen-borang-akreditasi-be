@@ -18,11 +18,20 @@ export class TimAkreditasivalidation {
       .max(max, `${field} maksimal ${max} karakter`);
   }
 
-  //   json schema
+  //   array schema
   private static numberArraySchema(field: string) {
     return z
       .array(z.number().int().positive())
       .nonempty({ message: `${field} harus berupa array yang tidak kosong` })
+      .refine((arr) => arr.every((n) => typeof n === "number"), {
+        message: `${field} harus berupa array of number`,
+      });
+  }
+
+  // array schema update
+  private static numberArraySchemaUpdate(field: string) {
+    return z
+      .array(z.number().int().positive())
       .refine((arr) => arr.every((n) => typeof n === "number"), {
         message: `${field} harus berupa array of number`,
       });
@@ -40,7 +49,7 @@ export class TimAkreditasivalidation {
   static readonly UPDATE = z
     .object({
       namaTimAkreditasi: this.stringSchema("namaTimAkreditasi").optional(),
-      users: this.numberArraySchema("users").optional(),
+      users: this.numberArraySchemaUpdate("users").optional(),
     })
     .strict() satisfies z.ZodType<UpdateTimAkreditasiType>;
 }
