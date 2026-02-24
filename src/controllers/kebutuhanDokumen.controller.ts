@@ -3,6 +3,7 @@ import { ResponseResult, ResponseStructure } from "../types/response";
 import { KriteriaService } from "../services/kriteira.service";
 import {
   CreateKebutuhanDokumenType,
+  ResponseKebutuhanDokumenChooseWithMetaType,
   ResponseKebutuhanDokumenType,
   ResponseKebutuhanDokumenWithMetaType,
   UpdateKebutuhanDokumenType,
@@ -59,6 +60,44 @@ export class kebutuhanDokumenController {
         res,
         200,
         "success create kebutuhan dokumen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // read choose
+  static async readChoose(
+    req: Request<{}, {}, {}, PaginationType>,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumenChooseWithMetaType | null>
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { page, limit, search } = req.query;
+
+      // check
+      const checkQuery = checkQueryPagination(page, limit);
+
+      // check query
+      if (!checkQuery?.status) {
+        return ResponseResult.error(res, 400, "page and limit must be numbers");
+      }
+
+      // call service
+      const service = await KebutuhanDokumenService.readChoose({
+        limit: checkQuery.limit,
+        page: checkQuery.page,
+        search,
+      });
+
+      return ResponseResult.success<ResponseKebutuhanDokumenChooseWithMetaType | null>(
+        service,
+        res,
+        200,
+        "success read kebutuhan dokumen choose",
       );
     } catch (error) {
       next(error);

@@ -1,8 +1,10 @@
 import prisma from "../libs/prisma";
 import {
   CreateKebutuhanDokumenType,
+  ResponseKebutuhanDokumenChooseWithMetaType,
   ResponseKebutuhanDokumenType,
   ResponseKebutuhanDokumenWithMetaType,
+  toResponseKebutuhanDokumenChooseWithMetaType,
   toResponseKebutuhanDokumenType,
   toResponseKebutuhanDokumenWithMetaType,
   UpdateKebutuhanDokumenType,
@@ -177,6 +179,58 @@ export class KebutuhanDokumenService {
           status: item.status as Status,
         }),
       ),
+      meta: {
+        totalData,
+        totalPage,
+        currentPage,
+        limit,
+      },
+    });
+  }
+
+  // read choose
+  static async readChoose(
+    query: PaginationType,
+  ): Promise<ResponseKebutuhanDokumenChooseWithMetaType | null> {
+    // get query
+    const { limit = 8, page = 1, search } = query;
+
+    // get current page
+    const currentPage = page < 1 ? 1 : page;
+
+    // get count
+    const totalData = await prisma.kebutuhan_Dokumen.count({
+      where: {
+        namaDokumen: {
+          contains: search,
+          startsWith: search,
+        },
+      },
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
+
+    // call prisma
+    const result = await prisma.kebutuhan_Dokumen.findMany({
+      where: {
+        namaDokumen: {
+          contains: search,
+        },
+      },
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        namaDokumen: true,
+      },
+    });
+
+    return toResponseKebutuhanDokumenChooseWithMetaType({
+      data: result,
       meta: {
         totalData,
         totalPage,

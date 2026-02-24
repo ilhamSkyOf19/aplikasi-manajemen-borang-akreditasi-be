@@ -1,8 +1,10 @@
 import prisma from "../libs/prisma";
 import {
   CreateTimAkreditasiType,
+  ResponseTimAkreditasiChooseWithMetaType,
   ResponseTimAkreditasiType,
   ResponseTimAkreditasiWithMetaType,
+  toResponseTimAkreditasiChooseWithMetaType,
   toResponseTimAkreditasiType,
   UpdateTimAkreditasiType,
 } from "../models/timAkreditasi.model";
@@ -164,6 +166,72 @@ export class TimAkreditasiService {
         limit,
       },
     };
+  }
+
+  // read choose tim akreditasi
+  static async readChoose(
+    query: PaginationType,
+  ): Promise<ResponseTimAkreditasiChooseWithMetaType | null> {
+    const { limit = 8, page = 1, search } = query;
+    // get current page
+    const currentPage = page < 1 ? 1 : page;
+
+    // get count data
+    const totalData = await prisma.tim_Akreditasi.count({
+      where: {
+        namaTimAkreditasi: {
+          contains: search,
+          startsWith: search,
+        },
+      },
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
+
+    // call db
+    const result = await prisma.tim_Akreditasi.findMany({
+      where: {
+        namaTimAkreditasi: {
+          contains: search,
+        },
+      },
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      select: {
+        id: true,
+        namaTimAkreditasi: true,
+        user: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                nama: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return toResponseTimAkreditasiChooseWithMetaType({
+      data: result.map((item) => {
+        return {
+          ...item,
+          anggota: item.user.map((user) => {
+            return {
+              ...user.user,
+            };
+          }),
+        };
+      }),
+      meta: {
+        totalData,
+        currentPage,
+        totalPage,
+        limit,
+      },
+    });
   }
 
   // update

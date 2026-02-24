@@ -50,3 +50,14 @@ export interface ResponseKebutuhanDokumenWithMetaType {
 export const toResponseKebutuhanDokumenWithMetaType = (
   kebutuhanDokumen: ResponseKebutuhanDokumenWithMetaType,
 ): ResponseKebutuhanDokumenWithMetaType => kebutuhanDokumen;
+
+// response choose
+export interface ResponseKebutuhanDokumenChooseWithMetaType {
+  data: { id: number; namaDokumen: string }[];
+  meta: MetaType;
+}
+
+// to response
+export const toResponseKebutuhanDokumenChooseWithMetaType = (
+  kebutuhanDokumen: ResponseKebutuhanDokumenChooseWithMetaType,
+): ResponseKebutuhanDokumenChooseWithMetaType => kebutuhanDokumen;

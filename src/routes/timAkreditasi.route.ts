@@ -39,6 +39,13 @@ timAkreditasiRoute.get(
   TimAkreditasiController.readAll,
 );
 
+// read choose
+timAkreditasiRoute.get(
+  "/read-choose",
+  [authMiddleware, aclMiddleware(["wakil_dekan_1", "kaprodi"])],
+  TimAkreditasiController.readChoose,
+);
+
 // update
 timAkreditasiRoute.patch(
   "/update/:id",

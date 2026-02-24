@@ -18,6 +18,13 @@ kebutuhanDokumenRoute.get(
   kebutuhanDokumenController.readAll,
 );
 
+// read choose
+kebutuhanDokumenRoute.get(
+  "/read-choose",
+  [authMiddleware, aclMiddleware(["kaprodi", "wakil_dekan_1"])],
+  kebutuhanDokumenController.readChoose,
+);
+
 // read by id
 kebutuhanDokumenRoute.get(
   "/read-by-id/:id",

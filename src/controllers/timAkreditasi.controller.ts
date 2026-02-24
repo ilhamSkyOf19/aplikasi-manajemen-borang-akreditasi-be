@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   CreateTimAkreditasiType,
+  ResponseTimAkreditasiChooseWithMetaType,
   ResponseTimAkreditasiType,
   ResponseTimAkreditasiWithMetaType,
   UpdateTimAkreditasiType,
@@ -186,6 +187,45 @@ export class TimAkreditasiController {
         res,
         200,
         "Success update tim akreditasi",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // read choose
+  static async readChoose(
+    req: Request<{}, {}, {}, PaginationType>,
+    res: Response<
+      ResponseStructure<ResponseTimAkreditasiChooseWithMetaType | null>
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { limit, page, search } = req.query;
+
+      // check
+      const checkQuery = checkQueryPagination(page, limit);
+
+      // check query
+      if (!checkQuery?.status) {
+        return ResponseResult.error(res, 400, "page and limit must be numbers");
+      }
+
+      // call service
+      const service = await TimAkreditasiService.readChoose({
+        limit: checkQuery.limit,
+        page: checkQuery.page,
+        search,
+      });
+
+      // return success
+      return ResponseResult.success<ResponseTimAkreditasiChooseWithMetaType | null>(
+        service,
+        res,
+        200,
+        "Success read choose tim akreditasi",
       );
     } catch (error) {
       next(error);
