@@ -4,9 +4,10 @@ import {
   UpdatePicType,
   UpdateStatusType,
 } from "../models/pic.model";
-import { Status } from "../utils/contstanst";
+import { JenisRiwayat, Status } from "../utils/contstanst";
+import { CreateRiwayatType, UpdateRiwayatType } from "../models/riwayat.model";
 
-export class PicValidation {
+export class RiwayatValidation {
   // only number
   private static onlyNumberSchema(
     field: string,
@@ -45,39 +46,46 @@ export class PicValidation {
   //   create
   static readonly CREATE = z
     .object({
-      timAkreditasiId: this.onlyNumberSchema("tim akreditasi", 1, 99999),
-      kebutuhanDokumenId: this.onlyNumberSchema("kebutuhan dokumen", 1, 99999),
-      keterangan: this.stringSchema("keterangan", 1, 1000),
-      pjId: this.numberArraySchema("penanggung jawab"),
-    })
-    .strict() satisfies z.ZodType<CreatePicType>;
-
-  // update
-  static readonly UPDATE = z
-    .object({
-      timAkreditasiId: this.onlyNumberSchema(
-        "tim akreditasi",
-        1,
-        99999,
-      ).optional(),
-      pjId: this.numberArraySchema("penanggung jawab").optional(),
-      kebutuhanDokumenId: this.onlyNumberSchema(
-        "kebutuhan dokumen",
-        1,
-        99999,
-      ).optional(),
-      keterangan: this.stringSchema("keterangan", 1, 1000).optional(),
-    })
-    .strict() satisfies z.ZodType<UpdatePicType>;
-
-  // update status
-  static readonly UPDATE_STATUS = z
-    .object({
+      jenis: z.enum(
+        ["pic", "kebutuhan_dokumen", "dokumen_borang"] as JenisRiwayat[],
+        "Jenis riwayat tidak valid",
+      ),
       status: z.enum(
         ["menunggu", "revisi", "disetujui"] as Status[],
         "Status tidak valid",
       ),
       keterangan: this.stringSchema("keterangan", 1, 1000),
+      kebutuhanDokumenId: this.onlyNumberSchema(
+        "kebutuhan dokumen",
+        1,
+        99999,
+      ).optional(),
+      picId: this.onlyNumberSchema("pic", 1, 99999).optional(),
     })
-    .strict() satisfies z.ZodType<UpdateStatusType>;
+    .strict() satisfies z.ZodType<CreateRiwayatType>;
+
+  // update
+  static readonly UPDATE = z
+    .object({
+      jenis: z
+        .enum(
+          ["pic", "kebutuhan_dokumen", "dokumen_borang"] as JenisRiwayat[],
+          "Jenis riwayat tidak valid",
+        )
+        .optional(),
+      status: z
+        .enum(
+          ["menunggu", "revisi", "disetujui"] as Status[],
+          "Status tidak valid",
+        )
+        .optional(),
+      keterangan: this.stringSchema("keterangan", 1, 1000).optional(),
+      kebutuhanDokumenId: this.onlyNumberSchema(
+        "kebutuhan dokumen",
+        1,
+        99999,
+      ).optional(),
+      picId: this.onlyNumberSchema("pic", 1, 99999).optional(),
+    })
+    .strict() satisfies z.ZodType<UpdateRiwayatType>;
 }

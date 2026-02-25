@@ -2,8 +2,10 @@ import prisma from "../libs/prisma";
 import {
   CreatePicType,
   ResponsePicType,
+  ResponsePicUpdateStatusType,
   ResponsePicWithMetaType,
   toResponsePicType,
+  toResponsePicUpdateStatusType,
   UpdatePicType,
 } from "../models/pic.model";
 import { PaginationType } from "../types/pagination";
@@ -123,10 +125,23 @@ export class PicService {
 
   //   read all
   static async readAll(
-    query: PaginationType & { status?: Status },
+    query: PaginationType & {
+      status?: Status;
+      kriteriaId?: string;
+      pendekatanId?: string;
+      sort?: string;
+    },
   ): Promise<ResponsePicWithMetaType | null> {
     // destruct query
-    const { limit = 8, page: currentPage = 1, search, status } = query;
+    const {
+      limit = 8,
+      page: currentPage = 1,
+      search,
+      status,
+      kriteriaId,
+      pendekatanId,
+      sort,
+    } = query;
 
     // conditional
     const conditional = {
@@ -153,6 +168,24 @@ export class PicService {
               }
             : {},
           status ? { status: status } : {},
+          kriteriaId
+            ? {
+                kebutuhanDokumen: {
+                  kriteria: {
+                    id: +kriteriaId,
+                  },
+                },
+              }
+            : {},
+          pendekatanId
+            ? {
+                kebutuhanDokumen: {
+                  pendekatan: {
+                    id: +pendekatanId,
+                  },
+                },
+              }
+            : {},
         ],
       },
     };
@@ -169,7 +202,7 @@ export class PicService {
       skip: (currentPage - 1) * limit,
       take: limit,
       orderBy: {
-        createdAt: "desc",
+        createdAt: sort === "asc" ? "asc" : "desc",
       },
       select: {
         id: true,
@@ -413,6 +446,67 @@ export class PicService {
       pj: result.pj.map((item) => ({
         id: item.user.id,
         email: item.user.email,
+        nama: item.user.nama,
+      })),
+    });
+  }
+
+  // update status
+  static async updateStatus(
+    id: number,
+    status: Status,
+  ): Promise<ResponsePicUpdateStatusType | null> {
+    // call db
+    const result = await prisma.pic.update({
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
+      select: {
+        id: true,
+        status: true,
+        keterangan: true,
+        createdAt: true,
+        updatedAt: true,
+        timAkreditasi: {
+          select: {
+            id: true,
+            namaTimAkreditasi: true,
+          },
+        },
+        kebutuhanDokumen: {
+          select: {
+            id: true,
+            namaDokumen: true,
+          },
+        },
+        pj: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                nama: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // check
+    if (!result) return null;
+
+    // return
+    return toResponsePicUpdateStatusType({
+      ...result,
+      status: result.status as Status,
+      kebutuhanDokumen: {
+        ...result.kebutuhanDokumen,
+      },
+      pj: result.pj.map((item) => ({
+        id: item.user.id,
         nama: item.user.nama,
       })),
     });

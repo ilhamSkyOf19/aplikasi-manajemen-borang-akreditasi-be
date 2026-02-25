@@ -2,7 +2,11 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import { zodValidation } from "../middlewares/validation.middleware";
-import { CreatePicType, UpdatePicType } from "../models/pic.model";
+import {
+  CreatePicType,
+  UpdatePicType,
+  UpdateStatusType,
+} from "../models/pic.model";
 import { PicValidation } from "../validations/pic.validation";
 import { PicController } from "../controllers/pic.controller";
 
@@ -42,6 +46,14 @@ picRouter.patch(
   [authMiddleware, aclMiddleware(["kaprodi", "wakil_dekan_1"])],
   zodValidation<UpdatePicType>(PicValidation.UPDATE),
   PicController.update,
+);
+
+// update status
+picRouter.patch(
+  "/update-status-pic/:id",
+  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  zodValidation<UpdateStatusType>(PicValidation.UPDATE_STATUS),
+  PicController.updateStatusPic,
 );
 
 // delete

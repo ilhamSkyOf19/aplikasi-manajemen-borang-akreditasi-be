@@ -17,3 +17,10 @@ export enum Status {
   revisi = "revisi",
   disetujui = "disetujui",
 }
+
+// jenis riwayat
+export enum JenisRiwayat {
+  kebutuhan_dokumen = "kebutuhan_dokumen",
+  dokumen_borang = "dokumen_borang",
+  pic = "pic",
+}

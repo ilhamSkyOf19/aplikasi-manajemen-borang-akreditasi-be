@@ -113,13 +113,11 @@ model Riwayat {
   kebutuhanDokumenId Int?
   kebutuhanDokumen   Kebutuhan_Dokumen? @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
 
+  picId Int?
+  pic   Pic? @relation(fields: [picId], references: [id], onDelete: Cascade)
+
   // dokumenBorangId Int?
   // dokumenBorang   Dokumen_Borang? @relation(fields: [dokumenBorangId], references: [id], onDelete: Cascade)
-
-  timAkreditasiId       Int?
-  kebutuhanDokumenPicId Int?
-
-  pic Pic? @relation(fields: [timAkreditasiId, kebutuhanDokumenPicId], references: [timAkreditasiId, kebutuhanDokumenId], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

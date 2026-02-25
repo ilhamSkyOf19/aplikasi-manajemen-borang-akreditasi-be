@@ -2,18 +2,21 @@ import { NextFunction, Request, Response } from "express";
 import {
   CreatePicType,
   ResponsePicType,
+  ResponsePicUpdateStatusType,
   ResponsePicWithMetaType,
   UpdatePicType,
+  UpdateStatusType,
 } from "../models/pic.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
 import { TimAkreditasiService } from "../services/timAkreditasi.service";
-import { UserService } from "../services/user.service";
 import { PicService } from "../services/pic.service";
 import { PaginationType } from "../types/pagination";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
-import { Status } from "../utils/contstanst";
+import { JenisRiwayat, Status } from "../utils/contstanst";
 import checkParamsId from "../utils/checkParamsId";
+import { stat } from "node:fs";
+import { RiwayatService } from "../services/riwayat.service";
 
 export class PicController {
   // create
@@ -83,6 +86,9 @@ export class PicController {
       {},
       PaginationType & {
         status?: string;
+        kriteriaId?: string;
+        pendekatanId?: string;
+        sort?: string;
       }
     >,
     res: Response<ResponseStructure<ResponsePicWithMetaType | null>>,
@@ -90,7 +96,8 @@ export class PicController {
   ) {
     try {
       // get query from params
-      const { limit, page, search, status } = req.query;
+      const { limit, page, search, status, kriteriaId, pendekatanId, sort } =
+        req.query;
 
       // check query
       const checkQuery = checkQueryPagination(page, limit);
@@ -107,12 +114,25 @@ export class PicController {
         }
       }
 
+      // check kriteria id
+      if (kriteriaId) {
+        checkParamsId(res, kriteriaId);
+      }
+
+      // check pendekatan id
+      if (pendekatanId) {
+        checkParamsId(res, pendekatanId);
+      }
+
       //   call service
       const service = await PicService.readAll({
         limit: checkQuery.limit,
         page: checkQuery.page,
         search,
         status: status as Status,
+        kriteriaId: kriteriaId,
+        pendekatanId: pendekatanId,
+        sort,
       });
 
       return ResponseResult.success<ResponsePicWithMetaType | null>(
@@ -251,6 +271,63 @@ export class PicController {
         res,
         200,
         "success update pic",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // update status
+  static async updateStatusPic(
+    req: Request<{ id: string }, {}, UpdateStatusType>,
+    res: Response<ResponseStructure<ResponsePicUpdateStatusType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get id from params
+      const { id } = req.params;
+
+      // check id
+      const checkId = checkParamsId(res, id);
+
+      // find pic
+      const pic = await PicService.findById(checkId as number);
+
+      // check
+      if (!pic) {
+        return ResponseResult.error(res, 404, "pic not found");
+      }
+
+      // get body
+      const { status, keterangan } = req.body;
+
+      // call service
+      const service = await PicService.updateStatus(checkId as number, status);
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(res, 404, "pic not found");
+      }
+
+      // create riwayat
+      const riwayat = await RiwayatService.create({
+        jenis: JenisRiwayat.pic,
+        keterangan,
+        status,
+        picId: service.id,
+      });
+
+      // check riwayat
+      if (!riwayat) {
+        return ResponseResult.error(res, 404, "riwayat not found");
+      }
+
+      // return success
+      return ResponseResult.success<ResponsePicUpdateStatusType | null>(
+        service,
+        res,
+        200,
+        "success update status pic",
       );
     } catch (error) {
       next(error);
