@@ -109,18 +109,79 @@ export class PicService {
   }
 
   //   find by id
-  static async findById(id: number): Promise<boolean> {
+  static async findById(id: number): Promise<ResponsePicType | null> {
     // call db
     const result = await prisma.pic.findFirst({
       where: {
         id,
       },
+      select: {
+        id: true,
+        status: true,
+        keterangan: true,
+        createdAt: true,
+        updatedAt: true,
+        timAkreditasi: {
+          select: {
+            id: true,
+            namaTimAkreditasi: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        kebutuhanDokumen: {
+          select: {
+            id: true,
+            namaDokumen: true,
+            keterangan: true,
+            status: true,
+            kriteria: {
+              select: {
+                id: true,
+                kriteria: true,
+                namaKriteria: true,
+              },
+            },
+            pendekatan: {
+              select: {
+                id: true,
+                tahap: true,
+                keterangan: true,
+              },
+            },
+          },
+        },
+        pj: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                nama: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     // check
-    if (!result) return false;
+    if (!result) return null;
 
-    return true;
+    // return
+    return toResponsePicType({
+      ...result,
+      status: result.status as Status,
+      kebutuhanDokumen: {
+        ...result.kebutuhanDokumen,
+        status: result.kebutuhanDokumen.status as Status,
+      },
+      pj: result.pj.map((item) => ({
+        id: item.user.id,
+        email: item.user.email,
+        nama: item.user.nama,
+      })),
+    });
   }
 
   //   read all

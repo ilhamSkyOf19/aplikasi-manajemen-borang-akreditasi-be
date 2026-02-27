@@ -9,6 +9,8 @@ export interface IRiwayat {
   jenis: JenisRiwayat;
   status: Status;
   keterangan: string;
+  createdData?: Date | null;
+  highlightDataEmpy?: string;
   kebutuhanDokumen?: Pick<
     IKebutuhanDokumen,
     "id" | "namaDokumen" | "status"

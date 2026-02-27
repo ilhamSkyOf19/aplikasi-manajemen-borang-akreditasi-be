@@ -309,6 +309,21 @@ export class PicController {
         return ResponseResult.error(res, 404, "pic not found");
       }
 
+      // check status success
+      const checkStatusSuccess = await RiwayatService.findByPicIdAndStatus(
+        service.id,
+        Status.disetujui,
+      );
+
+      // check
+      if (checkStatusSuccess) {
+        // delete status
+        await RiwayatService.delete({
+          idRiwayat: checkStatusSuccess.id,
+          picId: service.id,
+        });
+      }
+
       // create riwayat
       const riwayat = await RiwayatService.create({
         jenis: JenisRiwayat.pic,

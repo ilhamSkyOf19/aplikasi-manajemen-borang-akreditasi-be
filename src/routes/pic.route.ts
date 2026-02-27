@@ -35,7 +35,7 @@ picRouter.get(
 // create
 picRouter.post(
   "/create",
-  [authMiddleware, aclMiddleware(["kaprodi", "wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware(["kaprodi"])],
   zodValidation<CreatePicType>(PicValidation.CREATE),
   PicController.create,
 );
@@ -43,7 +43,7 @@ picRouter.post(
 // update
 picRouter.patch(
   "/update/:id",
-  [authMiddleware, aclMiddleware(["kaprodi", "wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware(["kaprodi"])],
   zodValidation<UpdatePicType>(PicValidation.UPDATE),
   PicController.update,
 );
@@ -59,7 +59,7 @@ picRouter.patch(
 // delete
 picRouter.delete(
   "/delete/:id",
-  [authMiddleware, aclMiddleware(["kaprodi", "wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware(["kaprodi"])],
   PicController.delete,
 );
 

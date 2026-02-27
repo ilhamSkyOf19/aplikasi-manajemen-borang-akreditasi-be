@@ -7,6 +7,7 @@ import LimiterMiddleware from "../middlewares/limiter.middleware";
 import userRoute from "./user.route";
 import kebutuhanDokumenRoute from "./kebutuhanDokumen.route";
 import picRouter from "./pic.route";
+import riwayatRouter from "./riwayat.route";
 
 const appRoute: Router = Router();
 
@@ -33,5 +34,8 @@ appRoute.use("/api/tim-akreditasi", timAkreditasiRoute);
 
 // pic router
 appRoute.use("/api/pic", picRouter);
+
+// riwayat router
+appRoute.use("/api/riwayat", riwayatRouter);
 
 export default appRoute;
