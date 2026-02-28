@@ -8,7 +8,7 @@ export interface IPic {
   id: number;
   timAkreditasi: Omit<ITimAkreditasi, "user">;
   kebutuhanDokumen: Omit<IKebutuhanDokumen, "createdAt" | "updatedAt">;
-  pj: Omit<PayloadUserType, "role">[];
+  pj: PayloadUserType[];
   status: Status;
   keterangan: string;
   createdAt: Date;

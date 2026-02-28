@@ -3,6 +3,7 @@ import {
   CreateRiwayatType,
   ResponseRiwayatType,
   toResponseRiwayatType,
+  UpdateRiwayatType,
 } from "../models/riwayat.model";
 import { JenisRiwayat, Status } from "../utils/contstanst";
 
@@ -309,6 +310,122 @@ export class RiwayatService {
           }
         : null,
     });
+  }
+
+  // update riwayat pic
+  static async updateRiwayatPic(
+    picId: number,
+    riwayatId: number,
+    data: UpdateRiwayatType,
+  ): Promise<ResponseRiwayatType | null> {
+    // call api
+    const result = await prisma.riwayat.update({
+      where: {
+        id: riwayatId,
+        picId,
+      },
+      data,
+      select: {
+        id: true,
+        jenis: true,
+        status: true,
+        keterangan: true,
+        createdAt: true,
+        updatedAt: true,
+        kebutuhanDokumen: {
+          select: {
+            id: true,
+            namaDokumen: true,
+            status: true,
+            createdAt: true,
+          },
+        },
+        pic: {
+          select: {
+            id: true,
+            status: true,
+            createdAt: true,
+            kebutuhanDokumen: {
+              select: {
+                id: true,
+                namaDokumen: true,
+              },
+            },
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+              },
+            },
+            pj: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    nama: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // check
+    if (!result) return null;
+
+    return toResponseRiwayatType({
+      ...result,
+      jenis: result.jenis as JenisRiwayat,
+      status: result.status as Status,
+      createdData: result.kebutuhanDokumen
+        ? result.kebutuhanDokumen.createdAt
+        : result.pic
+          ? result.pic.createdAt
+          : null,
+      kebutuhanDokumen: result.kebutuhanDokumen
+        ? {
+            ...result.kebutuhanDokumen,
+            status: result.kebutuhanDokumen.status as Status,
+          }
+        : null,
+      pic: result.pic
+        ? {
+            id: result.pic.id,
+            status: result.pic.status as Status,
+            kebutuhanDokumen: {
+              id: result.pic.kebutuhanDokumen.id,
+              namaDokumen: result.pic.kebutuhanDokumen.namaDokumen,
+            },
+            timAkreditasi: {
+              id: result.pic.timAkreditasi.id,
+              namaTimAkreditasi: result.pic.timAkreditasi.namaTimAkreditasi,
+            },
+            pj: result.pic.pj.map((pj) => ({
+              id: pj.user.id,
+              nama: pj.user.nama,
+            })),
+          }
+        : null,
+    });
+  }
+
+  // check riwayat pic
+  static async checkRiwayatPic(
+    picId: number,
+    riwayatId: number,
+  ): Promise<boolean> {
+    // call db
+    const result = await prisma.riwayat.findFirst({
+      where: {
+        id: riwayatId,
+        picId,
+      },
+    });
+
+    // return
+    return result ? true : false;
   }
 
   // delete pic id & id riwayat

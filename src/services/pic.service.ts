@@ -10,7 +10,7 @@ import {
 } from "../models/pic.model";
 import { PaginationType } from "../types/pagination";
 import { ResponseStructure } from "../types/response";
-import { Status } from "../utils/contstanst";
+import { Status, UserRole } from "../utils/contstanst";
 
 export class PicService {
   // create
@@ -82,6 +82,7 @@ export class PicService {
                 id: true,
                 nama: true,
                 email: true,
+                role: true,
               },
             },
           },
@@ -104,6 +105,7 @@ export class PicService {
         id: item.user.id,
         email: item.user.email,
         nama: item.user.nama,
+        role: item.user.role as UserRole,
       })),
     });
   }
@@ -158,6 +160,7 @@ export class PicService {
                 id: true,
                 nama: true,
                 email: true,
+                role: true,
               },
             },
           },
@@ -180,6 +183,7 @@ export class PicService {
         id: item.user.id,
         email: item.user.email,
         nama: item.user.nama,
+        role: item.user.role as UserRole,
       })),
     });
   }
@@ -308,6 +312,7 @@ export class PicService {
                 id: true,
                 nama: true,
                 email: true,
+                role: true,
               },
             },
           },
@@ -335,6 +340,7 @@ export class PicService {
             id: item.user.id,
             email: item.user.email,
             nama: item.user.nama,
+            role: item.user.role as UserRole,
           })),
         }),
       ),
@@ -391,6 +397,7 @@ export class PicService {
                 id: true,
                 nama: true,
                 email: true,
+                role: true,
               },
             },
           },
@@ -413,6 +420,7 @@ export class PicService {
         id: item.user.id,
         email: item.user.email,
         nama: item.user.nama,
+        role: item.user.role as UserRole,
       })),
     });
   }
@@ -486,6 +494,7 @@ export class PicService {
                 id: true,
                 nama: true,
                 email: true,
+                role: true,
               },
             },
           },
@@ -508,6 +517,7 @@ export class PicService {
         id: item.user.id,
         email: item.user.email,
         nama: item.user.nama,
+        role: item.user.role as UserRole,
       })),
     });
   }

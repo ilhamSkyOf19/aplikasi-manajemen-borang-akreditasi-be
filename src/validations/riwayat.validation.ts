@@ -80,12 +80,6 @@ export class RiwayatValidation {
         )
         .optional(),
       keterangan: this.stringSchema("keterangan", 1, 1000).optional(),
-      kebutuhanDokumenId: this.onlyNumberSchema(
-        "kebutuhan dokumen",
-        1,
-        99999,
-      ).optional(),
-      picId: this.onlyNumberSchema("pic", 1, 99999).optional(),
     })
     .strict() satisfies z.ZodType<UpdateRiwayatType>;
 }

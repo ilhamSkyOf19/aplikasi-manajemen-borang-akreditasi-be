@@ -29,14 +29,22 @@ export interface IRiwayat {
 // create
 export interface CreateRiwayatType extends Omit<
   IRiwayat,
-  "id" | "createdAt" | "updatedAt" | "kebutuhanDokumen" | "pic"
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "kebutuhanDokumen"
+  | "pic"
+  | "highlightDataEmpy"
+  | "createdData"
 > {
   kebutuhanDokumenId?: number;
   picId?: number;
 }
 
 // update
-export interface UpdateRiwayatType extends Partial<CreateRiwayatType> {}
+export interface UpdateRiwayatType extends Partial<
+  Omit<CreateRiwayatType, "kebutuhanDokumenId" | "picId">
+> {}
 
 // response
 export interface ResponseRiwayatType extends IRiwayat {}
