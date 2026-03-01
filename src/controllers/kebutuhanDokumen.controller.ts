@@ -5,7 +5,6 @@ import {
   CreateKebutuhanDokumenType,
   ResponseKebutuhanDokumenChooseWithMetaType,
   ResponseKebutuhanDokumenType,
-  ResponseKebutuhanDokumenUpdateStatusType,
   ResponseKebutuhanDokumenWithMetaType,
   UpdateKebutuhanDokumenType,
 } from "../models/kebutuhanDokumen.model";
@@ -271,86 +270,6 @@ export class kebutuhanDokumenController {
         res,
         200,
         "success update kebutuhan dokumen",
-      );
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // update status
-  static async updateStatusPic(
-    req: Request<{ id: string }, {}, UpdateStatusType>,
-    res: Response<
-      ResponseStructure<ResponseKebutuhanDokumenUpdateStatusType | null>
-    >,
-    next: NextFunction,
-  ) {
-    try {
-      // get id from params
-      const { id } = req.params;
-
-      // check id
-      const checkId = checkParamsId(res, id);
-
-      // find pic
-      const pic = await KebutuhanDokumenService.findById(checkId as number);
-
-      // check
-      if (!pic) {
-        return ResponseResult.error(res, 404, "kebutuhan dokumen not found");
-      }
-
-      // get body
-      const { status, keterangan } = req.body;
-
-      // call service
-      const service = await KebutuhanDokumenService.updateStatus(
-        checkId as number,
-        status,
-      );
-
-      // check service
-      if (!service) {
-        return ResponseResult.error(res, 404, "kebutuhan dokumen not found");
-      }
-
-      // check status revisi
-      if (service.status === "revisi") {
-        // find status success
-        const checkStatusSuccess = await RiwayatService.findByPicIdAndStatus(
-          service.id,
-          Status.disetujui,
-        );
-
-        // check
-        if (checkStatusSuccess) {
-          // delete status
-          await RiwayatService.deleteRiwayatKebutuhanDokumen({
-            idRiwayat: checkStatusSuccess.id,
-            kebutuhanDokumenId: service.id,
-          });
-        }
-      }
-
-      // create riwayat
-      const riwayat = await RiwayatService.create({
-        jenis: JenisRiwayat.kebutuhan_dokumen,
-        keterangan,
-        status,
-        kebutuhanDokumenId: service.id,
-      });
-
-      // check riwayat
-      if (!riwayat) {
-        return ResponseResult.error(res, 404, "riwayat not found");
-      }
-
-      // return success
-      return ResponseResult.success<ResponseKebutuhanDokumenUpdateStatusType | null>(
-        service,
-        res,
-        200,
-        "success update status kebutuhan dokumen",
       );
     } catch (error) {
       next(error);

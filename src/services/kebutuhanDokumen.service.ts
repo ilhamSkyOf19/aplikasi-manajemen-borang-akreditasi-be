@@ -3,11 +3,9 @@ import {
   CreateKebutuhanDokumenType,
   ResponseKebutuhanDokumenChooseWithMetaType,
   ResponseKebutuhanDokumenType,
-  ResponseKebutuhanDokumenUpdateStatusType,
   ResponseKebutuhanDokumenWithMetaType,
   toResponseKebutuhanDokumenChooseWithMetaType,
   toResponseKebutuhanDokumenType,
-  toResponseKebutuhanDokumenUpdateStatusType,
   toResponseKebutuhanDokumenWithMetaType,
   UpdateKebutuhanDokumenType,
 } from "../models/kebutuhanDokumen.model";

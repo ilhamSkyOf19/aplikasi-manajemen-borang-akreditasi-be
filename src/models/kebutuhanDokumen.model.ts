@@ -61,20 +61,3 @@ export interface ResponseKebutuhanDokumenChooseWithMetaType {
 export const toResponseKebutuhanDokumenChooseWithMetaType = (
   kebutuhanDokumen: ResponseKebutuhanDokumenChooseWithMetaType,
 ): ResponseKebutuhanDokumenChooseWithMetaType => kebutuhanDokumen;
-
-// response update status
-export interface ResponseKebutuhanDokumenUpdateStatusType {
-  id: number;
-  namaDokumen: string;
-  kriteria: Omit<ResponseKriteriaType, "revisi" | "createdAt" | "updatedAt">;
-  pendekatan: IPendekatan;
-  status: string;
-  keterangan: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// to response update status
-export const toResponseKebutuhanDokumenUpdateStatusType = (
-  pic: ResponseKebutuhanDokumenUpdateStatusType,
-) => pic;
