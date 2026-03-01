@@ -5,7 +5,6 @@ import {
   ResponsePicUpdateStatusType,
   ResponsePicWithMetaType,
   UpdatePicType,
-  UpdateStatusType,
 } from "../models/pic.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
@@ -17,6 +16,7 @@ import { JenisRiwayat, Status } from "../utils/contstanst";
 import checkParamsId from "../utils/checkParamsId";
 import { stat } from "node:fs";
 import { RiwayatService } from "../services/riwayat.service";
+import { UpdateStatusType } from "../models/status.model";
 
 export class PicController {
   // create
@@ -309,19 +309,40 @@ export class PicController {
         return ResponseResult.error(res, 404, "pic not found");
       }
 
-      // check status success
-      const checkStatusSuccess = await RiwayatService.findByPicIdAndStatus(
-        service.id,
-        Status.disetujui,
-      );
+      // check status disetujui
+      if (service.status === "disetujui") {
+        // find status disetujui
+        const findStatusKebutuhanDokumenDisetujui =
+          await KebutuhanDokumenService.findStatusDisetujui(
+            service.kebutuhanDokumen.id,
+          );
 
-      // check
-      if (checkStatusSuccess) {
-        // delete status
-        await RiwayatService.delete({
-          idRiwayat: checkStatusSuccess.id,
-          picId: service.id,
-        });
+        // check
+        if (!findStatusKebutuhanDokumenDisetujui) {
+          // update kebutuhan dokumen
+          await KebutuhanDokumenService.updateStatus(
+            service.kebutuhanDokumen.id,
+            status,
+          );
+        }
+      }
+
+      // check status revisi
+      if (service.status === "revisi") {
+        // find status success
+        const checkStatusSuccess = await RiwayatService.findByPicIdAndStatus(
+          service.id,
+          Status.disetujui,
+        );
+
+        // check
+        if (checkStatusSuccess) {
+          // delete status
+          await RiwayatService.delete({
+            idRiwayat: checkStatusSuccess.id,
+            picId: service.id,
+          });
+        }
       }
 
       // create riwayat

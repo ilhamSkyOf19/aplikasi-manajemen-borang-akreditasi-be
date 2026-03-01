@@ -26,12 +26,6 @@ export interface CreatePicType {
 // update
 export interface UpdatePicType extends Partial<Omit<CreatePicType, "status">> {}
 
-// update status
-export interface UpdateStatusType {
-  status: Status;
-  keterangan: string;
-}
-
 // response
 export interface ResponsePicType extends IPic {}
 

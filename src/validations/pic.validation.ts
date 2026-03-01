@@ -1,10 +1,5 @@
 import z from "zod";
-import {
-  CreatePicType,
-  UpdatePicType,
-  UpdateStatusType,
-} from "../models/pic.model";
-import { Status } from "../utils/contstanst";
+import { CreatePicType, UpdatePicType } from "../models/pic.model";
 
 export class PicValidation {
   // only number
@@ -69,15 +64,4 @@ export class PicValidation {
       keterangan: this.stringSchema("keterangan", 1, 1000).optional(),
     })
     .strict() satisfies z.ZodType<UpdatePicType>;
-
-  // update status
-  static readonly UPDATE_STATUS = z
-    .object({
-      status: z.enum(
-        ["menunggu", "revisi", "disetujui"] as Status[],
-        "Status tidak valid",
-      ),
-      keterangan: this.stringSchema("keterangan", 1, 1000),
-    })
-    .strict() satisfies z.ZodType<UpdateStatusType>;
 }

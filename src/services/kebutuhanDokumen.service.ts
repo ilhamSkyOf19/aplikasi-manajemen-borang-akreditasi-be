@@ -3,9 +3,11 @@ import {
   CreateKebutuhanDokumenType,
   ResponseKebutuhanDokumenChooseWithMetaType,
   ResponseKebutuhanDokumenType,
+  ResponseKebutuhanDokumenUpdateStatusType,
   ResponseKebutuhanDokumenWithMetaType,
   toResponseKebutuhanDokumenChooseWithMetaType,
   toResponseKebutuhanDokumenType,
+  toResponseKebutuhanDokumenUpdateStatusType,
   toResponseKebutuhanDokumenWithMetaType,
   UpdateKebutuhanDokumenType,
 } from "../models/kebutuhanDokumen.model";
@@ -62,6 +64,18 @@ export class KebutuhanDokumenService {
       ...result,
       status: result.status as Status,
     });
+  }
+
+  // find by id return boolean
+  static async findById(id: number): Promise<boolean> {
+    // call db
+    const result = await prisma.kebutuhan_Dokumen.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return !!result;
   }
 
   // read by id
@@ -279,6 +293,79 @@ export class KebutuhanDokumenService {
       ...result,
       status: result.status as Status,
     });
+  }
+
+  // update status
+  static async updateStatus(
+    id: number,
+    status: Status,
+  ): Promise<ResponseKebutuhanDokumenUpdateStatusType | null> {
+    // call db
+    const result = await prisma.kebutuhan_Dokumen.update({
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
+      select: {
+        id: true,
+        status: true,
+        keterangan: true,
+        createdAt: true,
+        updatedAt: true,
+        namaDokumen: true,
+        kriteria: {
+          select: {
+            id: true,
+            kriteria: true,
+            namaKriteria: true,
+          },
+        },
+        pendekatan: {
+          select: {
+            id: true,
+            tahap: true,
+            keterangan: true,
+          },
+        },
+      },
+    });
+
+    // check
+    if (!result) return null;
+
+    // return
+    return toResponseKebutuhanDokumenUpdateStatusType({
+      ...result,
+      kriteria: {
+        id: result.kriteria.id,
+        kriteria: result.kriteria.kriteria,
+        namaKriteria: result.kriteria.namaKriteria,
+      },
+      pendekatan: {
+        id: result.pendekatan.id,
+        keterangan: result.pendekatan.keterangan,
+        tahap: result.pendekatan.tahap,
+      },
+      status: result.status as Status,
+    });
+  }
+
+  // find status disetujui by id
+  static async findStatusDisetujui(
+    kebutuhanDokumenId: number,
+  ): Promise<boolean> {
+    // call db
+    const result = await prisma.kebutuhan_Dokumen.findFirst({
+      where: {
+        id: kebutuhanDokumenId,
+        status: "disetujui",
+      },
+    });
+
+    // return
+    return !!result;
   }
 
   //   delete

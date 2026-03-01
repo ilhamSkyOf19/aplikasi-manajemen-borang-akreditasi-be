@@ -8,6 +8,8 @@ import {
   UpdateKebutuhanDokumenType,
 } from "../models/kebutuhanDokumen.model";
 import { KebutuhanDokumenValidation } from "../validations/kebutuhanDokumen.validation";
+import { UpdateStatusType } from "../models/status.model";
+import { StatusValidation } from "../validations/status.validation";
 
 const kebutuhanDokumenRoute: Router = Router();
 
@@ -46,6 +48,14 @@ kebutuhanDokumenRoute.patch(
   [authMiddleware, aclMiddleware(["kaprodi"])],
   zodValidation<UpdateKebutuhanDokumenType>(KebutuhanDokumenValidation.UPDATE),
   kebutuhanDokumenController.update,
+);
+
+// update status
+kebutuhanDokumenRoute.patch(
+  "/update-status-kebutuhan-dokumen/:id",
+  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  zodValidation<UpdateStatusType>(StatusValidation.UPDATE_STATUS),
+  kebutuhanDokumenController.updateStatusPic,
 );
 
 // delete
