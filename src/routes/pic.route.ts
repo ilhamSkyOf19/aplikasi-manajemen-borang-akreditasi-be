@@ -5,8 +5,6 @@ import { zodValidation } from "../middlewares/validation.middleware";
 import { CreatePicType, UpdatePicType } from "../models/pic.model";
 import { PicValidation } from "../validations/pic.validation";
 import { PicController } from "../controllers/pic.controller";
-import { UpdateStatusType } from "../models/status.model";
-import { StatusValidation } from "../validations/status.validation";
 
 const picRouter: Router = Router();
 
@@ -44,14 +42,6 @@ picRouter.patch(
   [authMiddleware, aclMiddleware(["kaprodi"])],
   zodValidation<UpdatePicType>(PicValidation.UPDATE),
   PicController.update,
-);
-
-// update status
-picRouter.patch(
-  "/update-status-pic/:id",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
-  zodValidation<UpdateStatusType>(StatusValidation.UPDATE_STATUS),
-  PicController.updateStatusPic,
 );
 
 // delete

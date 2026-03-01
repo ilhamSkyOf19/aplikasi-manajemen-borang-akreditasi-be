@@ -11,10 +11,6 @@ export interface IRiwayat {
   keterangan: string;
   createdData?: Date | null;
   highlightDataEmpy?: string;
-  kebutuhanDokumen?: Pick<
-    IKebutuhanDokumen,
-    "id" | "namaDokumen" | "status"
-  > | null;
   pic?:
     | (Pick<IPic, "id" | "status"> & {
         kebutuhanDokumen: Pick<IKebutuhanDokumen, "id" | "namaDokumen">;

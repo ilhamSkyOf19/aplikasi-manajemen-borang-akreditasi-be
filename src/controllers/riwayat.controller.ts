@@ -8,8 +8,97 @@ import checkParamsId from "../utils/checkParamsId";
 import { PicService } from "../services/pic.service";
 import { RiwayatService } from "../services/riwayat.service";
 import { JenisRiwayat, Status } from "../utils/contstanst";
+import { UpdateStatusType } from "../models/status.model";
+import { ResponsePicUpdateStatusType } from "../models/pic.model";
 
 export class RiwayatController {
+  // update status
+  static async updateStatus(
+    req: Request<{ id: string }, {}, UpdateStatusType>,
+    res: Response<ResponseStructure<ResponsePicUpdateStatusType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get body
+      const { status, keterangan, jenisRiwayat } = req.body;
+
+      // get id from params
+      const { id } = req.params;
+
+      // service pic
+      let servicePic: ResponsePicUpdateStatusType | null = null;
+
+      let checkStatusSuccess: ResponseRiwayatType | null = null;
+
+      // check jenis riwayat = pic
+      if (jenisRiwayat === "pic") {
+        // check id
+        const checkId = checkParamsId(res, id);
+
+        // find pic
+        const pic = await PicService.findById(checkId as number);
+
+        // check
+        if (!pic) {
+          return ResponseResult.error(res, 404, "pic not found");
+        }
+
+        // find status success
+        checkStatusSuccess = await RiwayatService.findByPicIdAndStatus(
+          checkId as number,
+          Status.disetujui,
+        );
+
+        // check if reqeust status di setujui
+        if (status === Status.disetujui && checkStatusSuccess) {
+          return ResponseResult.error(res, 400, "pic sudah disetujui");
+        }
+
+        // call service
+        servicePic = await PicService.updateStatus(checkId as number, status);
+
+        // check service
+        if (!servicePic) {
+          return ResponseResult.error(res, 404, "pic not found");
+        }
+      }
+
+      // check status revisi
+      if (servicePic && servicePic.status === "revisi") {
+        // check
+        if (checkStatusSuccess) {
+          // delete status
+          await RiwayatService.delete({
+            idRiwayat: checkStatusSuccess.id,
+            picId: servicePic.id,
+          });
+        }
+      }
+
+      // create riwayat
+      const riwayat = await RiwayatService.create({
+        jenis: JenisRiwayat.pic,
+        keterangan,
+        status,
+        picId: servicePic ? servicePic.id : 0,
+      });
+
+      // check riwayat
+      if (!riwayat) {
+        return ResponseResult.error(res, 404, "riwayat not found");
+      }
+
+      // return success
+      return ResponseResult.success<ResponsePicUpdateStatusType | null>(
+        servicePic,
+        res,
+        200,
+        "success update status pic",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
   //   read all by pic id
   static async readAllByPicId(
     req: Request<{ picId: string }>,
@@ -61,7 +150,9 @@ export class RiwayatController {
         200,
         "success read riwayat by pic id",
       );
-    } catch (error) {}
+    } catch (error) {
+      next(error);
+    }
   }
 
   // update riwayat pic

@@ -1,6 +1,6 @@
 import z from "zod";
 import { UpdateStatusType } from "../models/status.model";
-import { Status } from "../utils/contstanst";
+import { JenisRiwayat, Status } from "../utils/contstanst";
 
 export class StatusValidation {
   // string
@@ -23,6 +23,10 @@ export class StatusValidation {
         "Status tidak valid",
       ),
       keterangan: this.stringSchema("keterangan", 1, 1000),
+      jenisRiwayat: z.enum(
+        ["pic", "dokumen_borang"] as JenisRiwayat[],
+        "jenis riwayat tidak valid",
+      ),
     })
     .strict() satisfies z.ZodType<UpdateStatusType>;
 }

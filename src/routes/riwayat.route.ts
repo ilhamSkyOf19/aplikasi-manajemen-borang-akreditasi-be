@@ -5,6 +5,8 @@ import { aclMiddleware } from "../middlewares/acl.middleware";
 import { zodValidation } from "../middlewares/validation.middleware";
 import { UpdateRiwayatType } from "../models/riwayat.model";
 import { RiwayatValidation } from "../validations/riwayat.validation";
+import { UpdateStatusType } from "../models/status.model";
+import { StatusValidation } from "../validations/status.validation";
 
 const riwayatRouter: Router = Router();
 
@@ -16,6 +18,14 @@ riwayatRouter.get(
     aclMiddleware(["kaprodi", "wakil_dekan_1", "tim_akreditasi"]),
   ],
   RiwayatController.readAllByPicId,
+);
+
+// update status
+riwayatRouter.patch(
+  "/update-status/:id",
+  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  zodValidation<UpdateStatusType>(StatusValidation.UPDATE_STATUS),
+  RiwayatController.updateStatus,
 );
 
 // update riwayat pic

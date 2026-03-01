@@ -20,7 +20,6 @@ export enum Status {
 
 // jenis riwayat
 export enum JenisRiwayat {
-  kebutuhan_dokumen = "kebutuhan_dokumen",
   dokumen_borang = "dokumen_borang",
   pic = "pic",
 }

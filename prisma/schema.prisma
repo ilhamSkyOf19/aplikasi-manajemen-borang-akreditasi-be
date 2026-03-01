@@ -25,7 +25,6 @@ enum Status {
 
 // enum jenis revisi
 enum JenisRevisi {
-  kebutuhan_dokumen
   dokumen_borang
   pic
 }
@@ -92,11 +91,11 @@ model Kebutuhan_Dokumen {
   kriteria   Kriteria   @relation(fields: [kriteriaId], references: [id], onDelete: Cascade)
   pendekatan pendekatan @relation(fields: [pendekatanId], references: [id], onDelete: Cascade)
 
-  pic     Pic[]
-  riwayat Riwayat[]
+  pic Pic[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  riwayats  Riwayat[]
 }
 
 // model riwayat 
@@ -110,17 +109,16 @@ model Riwayat {
 
   // ===== OPTIONAL RELATIONS =====
 
-  kebutuhanDokumenId Int?
-  kebutuhanDokumen   Kebutuhan_Dokumen? @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
-
   picId Int?
   pic   Pic? @relation(fields: [picId], references: [id], onDelete: Cascade)
 
   // dokumenBorangId Int?
   // dokumenBorang   Dokumen_Borang? @relation(fields: [dokumenBorangId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  kebutuhanDokumen    Kebutuhan_Dokumen? @relation(fields: [kebutuhan_DokumenId], references: [id])
+  kebutuhan_DokumenId Int?
 }
 
 // // ===== PIVOT TABLES ===== //

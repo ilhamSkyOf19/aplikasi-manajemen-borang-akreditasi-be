@@ -295,63 +295,6 @@ export class KebutuhanDokumenService {
     });
   }
 
-  // update status
-  static async updateStatus(
-    id: number,
-    status: Status,
-  ): Promise<ResponseKebutuhanDokumenUpdateStatusType | null> {
-    // call db
-    const result = await prisma.kebutuhan_Dokumen.update({
-      where: {
-        id,
-      },
-      data: {
-        status,
-      },
-      select: {
-        id: true,
-        status: true,
-        keterangan: true,
-        createdAt: true,
-        updatedAt: true,
-        namaDokumen: true,
-        kriteria: {
-          select: {
-            id: true,
-            kriteria: true,
-            namaKriteria: true,
-          },
-        },
-        pendekatan: {
-          select: {
-            id: true,
-            tahap: true,
-            keterangan: true,
-          },
-        },
-      },
-    });
-
-    // check
-    if (!result) return null;
-
-    // return
-    return toResponseKebutuhanDokumenUpdateStatusType({
-      ...result,
-      kriteria: {
-        id: result.kriteria.id,
-        kriteria: result.kriteria.kriteria,
-        namaKriteria: result.kriteria.namaKriteria,
-      },
-      pendekatan: {
-        id: result.pendekatan.id,
-        keterangan: result.pendekatan.keterangan,
-        tahap: result.pendekatan.tahap,
-      },
-      status: result.status as Status,
-    });
-  }
-
   // find status disetujui by id
   static async findStatusDisetujui(
     kebutuhanDokumenId: number,
