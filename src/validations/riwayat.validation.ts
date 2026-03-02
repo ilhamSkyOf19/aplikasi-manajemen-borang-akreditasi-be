@@ -1,9 +1,4 @@
 import z from "zod";
-import {
-  CreatePicType,
-  UpdatePicType,
-  UpdateStatusType,
-} from "../models/pic.model";
 import { JenisRiwayat, Status } from "../utils/contstanst";
 import { CreateRiwayatType, UpdateRiwayatType } from "../models/riwayat.model";
 

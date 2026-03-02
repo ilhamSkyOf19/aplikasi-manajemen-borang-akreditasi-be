@@ -84,7 +84,7 @@ export class AuthController {
       if (!service)
         return ResponseResult.error(
           res,
-          400,
+          401,
           "Email or nama or password is wrong",
         );
 
@@ -98,19 +98,22 @@ export class AuthController {
       if (!isMatch)
         return ResponseResult.error(
           res,
-          400,
+          401,
           "Email or nama or password is wrong",
         );
 
       // generate token
       const token = generateAccessToken(service);
 
+      const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
+
       // set cookie
       res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict" as const,
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: COOKIE_MAX_AGE,
+        path: "/api",
       });
 
       // return success

@@ -33,13 +33,12 @@ export interface CreateRiwayatType extends Omit<
   | "highlightDataEmpy"
   | "createdData"
 > {
-  kebutuhanDokumenId?: number;
   picId?: number;
 }
 
 // update
 export interface UpdateRiwayatType extends Partial<
-  Omit<CreateRiwayatType, "kebutuhanDokumenId" | "picId">
+  Omit<CreateRiwayatType, "picId">
 > {}
 
 // response

@@ -12,20 +12,13 @@ export class RiwayatService {
   static async create(
     data: CreateRiwayatType,
   ): Promise<ResponseRiwayatType | null> {
-    const { jenis, keterangan, status, kebutuhanDokumenId, picId } = data;
+    const { jenis, keterangan, status, picId } = data;
     // call db
     const result = await prisma.riwayat.create({
       data: {
         jenis,
         keterangan,
         status,
-        kebutuhanDokumen: kebutuhanDokumenId
-          ? {
-              connect: {
-                id: kebutuhanDokumenId,
-              },
-            }
-          : undefined,
         pic: picId
           ? {
               connect: {
@@ -181,9 +174,12 @@ export class RiwayatService {
   }
 
   // find riwayat by pic id dan status
-  static async findByPicIdAndStatus(picId: number, status: Status) {
+  static async findByPicIdAndStatus(
+    picId: number,
+    status: Status,
+  ): Promise<ResponseRiwayatType[] | null> {
     // call db
-    const result = await prisma.riwayat.findFirst({
+    const result = await prisma.riwayat.findMany({
       where: {
         picId,
         status,
@@ -225,35 +221,41 @@ export class RiwayatService {
           },
         },
       },
+      orderBy: { createdAt: "desc" },
     });
 
     // check result
     if (!result) return null;
 
-    return toResponseRiwayatType({
-      ...result,
-      jenis: result.jenis as JenisRiwayat,
-      status: result.status as Status,
-      createdData: result.pic ? result.pic.createdAt : null,
-      pic: result.pic
-        ? {
-            id: result.pic.id,
-            status: result.pic.status as Status,
-            kebutuhanDokumen: {
-              id: result.pic.kebutuhanDokumen.id,
-              namaDokumen: result.pic.kebutuhanDokumen.namaDokumen,
-            },
-            timAkreditasi: {
-              id: result.pic.timAkreditasi.id,
-              namaTimAkreditasi: result.pic.timAkreditasi.namaTimAkreditasi,
-            },
-            pj: result.pic.pj.map((pj) => ({
-              id: pj.user.id,
-              nama: pj.user.nama,
-            })),
-          }
-        : null,
-    });
+    return result.map((item) =>
+      toResponseRiwayatType({
+        ...item,
+        jenis: item.jenis as JenisRiwayat,
+        status: item.status as Status,
+        createdData: item.pic ? item.pic.createdAt : null,
+        highlightDataEmpy: item.pic?.kebutuhanDokumen?.namaDokumen
+          ? item.pic?.kebutuhanDokumen?.namaDokumen
+          : "",
+        pic: item.pic
+          ? {
+              id: item.pic.id,
+              status: item.pic.status as Status,
+              kebutuhanDokumen: {
+                id: item.pic.kebutuhanDokumen.id,
+                namaDokumen: item.pic.kebutuhanDokumen.namaDokumen,
+              },
+              timAkreditasi: {
+                id: item.pic.timAkreditasi.id,
+                namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
+              },
+              pj: item.pic.pj.map((pj) => ({
+                id: pj.user.id,
+                nama: pj.user.nama,
+              })),
+            }
+          : null,
+      }),
+    );
   }
 
   // update riwayat pic
@@ -356,14 +358,14 @@ export class RiwayatService {
 
   // delete pic id & id riwayat
   static async delete(data: {
-    picId: number;
+    picId?: number;
     idRiwayat: number;
   }): Promise<boolean> {
     // call db
     const result = await prisma.riwayat.delete({
       where: {
         id: data.idRiwayat,
-        picId: data.picId,
+        picId: data.picId || undefined,
       },
     });
 

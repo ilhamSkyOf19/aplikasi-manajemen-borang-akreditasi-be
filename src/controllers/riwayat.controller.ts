@@ -28,7 +28,10 @@ export class RiwayatController {
       // service pic
       let servicePic: ResponsePicUpdateStatusType | null = null;
 
-      let checkStatusSuccess: ResponseRiwayatType | null = null;
+      let checkStatusSuccess: ResponseRiwayatType[] | null = null;
+
+      // check status revisi
+      let checkStatusRevisi: ResponseRiwayatType[] | null = null;
 
       // check jenis riwayat = pic
       if (jenisRiwayat === "pic") {
@@ -43,19 +46,31 @@ export class RiwayatController {
           return ResponseResult.error(res, 404, "pic not found");
         }
 
-        // find status success
-        checkStatusSuccess = await RiwayatService.findByPicIdAndStatus(
-          checkId as number,
-          Status.disetujui,
-        );
+        // check status revisi
+        if (pic.status === "revisi" && status === "revisi") {
+          checkStatusRevisi = await RiwayatService.findByPicIdAndStatus(
+            pic.id,
+            Status.revisi,
+          );
+        } else {
+          // find status success
+          checkStatusSuccess = await RiwayatService.findByPicIdAndStatus(
+            pic.id,
+            Status.disetujui,
+          );
+        }
 
         // check if reqeust status di setujui
-        if (status === Status.disetujui && checkStatusSuccess) {
+        if (
+          status === Status.disetujui &&
+          checkStatusSuccess &&
+          checkStatusSuccess.length > 0
+        ) {
           return ResponseResult.error(res, 400, "pic sudah disetujui");
         }
 
         // call service
-        servicePic = await PicService.updateStatus(checkId as number, status);
+        servicePic = await PicService.updateStatus(pic.id, status);
 
         // check service
         if (!servicePic) {
@@ -66,10 +81,18 @@ export class RiwayatController {
       // check status revisi
       if (servicePic && servicePic.status === "revisi") {
         // check
-        if (checkStatusSuccess) {
+        if (checkStatusSuccess && checkStatusSuccess.length > 0) {
           // delete status
           await RiwayatService.delete({
-            idRiwayat: checkStatusSuccess.id,
+            idRiwayat: checkStatusSuccess[0].id,
+            picId: servicePic.id,
+          });
+        }
+
+        if (checkStatusRevisi && checkStatusRevisi.length > 0) {
+          // delete status revisi terbaru
+          await RiwayatService.delete({
+            idRiwayat: checkStatusRevisi[0].id,
             picId: servicePic.id,
           });
         }

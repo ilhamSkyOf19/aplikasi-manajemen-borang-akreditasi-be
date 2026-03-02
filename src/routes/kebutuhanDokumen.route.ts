@@ -50,14 +50,6 @@ kebutuhanDokumenRoute.patch(
   kebutuhanDokumenController.update,
 );
 
-// update status
-kebutuhanDokumenRoute.patch(
-  "/update-status-kebutuhan-dokumen/:id",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
-  zodValidation<UpdateStatusType>(StatusValidation.UPDATE_STATUS),
-  kebutuhanDokumenController.updateStatusPic,
-);
-
 // delete
 kebutuhanDokumenRoute.delete(
   "/delete/:id",
