@@ -10,6 +10,7 @@ import { RiwayatService } from "../services/riwayat.service";
 import { JenisRiwayat, Status } from "../utils/contstanst";
 import { UpdateStatusType } from "../models/status.model";
 import { ResponsePicUpdateStatusType } from "../models/pic.model";
+import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
 
 export class RiwayatController {
   // update status
@@ -76,6 +77,53 @@ export class RiwayatController {
         if (!servicePic) {
           return ResponseResult.error(res, 404, "pic not found");
         }
+
+        // update status kebutuhan dokumen
+        const updateStatusKebutuhanDokumen =
+          await KebutuhanDokumenService.updateStatusKebutuhanDokumentasi(
+            servicePic.kebutuhanDokumen.id,
+            status,
+          );
+
+        // check update status kebutuhan dokumen
+        if (!updateStatusKebutuhanDokumen) {
+          return ResponseResult.error(
+            res,
+            500,
+            "gagal update status kebutuhan dokumen",
+          );
+        }
+
+        // check status success
+        if (status === "disetujui" || status === "revisi") {
+          // check find pic by id and status
+          const findPicByIdAndStatus =
+            await RiwayatService.findByPicIdAndStatus(
+              servicePic.id,
+              Status.menunggu,
+            );
+
+          if (findPicByIdAndStatus && findPicByIdAndStatus?.length > 0) {
+            // data delete riwayat menunggu
+            const dataDeleteRiwayatMenunggu = findPicByIdAndStatus.map(
+              (item) => item.id,
+            );
+
+            // delete many status menunggu
+            const deleteManyStatusMenunggu = await RiwayatService.deleteMany(
+              dataDeleteRiwayatMenunggu,
+            );
+
+            // check delete many status menunggu
+            if (!deleteManyStatusMenunggu) {
+              return ResponseResult.error(
+                res,
+                500,
+                "gagal delete many status menunggu",
+              );
+            }
+          }
+        }
       }
 
       // check status revisi
@@ -122,6 +170,7 @@ export class RiwayatController {
       next(error);
     }
   }
+
   //   read all by pic id
   static async readAllByPicId(
     req: Request<{ picId: string }>,

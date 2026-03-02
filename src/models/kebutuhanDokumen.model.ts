@@ -30,7 +30,9 @@ export interface CreateKebutuhanDokumenType extends Omit<
 }
 
 // update
-export interface UpdateKebutuhanDokumenType extends Partial<CreateKebutuhanDokumenType> {}
+export interface UpdateKebutuhanDokumenType extends Partial<CreateKebutuhanDokumenType> {
+  keteranganUpdate: string;
+}
 
 // response
 export interface ResponseKebutuhanDokumenType extends IKebutuhanDokumen {}

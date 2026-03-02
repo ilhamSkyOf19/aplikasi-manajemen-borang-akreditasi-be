@@ -16,6 +16,8 @@ import { checkQueryPagination } from "../utils/checkQueryPagination";
 import { JenisRiwayat, Status } from "../utils/contstanst";
 import { UpdateStatusType } from "../models/status.model";
 import { RiwayatService } from "../services/riwayat.service";
+import { CreateRiwayatType } from "../models/riwayat.model";
+import { PicService } from "../services/pic.service";
 
 export class kebutuhanDokumenController {
   // create
@@ -234,7 +236,13 @@ export class kebutuhanDokumenController {
         return ResponseResult.error(res, 404, "kebutuhan dokumen not found");
 
       // get body
-      const { keterangan, kriteriaId, namaDokumen, pendekatanId } = req.body;
+      const {
+        keterangan,
+        kriteriaId,
+        namaDokumen,
+        pendekatanId,
+        keteranganUpdate,
+      } = req.body;
 
       // check kriteria id
       if (kriteriaId) {
@@ -263,6 +271,70 @@ export class kebutuhanDokumenController {
       // check service
       if (!service)
         return ResponseResult.error(res, 500, "gagal update kebutuhan dokumen");
+
+      // check riwayat
+      const checkRiwayat =
+        await RiwayatService.findAllRiwayatByKebutuhanDokumenId(service.id);
+
+      //  check status
+      if (checkRiwayat && checkRiwayat.length > 0) {
+        // check status disetujui
+        if (checkRiwayat.find((item) => item.status === Status.disetujui)) {
+          const dataRiwayatDisetujui = checkRiwayat.filter(
+            (item) => item.status === Status.disetujui,
+          );
+
+          // delete data disetujui
+          await RiwayatService.deleteMany(
+            dataRiwayatDisetujui.map((item) => item.id),
+          );
+        }
+
+        // get id pic
+        const picids = [
+          ...new Set(checkRiwayat.map((item) => item.pic?.id ?? 0)),
+        ];
+
+        // update pic
+        const updatePics = await PicService.updateManyStatus(
+          picids,
+          Status.menunggu,
+        );
+
+        // check update pic
+        if (!updatePics)
+          return ResponseResult.error(res, 500, "gagal update pic");
+
+        // update status kebutuhan dokumentasi
+        const updateStatusKebutuhanDokumentasi =
+          await KebutuhanDokumenService.updateStatusKebutuhanDokumentasi(
+            service.id,
+            Status.menunggu,
+          );
+
+        // check update status kebutuhan dokumentasi
+        if (!updateStatusKebutuhanDokumentasi)
+          return ResponseResult.error(
+            res,
+            500,
+            "gagal update status kebutuhan dokumentasi",
+          );
+
+        // data riwayat
+        const dataRiwayat: CreateRiwayatType[] = picids.map((id) => ({
+          jenis: JenisRiwayat.pic,
+          status: Status.menunggu,
+          keterangan: keteranganUpdate,
+          picId: id,
+        }));
+
+        // create riwayat
+        const riwayat = await RiwayatService.createMany(dataRiwayat);
+
+        // check riwayat
+        if (!riwayat)
+          return ResponseResult.error(res, 500, "gagal create riwayat");
+      }
 
       // return
       return ResponseResult.success<ResponseKebutuhanDokumenType | null>(

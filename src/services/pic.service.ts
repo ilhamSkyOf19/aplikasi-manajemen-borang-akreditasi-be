@@ -583,6 +583,27 @@ export class PicService {
     });
   }
 
+  // update status many
+  static async updateManyStatus(
+    picId: number[],
+    status: Status,
+  ): Promise<boolean> {
+    const result = await prisma.pic.updateMany({
+      where: {
+        id: {
+          in: picId,
+        },
+      },
+      data: {
+        status: {
+          set: status,
+        },
+      },
+    });
+
+    return result.count > 0;
+  }
+
   //   delete
   static async delete(id: number): Promise<boolean> {
     // call db

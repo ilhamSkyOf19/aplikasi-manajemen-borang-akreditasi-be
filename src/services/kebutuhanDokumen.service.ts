@@ -255,7 +255,7 @@ export class KebutuhanDokumenService {
   //   update
   static async update(
     id: number,
-    req: UpdateKebutuhanDokumenType,
+    req: Omit<UpdateKebutuhanDokumenType, "keteranganUpdate">,
   ): Promise<ResponseKebutuhanDokumenType | null> {
     // call db
     const result = await prisma.kebutuhan_Dokumen.update({
@@ -291,6 +291,25 @@ export class KebutuhanDokumenService {
       ...result,
       status: result.status as Status,
     });
+  }
+
+  // update status kebutuhan dokumentasi
+  static async updateStatusKebutuhanDokumentasi(
+    id: number,
+    status: Status,
+  ): Promise<boolean> {
+    // call db
+    const result = await prisma.kebutuhan_Dokumen.update({
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
+    });
+
+    // return
+    return !!result;
   }
 
   // find status disetujui by id

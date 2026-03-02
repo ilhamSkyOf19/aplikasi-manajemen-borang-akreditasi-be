@@ -92,6 +92,20 @@ export class RiwayatService {
     });
   }
 
+  // create many
+  static async createMany(data: CreateRiwayatType[]): Promise<boolean> {
+    const result = await prisma.riwayat.createMany({
+      data: data.map((item) => ({
+        jenis: item.jenis,
+        keterangan: item.keterangan,
+        status: item.status,
+        picId: item.picId ?? null,
+      })),
+    });
+
+    return result.count > 0;
+  }
+
   // read all riwayat by pic id
   static async readAllByPicId(picId: number): Promise<ResponseRiwayatType[]> {
     // call db
@@ -258,6 +272,103 @@ export class RiwayatService {
     );
   }
 
+  // read by kebutuhan dokumen id
+  static async findAllRiwayatByKebutuhanDokumenId(
+    kebutuhanDokumenId: number,
+  ): Promise<ResponseRiwayatType[] | null> {
+    // call db
+    const result = await prisma.riwayat.findMany({
+      where: {
+        pic: {
+          kebutuhanDokumenId: kebutuhanDokumenId,
+        },
+      },
+      select: {
+        id: true,
+        jenis: true,
+        status: true,
+        keterangan: true,
+        createdAt: true,
+        updatedAt: true,
+        pic: {
+          select: {
+            id: true,
+            status: true,
+            createdAt: true,
+            kebutuhanDokumen: {
+              select: {
+                id: true,
+                namaDokumen: true,
+              },
+            },
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+              },
+            },
+            pj: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    nama: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return result.map((item) =>
+      toResponseRiwayatType({
+        ...item,
+        jenis: item.jenis as JenisRiwayat,
+        status: item.status as Status,
+        createdData: item.pic ? item.pic.createdAt : null,
+        highlightDataEmpy: item.pic?.kebutuhanDokumen?.namaDokumen
+          ? item.pic?.kebutuhanDokumen?.namaDokumen
+          : "",
+        pic: item.pic
+          ? {
+              id: item.pic.id,
+              status: item.pic.status as Status,
+              kebutuhanDokumen: {
+                id: item.pic.kebutuhanDokumen.id,
+                namaDokumen: item.pic.kebutuhanDokumen.namaDokumen,
+              },
+              timAkreditasi: {
+                id: item.pic.timAkreditasi.id,
+                namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
+              },
+              pj: item.pic.pj.map((pj) => ({
+                id: pj.user.id,
+                nama: pj.user.nama,
+              })),
+            }
+          : null,
+      }),
+    );
+  }
+
+  static async checkRiwayatPic(
+    picId: number,
+    riwayatId: number,
+  ): Promise<boolean> {
+    // call db
+    const result = await prisma.riwayat.findFirst({
+      where: {
+        id: riwayatId,
+        picId,
+      },
+    });
+
+    // return
+    return result ? true : false;
+  }
+
   // update riwayat pic
   static async updateRiwayatPic(
     picId: number,
@@ -339,21 +450,18 @@ export class RiwayatService {
     });
   }
 
-  // check riwayat pic
-  static async checkRiwayatPic(
-    picId: number,
-    riwayatId: number,
-  ): Promise<boolean> {
+  // delete riwayat many
+  static async deleteMany(id: number[]): Promise<boolean> {
     // call db
-    const result = await prisma.riwayat.findFirst({
+    const result = await prisma.riwayat.deleteMany({
       where: {
-        id: riwayatId,
-        picId,
+        id: {
+          in: id,
+        },
       },
     });
 
-    // return
-    return result ? true : false;
+    return result.count > 0;
   }
 
   // delete pic id & id riwayat
@@ -371,20 +479,5 @@ export class RiwayatService {
 
     // return
     return result ? true : false;
-  }
-
-  // delete id riwayat
-  static async deleteRiwayatKebutuhanDokumen(data: {
-    idRiwayat: number;
-  }): Promise<boolean> {
-    // call db
-    const result = await prisma.riwayat.delete({
-      where: {
-        id: data.idRiwayat,
-      },
-    });
-
-    // return
-    return !!result;
   }
 }

@@ -49,10 +49,7 @@ export class KebutuhanDokumenValidation {
       keterangan: this.stringSchema("keterangan").optional(),
       kriteriaId: this.onlyNumberSchema("kriteria", 1, 99999).optional(),
       pendekatanId: this.onlyNumberSchema("pendekatan", 1, 99999).optional(),
-      // status: z.enum(
-      //   ["menunggu", "revisi", "disetujui"] as Status[],
-      //   "Role tidak valid",
-      // ),
+      keteranganUpdate: this.stringSchema("keteranganUpdate", 1, 1000),
     })
     .strict() satisfies z.ZodType<UpdateKebutuhanDokumenType>;
 }
