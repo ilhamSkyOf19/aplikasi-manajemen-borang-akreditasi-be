@@ -45,6 +45,14 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        riwayat: {
+          select: {
+            status: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
         timAkreditasi: {
           select: {
             id: true,
@@ -97,6 +105,7 @@ export class PicService {
     return toResponsePicType({
       ...result,
       status: result.status as Status,
+      statusRiwayat: (result.riwayat[0]?.status ?? null) as Status | null,
       kebutuhanDokumen: {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
@@ -123,6 +132,14 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        riwayat: {
+          select: {
+            status: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
         timAkreditasi: {
           select: {
             id: true,
@@ -175,6 +192,7 @@ export class PicService {
     return toResponsePicType({
       ...result,
       status: result.status as Status,
+      statusRiwayat: (result.riwayat[0]?.status ?? null) as Status | null,
       kebutuhanDokumen: {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
@@ -275,6 +293,14 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        riwayat: {
+          select: {
+            status: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
         timAkreditasi: {
           select: {
             id: true,
@@ -332,6 +358,7 @@ export class PicService {
         toResponsePicType({
           ...item,
           status: item.status as Status,
+          statusRiwayat: (item.riwayat[0]?.status ?? null) as Status | null,
           kebutuhanDokumen: {
             ...item.kebutuhanDokumen,
             status: item.kebutuhanDokumen.status as Status,
@@ -360,6 +387,14 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        riwayat: {
+          select: {
+            status: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
         timAkreditasi: {
           select: {
             id: true,
@@ -412,6 +447,7 @@ export class PicService {
     return toResponsePicType({
       ...result,
       status: result.status as Status,
+      statusRiwayat: (result.riwayat[0]?.status ?? null) as Status | null,
       kebutuhanDokumen: {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
@@ -428,7 +464,7 @@ export class PicService {
   //   update
   static async update(
     id: number,
-    req: UpdatePicType,
+    req: Omit<UpdatePicType, "keteranganUpdate">,
   ): Promise<ResponsePicType | null> {
     // destroy pj
     const { pjId, ...rest } = req;
@@ -457,6 +493,14 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        riwayat: {
+          select: {
+            status: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
         timAkreditasi: {
           select: {
             id: true,
@@ -509,6 +553,7 @@ export class PicService {
     return toResponsePicType({
       ...result,
       status: result.status as Status,
+      statusRiwayat: (result.riwayat[0]?.status ?? null) as Status | null,
       kebutuhanDokumen: {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,

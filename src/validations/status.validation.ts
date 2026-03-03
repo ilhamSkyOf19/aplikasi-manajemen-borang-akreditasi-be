@@ -1,6 +1,6 @@
 import z from "zod";
 import { UpdateStatusType } from "../models/status.model";
-import { JenisRiwayat, Status } from "../utils/contstanst";
+import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 
 export class StatusValidation {
   // string
@@ -27,6 +27,17 @@ export class StatusValidation {
         ["pic", "dokumen_borang"] as JenisRiwayat[],
         "jenis riwayat tidak valid",
       ),
+      flagRevisi: z
+        .array(
+          z.enum(
+            ["pic", "kebutuhan_dokumen", "dokumen_borang"] as FlagRevisi[],
+            "flag revisi tidak valid",
+          ),
+        )
+        .nonempty({
+          message: `flag revisi harus berupa array yang tidak kosong`,
+        })
+        .optional(),
     })
     .strict() satisfies z.ZodType<UpdateStatusType>;
 }

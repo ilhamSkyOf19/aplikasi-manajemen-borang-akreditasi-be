@@ -1,8 +1,9 @@
-import { JenisRiwayat, Status } from "../utils/contstanst";
+import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 
 // update status
 export interface UpdateStatusType {
   status: Status;
   keterangan: string;
   jenisRiwayat: JenisRiwayat;
+  flagRevisi?: FlagRevisi[];
 }

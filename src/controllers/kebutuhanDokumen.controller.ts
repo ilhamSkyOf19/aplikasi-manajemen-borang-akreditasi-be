@@ -13,7 +13,7 @@ import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
 import checkParamsId from "../utils/checkParamsId";
 import { PaginationType } from "../types/pagination";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
-import { JenisRiwayat, Status } from "../utils/contstanst";
+import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 import { UpdateStatusType } from "../models/status.model";
 import { RiwayatService } from "../services/riwayat.service";
 import { CreateRiwayatType } from "../models/riwayat.model";
@@ -260,21 +260,27 @@ export class kebutuhanDokumenController {
           return ResponseResult.error(res, 404, "pendekatan not found");
       }
 
-      // call service
-      const service = await KebutuhanDokumenService.update(findData.id, {
-        keterangan,
-        kriteriaId,
-        namaDokumen,
-        pendekatanId,
-      });
-
-      // check service
-      if (!service)
-        return ResponseResult.error(res, 500, "gagal update kebutuhan dokumen");
-
       // check riwayat
       const checkRiwayat =
-        await RiwayatService.findAllRiwayatByKebutuhanDokumenId(service.id);
+        await RiwayatService.findAllRiwayatByKebutuhanDokumenId(
+          checkId as number,
+        );
+
+      // check flag kebutuhan
+      if (
+        checkRiwayat?.some((item) =>
+          item.flagRevisi?.some(
+            (flag) =>
+              flag === "kebutuhan_dokumen" && item.status === "menunggu",
+          ),
+        )
+      ) {
+        return ResponseResult.error(
+          res,
+          409,
+          "kebutuhan dokumen menunggu verifikasi",
+        );
+      }
 
       //  check status
       if (checkRiwayat && checkRiwayat.length > 0) {
@@ -305,27 +311,13 @@ export class kebutuhanDokumenController {
         if (!updatePics)
           return ResponseResult.error(res, 500, "gagal update pic");
 
-        // update status kebutuhan dokumentasi
-        const updateStatusKebutuhanDokumentasi =
-          await KebutuhanDokumenService.updateStatusKebutuhanDokumentasi(
-            service.id,
-            Status.menunggu,
-          );
-
-        // check update status kebutuhan dokumentasi
-        if (!updateStatusKebutuhanDokumentasi)
-          return ResponseResult.error(
-            res,
-            500,
-            "gagal update status kebutuhan dokumentasi",
-          );
-
         // data riwayat
         const dataRiwayat: CreateRiwayatType[] = picids.map((id) => ({
           jenis: JenisRiwayat.pic,
           status: Status.menunggu,
           keterangan: keteranganUpdate,
           picId: id,
+          flagRevisi: [FlagRevisi.kebutuhan_dokumen],
         }));
 
         // create riwayat
@@ -335,6 +327,18 @@ export class kebutuhanDokumenController {
         if (!riwayat)
           return ResponseResult.error(res, 500, "gagal create riwayat");
       }
+
+      // call service
+      const service = await KebutuhanDokumenService.update(findData.id, {
+        keterangan,
+        kriteriaId,
+        namaDokumen,
+        pendekatanId,
+      });
+
+      // check service
+      if (!service)
+        return ResponseResult.error(res, 500, "gagal update kebutuhan dokumen");
 
       // return
       return ResponseResult.success<ResponseKebutuhanDokumenType | null>(

@@ -16,15 +16,25 @@ export class RiwayatController {
   // update status
   static async updateStatus(
     req: Request<{ id: string }, {}, UpdateStatusType>,
-    res: Response<ResponseStructure<ResponsePicUpdateStatusType | null>>,
+    res: Response<ResponseStructure<ResponseRiwayatType | null>>,
     next: NextFunction,
   ) {
     try {
       // get body
-      const { status, keterangan, jenisRiwayat } = req.body;
+      const { status, keterangan, jenisRiwayat, flagRevisi } = req.body;
 
       // get id from params
       const { id } = req.params;
+
+      // check id
+      const checkId = checkParamsId(res, id);
+
+      // check status
+      if (status === Status.menunggu || status === Status.revisi) {
+        if (!flagRevisi) {
+          return ResponseResult.error(res, 400, "flag revisi harus diisi");
+        }
+      }
 
       // service pic
       let servicePic: ResponsePicUpdateStatusType | null = null;
@@ -36,9 +46,6 @@ export class RiwayatController {
 
       // check jenis riwayat = pic
       if (jenisRiwayat === "pic") {
-        // check id
-        const checkId = checkParamsId(res, id);
-
         // find pic
         const pic = await PicService.findById(checkId as number);
 
@@ -152,6 +159,7 @@ export class RiwayatController {
         keterangan,
         status,
         picId: servicePic ? servicePic.id : 0,
+        flagRevisi,
       });
 
       // check riwayat
@@ -160,8 +168,8 @@ export class RiwayatController {
       }
 
       // return success
-      return ResponseResult.success<ResponsePicUpdateStatusType | null>(
-        servicePic,
+      return ResponseResult.success<ResponseRiwayatType | null>(
+        riwayat,
         res,
         200,
         "success update status pic",
@@ -227,53 +235,53 @@ export class RiwayatController {
     }
   }
 
-  // update riwayat pic
-  static async updateRiwayatPic(
-    req: Request<{ picId: string; riwayatId: string }, {}, UpdateRiwayatType>,
-    res: Response<ResponseStructure<ResponseRiwayatType | null>>,
-    next: NextFunction,
-  ) {
-    try {
-      // get id from params
-      const { picId, riwayatId } = req.params;
+  // // update riwayat pic
+  // static async updateRiwayatPic(
+  //   req: Request<{ picId: string; riwayatId: string }, {}, UpdateRiwayatType>,
+  //   res: Response<ResponseStructure<ResponseRiwayatType | null>>,
+  //   next: NextFunction,
+  // ) {
+  //   try {
+  //     // get id from params
+  //     const { picId, riwayatId } = req.params;
 
-      // check id
-      const checkPicId = checkParamsId(res, picId);
+  //     // check id
+  //     const checkPicId = checkParamsId(res, picId);
 
-      const checkRiwayatId = checkParamsId(res, riwayatId);
+  //     const checkRiwayatId = checkParamsId(res, riwayatId);
 
-      // find pic id
-      const findPic = await PicService.findById(checkPicId as number);
+  //     // find pic id
+  //     const findPic = await PicService.findById(checkPicId as number);
 
-      // check
-      if (!findPic) return ResponseResult.error(res, 404, "pic not found");
+  //     // check
+  //     if (!findPic) return ResponseResult.error(res, 404, "pic not found");
 
-      // find riwayat
-      const findRiwayat = await RiwayatService.checkRiwayatPic(
-        checkPicId as number,
-        checkRiwayatId as number,
-      );
+  //     // find riwayat
+  //     const findRiwayat = await RiwayatService.checkRiwayatPic(
+  //       checkPicId as number,
+  //       checkRiwayatId as number,
+  //     );
 
-      // check
-      if (!findRiwayat)
-        return ResponseResult.error(res, 404, "riwayat not found");
+  //     // check
+  //     if (!findRiwayat)
+  //       return ResponseResult.error(res, 404, "riwayat not found");
 
-      // call service
-      const service = await RiwayatService.updateRiwayatPic(
-        checkPicId as number,
-        checkRiwayatId as number,
-        req.body,
-      );
+  //     // call service
+  //     const service = await RiwayatService.updateRiwayatPic(
+  //       checkPicId as number,
+  //       checkRiwayatId as number,
+  //       req.body,
+  //     );
 
-      // return
-      return ResponseResult.success<ResponseRiwayatType | null>(
-        service,
-        res,
-        200,
-        "success update riwayat pic",
-      );
-    } catch (error) {
-      next(error);
-    }
-  }
+  //     // return
+  //     return ResponseResult.success<ResponseRiwayatType | null>(
+  //       service,
+  //       res,
+  //       200,
+  //       "success update riwayat pic",
+  //     );
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 }

@@ -1,80 +1,38 @@
-import z from "zod";
-import { JenisRiwayat, Status } from "../utils/contstanst";
-import { CreateRiwayatType, UpdateRiwayatType } from "../models/riwayat.model";
+// import z from "zod";
+// import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
+// import { UpdateRiwayatType } from "../models/riwayat.model";
 
-export class RiwayatValidation {
-  // only number
-  private static onlyNumberSchema(
-    field: string,
-    min: number = 1,
-    max: number = 100,
-  ) {
-    return z
-      .number(`${field} harus berupa number`)
-      .min(min, `${field} minimal ${min}`)
-      .max(max, `${field} maksimal ${max}`);
-  }
+// export class RiwayatValidation {
+//   // string
+//   private static stringSchema(
+//     field: string,
+//     min: number = 1,
+//     max: number = 100,
+//   ) {
+//     return z
+//       .string(`${field} harus berupa karakter`)
+//       .trim()
+//       .min(min, `${field} minimal ${min} karakter`)
+//       .max(max, `${field} maksimal ${max} karakter`);
+//   }
 
-  // string
-  private static stringSchema(
-    field: string,
-    min: number = 1,
-    max: number = 100,
-  ) {
-    return z
-      .string(`${field} harus berupa karakter`)
-      .trim()
-      .min(min, `${field} minimal ${min} karakter`)
-      .max(max, `${field} maksimal ${max} karakter`);
-  }
+//   // update
+//   static readonly UPDATE = z
+//     .object({
+//       jenis: z
+//         .enum(
+//           ["pic", "kebutuhan_dokumen", "dokumen_borang"] as JenisRiwayat[],
+//           "Jenis riwayat tidak valid",
+//         )
+//         .optional(),
+//       status: z
+//         .enum(
+//           ["menunggu", "revisi", "disetujui"] as Status[],
+//           "Status tidak valid",
+//         )
+//         .optional(),
+//       keterangan: this.stringSchema("keterangan", 1, 1000),
 
-  // number array schema
-  private static numberArraySchema(field: string) {
-    return z
-      .array(z.number().int().positive())
-      .nonempty({ message: `${field} harus berupa array yang tidak kosong` })
-      .refine((arr) => arr.every((n) => typeof n === "number"), {
-        message: `${field} harus berupa array of number`,
-      });
-  }
-
-  //   create
-  static readonly CREATE = z
-    .object({
-      jenis: z.enum(
-        ["pic", "kebutuhan_dokumen", "dokumen_borang"] as JenisRiwayat[],
-        "Jenis riwayat tidak valid",
-      ),
-      status: z.enum(
-        ["menunggu", "revisi", "disetujui"] as Status[],
-        "Status tidak valid",
-      ),
-      keterangan: this.stringSchema("keterangan", 1, 1000),
-      kebutuhanDokumenId: this.onlyNumberSchema(
-        "kebutuhan dokumen",
-        1,
-        99999,
-      ).optional(),
-      picId: this.onlyNumberSchema("pic", 1, 99999).optional(),
-    })
-    .strict() satisfies z.ZodType<CreateRiwayatType>;
-
-  // update
-  static readonly UPDATE = z
-    .object({
-      jenis: z
-        .enum(
-          ["pic", "kebutuhan_dokumen", "dokumen_borang"] as JenisRiwayat[],
-          "Jenis riwayat tidak valid",
-        )
-        .optional(),
-      status: z
-        .enum(
-          ["menunggu", "revisi", "disetujui"] as Status[],
-          "Status tidak valid",
-        )
-        .optional(),
-      keterangan: this.stringSchema("keterangan", 1, 1000).optional(),
-    })
-    .strict() satisfies z.ZodType<UpdateRiwayatType>;
-}
+//     })
+//     .strict() satisfies z.ZodType<UpdateRiwayatType>;
+// }

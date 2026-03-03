@@ -5,7 +5,7 @@ import {
   toResponseRiwayatType,
   UpdateRiwayatType,
 } from "../models/riwayat.model";
-import { JenisRiwayat, Status } from "../utils/contstanst";
+import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 
 export class RiwayatService {
   // create
@@ -26,6 +26,13 @@ export class RiwayatService {
               },
             }
           : undefined,
+        flagRevisi: data.flagRevisi
+          ? {
+              create: data.flagRevisi.map((item) => ({
+                flagRevisi: item,
+              })),
+            }
+          : undefined,
       },
       select: {
         id: true,
@@ -34,6 +41,11 @@ export class RiwayatService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        flagRevisi: {
+          select: {
+            flagRevisi: true,
+          },
+        },
         pic: {
           select: {
             id: true,
@@ -69,6 +81,9 @@ export class RiwayatService {
     return toResponseRiwayatType({
       ...result,
       jenis: result.jenis as JenisRiwayat,
+      flagRevisi: result.flagRevisi?.map(
+        (item) => item.flagRevisi as FlagRevisi,
+      ) as FlagRevisi[] | null,
       status: result.status as Status,
       createdData: result.pic ? result.pic.createdAt : null,
       pic: result.pic
@@ -94,16 +109,26 @@ export class RiwayatService {
 
   // create many
   static async createMany(data: CreateRiwayatType[]): Promise<boolean> {
-    const result = await prisma.riwayat.createMany({
-      data: data.map((item) => ({
-        jenis: item.jenis,
-        keterangan: item.keterangan,
-        status: item.status,
-        picId: item.picId ?? null,
-      })),
-    });
+    const results = await prisma.$transaction(
+      data.map((item) =>
+        prisma.riwayat.create({
+          data: {
+            jenis: item.jenis,
+            keterangan: item.keterangan,
+            status: item.status,
+            picId: item.picId ?? null,
+            flagRevisi: {
+              create:
+                item.flagRevisi?.map((flag) => ({
+                  flagRevisi: flag,
+                })) ?? [],
+            },
+          },
+        }),
+      ),
+    );
 
-    return result.count > 0;
+    return results.length > 0;
   }
 
   // read all riwayat by pic id
@@ -120,6 +145,11 @@ export class RiwayatService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        flagRevisi: {
+          select: {
+            flagRevisi: true,
+          },
+        },
         pic: {
           select: {
             id: true,
@@ -150,6 +180,9 @@ export class RiwayatService {
           },
         },
       },
+      orderBy: {
+        createdAt: "asc",
+      },
     });
 
     // check result
@@ -160,6 +193,9 @@ export class RiwayatService {
       toResponseRiwayatType({
         ...item,
         jenis: item.jenis as JenisRiwayat,
+        flagRevisi: item.flagRevisi?.map(
+          (item) => item.flagRevisi as FlagRevisi,
+        ) as FlagRevisi[] | null,
         status: item.status as Status,
         createdData: item.pic ? item.pic.createdAt : null,
         highlightDataEmpy: item.pic?.kebutuhanDokumen?.namaDokumen
@@ -205,6 +241,11 @@ export class RiwayatService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        flagRevisi: {
+          select: {
+            flagRevisi: true,
+          },
+        },
         pic: {
           select: {
             id: true,
@@ -245,6 +286,9 @@ export class RiwayatService {
       toResponseRiwayatType({
         ...item,
         jenis: item.jenis as JenisRiwayat,
+        flagRevisi: item.flagRevisi?.map(
+          (item) => item.flagRevisi as FlagRevisi,
+        ) as FlagRevisi[] | null,
         status: item.status as Status,
         createdData: item.pic ? item.pic.createdAt : null,
         highlightDataEmpy: item.pic?.kebutuhanDokumen?.namaDokumen
@@ -290,6 +334,11 @@ export class RiwayatService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        flagRevisi: {
+          select: {
+            flagRevisi: true,
+          },
+        },
         pic: {
           select: {
             id: true,
@@ -326,6 +375,9 @@ export class RiwayatService {
       toResponseRiwayatType({
         ...item,
         jenis: item.jenis as JenisRiwayat,
+        flagRevisi: item.flagRevisi?.map(
+          (item) => item.flagRevisi as FlagRevisi,
+        ) as FlagRevisi[] | null,
         status: item.status as Status,
         createdData: item.pic ? item.pic.createdAt : null,
         highlightDataEmpy: item.pic?.kebutuhanDokumen?.namaDokumen
@@ -369,86 +421,103 @@ export class RiwayatService {
     return result ? true : false;
   }
 
-  // update riwayat pic
-  static async updateRiwayatPic(
-    picId: number,
-    riwayatId: number,
-    data: UpdateRiwayatType,
-  ): Promise<ResponseRiwayatType | null> {
-    // call api
-    const result = await prisma.riwayat.update({
-      where: {
-        id: riwayatId,
-        picId,
-      },
-      data,
-      select: {
-        id: true,
-        jenis: true,
-        status: true,
-        keterangan: true,
-        createdAt: true,
-        updatedAt: true,
-        pic: {
-          select: {
-            id: true,
-            status: true,
-            createdAt: true,
-            kebutuhanDokumen: {
-              select: {
-                id: true,
-                namaDokumen: true,
-              },
-            },
-            timAkreditasi: {
-              select: {
-                id: true,
-                namaTimAkreditasi: true,
-              },
-            },
-            pj: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+  // // update riwayat pic
+  // static async updateRiwayatPic(
+  //   picId: number,
+  //   riwayatId: number,
+  //   data: UpdateRiwayatType,
+  // ): Promise<ResponseRiwayatType | null> {
+  //   // call api
+  //   const result = await prisma.riwayat.update({
+  //     where: {
+  //       id: riwayatId,
+  //       picId,
+  //     },
+  //     data: {
+  //       ...data,
+  //       flagRevisi: data.flagRevisi
+  //         ? {
+  //             create: data.flagRevisi.map((item) => ({
+  //               flagRevisi: item,
+  //             })),
+  //           }
+  //         : undefined,
+  //     },
+  //     select: {
+  //       id: true,
+  //       jenis: true,
+  //       status: true,
+  //       keterangan: true,
+  //       createdAt: true,
+  //       updatedAt: true,
+  //       flagRevisi: {
+  //         select: {
+  //           flagRevisi: true,
+  //         },
+  //       },
+  //       pic: {
+  //         select: {
+  //           id: true,
+  //           status: true,
+  //           createdAt: true,
+  //           kebutuhanDokumen: {
+  //             select: {
+  //               id: true,
+  //               namaDokumen: true,
+  //             },
+  //           },
+  //           timAkreditasi: {
+  //             select: {
+  //               id: true,
+  //               namaTimAkreditasi: true,
+  //             },
+  //           },
+  //           pj: {
+  //             include: {
+  //               user: {
+  //                 select: {
+  //                   id: true,
+  //                   nama: true,
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   });
 
-    // check
-    if (!result) return null;
+  //   // check
+  //   if (!result) return null;
 
-    return toResponseRiwayatType({
-      ...result,
-      jenis: result.jenis as JenisRiwayat,
-      status: result.status as Status,
-      createdData: result.pic ? result.pic.createdAt : null,
-      pic: result.pic
-        ? {
-            id: result.pic.id,
-            status: result.pic.status as Status,
-            kebutuhanDokumen: {
-              id: result.pic.kebutuhanDokumen.id,
-              namaDokumen: result.pic.kebutuhanDokumen.namaDokumen,
-            },
-            timAkreditasi: {
-              id: result.pic.timAkreditasi.id,
-              namaTimAkreditasi: result.pic.timAkreditasi.namaTimAkreditasi,
-            },
-            pj: result.pic.pj.map((pj) => ({
-              id: pj.user.id,
-              nama: pj.user.nama,
-            })),
-          }
-        : null,
-    });
-  }
+  //   return toResponseRiwayatType({
+  //     ...result,
+  //     jenis: result.jenis as JenisRiwayat,
+  //     status: result.status as Status,
+  //     flagRevisi: result.flagRevisi?.map(
+  //       (item) => item.flagRevisi as FlagRevisi,
+  //     ) as FlagRevisi[] | null,
+  //     createdData: result.pic ? result.pic.createdAt : null,
+  //     pic: result.pic
+  //       ? {
+  //           id: result.pic.id,
+  //           status: result.pic.status as Status,
+  //           kebutuhanDokumen: {
+  //             id: result.pic.kebutuhanDokumen.id,
+  //             namaDokumen: result.pic.kebutuhanDokumen.namaDokumen,
+  //           },
+  //           timAkreditasi: {
+  //             id: result.pic.timAkreditasi.id,
+  //             namaTimAkreditasi: result.pic.timAkreditasi.namaTimAkreditasi,
+  //           },
+  //           pj: result.pic.pj.map((pj) => ({
+  //             id: pj.user.id,
+  //             nama: pj.user.nama,
+  //           })),
+  //         }
+  //       : null,
+  //   });
+  // }
 
   // delete riwayat many
   static async deleteMany(id: number[]): Promise<boolean> {

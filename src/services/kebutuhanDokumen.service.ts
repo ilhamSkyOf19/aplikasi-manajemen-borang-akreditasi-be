@@ -262,7 +262,10 @@ export class KebutuhanDokumenService {
       where: {
         id,
       },
-      data: req,
+      data: {
+        ...req,
+        status: Status.menunggu,
+      },
       select: {
         id: true,
         namaDokumen: true,

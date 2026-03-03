@@ -29,6 +29,13 @@ enum JenisRevisi {
   pic
 }
 
+// enum flag revisi
+enum FlagRevisi {
+  dokumen_borang
+  kebutuhan_dokumen
+  pic
+}
+
 // model user
 model User {
   id        Int      @id @default(autoincrement())
@@ -115,10 +122,25 @@ model Riwayat {
   // dokumenBorangId Int?
   // dokumenBorang   Dokumen_Borang? @relation(fields: [dokumenBorangId], references: [id], onDelete: Cascade)
 
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
-  kebutuhanDokumen    Kebutuhan_Dokumen? @relation(fields: [kebutuhan_DokumenId], references: [id])
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  kebutuhanDokumen Kebutuhan_Dokumen? @relation(fields: [kebutuhan_DokumenId], references: [id])
+
   kebutuhan_DokumenId Int?
+
+  // flag revisi 
+  flagRevisi Riwayat_flag_revisi[]
+}
+
+// pivot tabel 
+model Riwayat_flag_revisi {
+  id Int @id @default(autoincrement())
+
+  // relasi riwayat
+  riwayatId Int
+  riwatat   Riwayat @relation(fields: [riwayatId], references: [id], onDelete: Cascade)
+
+  flagRevisi FlagRevisi
 }
 
 // // ===== PIVOT TABLES ===== //

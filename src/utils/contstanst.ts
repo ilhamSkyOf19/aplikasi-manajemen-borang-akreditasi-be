@@ -23,3 +23,10 @@ export enum JenisRiwayat {
   dokumen_borang = "dokumen_borang",
   pic = "pic",
 }
+
+// flag revisi
+export enum FlagRevisi {
+  dokumen_borang = "dokumen_borang",
+  kebutuhan_dokumen = "kebutuhan_dokumen",
+  pic = "pic",
+}

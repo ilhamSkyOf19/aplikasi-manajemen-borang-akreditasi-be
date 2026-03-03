@@ -62,6 +62,7 @@ export class PicValidation {
         99999,
       ).optional(),
       keterangan: this.stringSchema("keterangan", 1, 1000).optional(),
+      keteranganUpdate: this.stringSchema("keterangan update", 1, 1000),
     })
     .strict() satisfies z.ZodType<UpdatePicType>;
 }

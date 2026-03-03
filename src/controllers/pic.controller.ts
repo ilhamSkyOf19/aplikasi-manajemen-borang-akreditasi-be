@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import {
   CreatePicType,
   ResponsePicType,
-  ResponsePicUpdateStatusType,
   ResponsePicWithMetaType,
   UpdatePicType,
 } from "../models/pic.model";
@@ -12,11 +11,9 @@ import { TimAkreditasiService } from "../services/timAkreditasi.service";
 import { PicService } from "../services/pic.service";
 import { PaginationType } from "../types/pagination";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
-import { JenisRiwayat, Status } from "../utils/contstanst";
+import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 import checkParamsId from "../utils/checkParamsId";
-import { stat } from "node:fs";
 import { RiwayatService } from "../services/riwayat.service";
-import { UpdateStatusType } from "../models/status.model";
 
 export class PicController {
   // create
@@ -201,8 +198,13 @@ export class PicController {
       }
 
       // get body
-      const { kebutuhanDokumenId, keterangan, pjId, timAkreditasiId } =
-        req.body;
+      const {
+        kebutuhanDokumenId,
+        keterangan,
+        pjId,
+        timAkreditasiId,
+        keteranganUpdate,
+      } = req.body;
 
       // check if kebutuhan dokumen exist in request
       if (kebutuhanDokumenId) {
@@ -263,6 +265,38 @@ export class PicController {
       // check service
       if (!service) {
         return ResponseResult.error(res, 404, "pic not found");
+      }
+
+      // find riwayat by pic id
+      const findRiwayat = await RiwayatService.readAllByPicId(service.id);
+
+      // check riwayat
+      if (findRiwayat && findRiwayat.length > 0) {
+        // check status di setujui
+        if (findRiwayat.find((item) => item.status === Status.disetujui)) {
+          const dataRiwayatDisetujui = findRiwayat.filter(
+            (item) => item.status === Status.disetujui,
+          );
+
+          // delete data disetujui
+          await RiwayatService.deleteMany(
+            dataRiwayatDisetujui.map((item) => item.id),
+          );
+        }
+
+        // create riwayat
+        const riwayat = await RiwayatService.create({
+          jenis: JenisRiwayat.pic,
+          keterangan: keteranganUpdate,
+          status: Status.menunggu,
+          picId: service ? service.id : 0,
+          flagRevisi: [FlagRevisi.pic],
+        });
+
+        // check riwayat
+        if (!riwayat) {
+          return ResponseResult.error(res, 404, "riwayat not found");
+        }
       }
 
       // return success
