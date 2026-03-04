@@ -301,16 +301,6 @@ export class kebutuhanDokumenController {
           ...new Set(checkRiwayat.map((item) => item.pic?.id ?? 0)),
         ];
 
-        // update pic
-        const updatePics = await PicService.updateManyStatus(
-          picids,
-          Status.menunggu,
-        );
-
-        // check update pic
-        if (!updatePics)
-          return ResponseResult.error(res, 500, "gagal update pic");
-
         // data riwayat
         const dataRiwayat: CreateRiwayatType[] = picids.map((id) => ({
           jenis: JenisRiwayat.pic,

@@ -7,7 +7,7 @@ import {
 import checkParamsId from "../utils/checkParamsId";
 import { PicService } from "../services/pic.service";
 import { RiwayatService } from "../services/riwayat.service";
-import { JenisRiwayat, Status } from "../utils/contstanst";
+import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 import { UpdateStatusType } from "../models/status.model";
 import { ResponsePicUpdateStatusType } from "../models/pic.model";
 import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
@@ -85,20 +85,25 @@ export class RiwayatController {
           return ResponseResult.error(res, 404, "pic not found");
         }
 
-        // update status kebutuhan dokumen
-        const updateStatusKebutuhanDokumen =
-          await KebutuhanDokumenService.updateStatusKebutuhanDokumentasi(
-            servicePic.kebutuhanDokumen.id,
-            status,
-          );
+        // update status kebutuhan dokumen if flag kebutuhan dokumen
+        if (
+          (flagRevisi && flagRevisi.includes(FlagRevisi.kebutuhan_dokumen)) ||
+          status === Status.disetujui
+        ) {
+          const updateStatusKebutuhanDokumen =
+            await KebutuhanDokumenService.updateStatusKebutuhanDokumentasi(
+              servicePic.kebutuhanDokumen.id,
+              status,
+            );
 
-        // check update status kebutuhan dokumen
-        if (!updateStatusKebutuhanDokumen) {
-          return ResponseResult.error(
-            res,
-            500,
-            "gagal update status kebutuhan dokumen",
-          );
+          // check update status kebutuhan dokumen
+          if (!updateStatusKebutuhanDokumen) {
+            return ResponseResult.error(
+              res,
+              500,
+              "gagal update status kebutuhan dokumen",
+            );
+          }
         }
 
         // check status success
