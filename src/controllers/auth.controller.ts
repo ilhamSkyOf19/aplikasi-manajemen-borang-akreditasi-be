@@ -84,7 +84,7 @@ export class AuthController {
       if (!service)
         return ResponseResult.error(
           res,
-          401,
+          400,
           "Email or nama or password is wrong",
         );
 
@@ -98,7 +98,7 @@ export class AuthController {
       if (!isMatch)
         return ResponseResult.error(
           res,
-          401,
+          400,
           "Email or nama or password is wrong",
         );
 

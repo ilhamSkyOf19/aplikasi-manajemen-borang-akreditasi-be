@@ -8,6 +8,7 @@ import userRoute from "./user.route";
 import kebutuhanDokumenRoute from "./kebutuhanDokumen.route";
 import picRouter from "./pic.route";
 import riwayatRouter from "./riwayat.route";
+import notifikasiRoute from "./notifikasi.route";
 
 const appRoute: Router = Router();
 
@@ -37,5 +38,8 @@ appRoute.use("/api/pic", picRouter);
 
 // riwayat router
 appRoute.use("/api/riwayat", riwayatRouter);
+
+// notifikasi router
+appRoute.use("/api/notifikasi", notifikasiRoute);
 
 export default appRoute;

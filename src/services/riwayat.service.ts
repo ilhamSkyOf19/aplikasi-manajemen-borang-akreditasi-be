@@ -63,7 +63,7 @@ export class RiwayatService {
                 namaTimAkreditasi: true,
               },
             },
-            pj: {
+            picPj: {
               include: {
                 user: {
                   select: {
@@ -98,7 +98,7 @@ export class RiwayatService {
               id: result.pic.timAkreditasi.id,
               namaTimAkreditasi: result.pic.timAkreditasi.namaTimAkreditasi,
             },
-            pj: result.pic.pj.map((pj) => ({
+            pj: result.pic.picPj.map((pj) => ({
               id: pj.user.id,
               nama: pj.user.nama,
             })),
@@ -167,7 +167,7 @@ export class RiwayatService {
                 namaTimAkreditasi: true,
               },
             },
-            pj: {
+            picPj: {
               include: {
                 user: {
                   select: {
@@ -213,7 +213,7 @@ export class RiwayatService {
                 id: item.pic.timAkreditasi.id,
                 namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
               },
-              pj: item.pic.pj.map((pj) => ({
+              pj: item.pic.picPj.map((pj) => ({
                 id: pj.user.id,
                 nama: pj.user.nama,
               })),
@@ -263,7 +263,7 @@ export class RiwayatService {
                 namaTimAkreditasi: true,
               },
             },
-            pj: {
+            picPj: {
               include: {
                 user: {
                   select: {
@@ -306,7 +306,7 @@ export class RiwayatService {
                 id: item.pic.timAkreditasi.id,
                 namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
               },
-              pj: item.pic.pj.map((pj) => ({
+              pj: item.pic.picPj.map((pj) => ({
                 id: pj.user.id,
                 nama: pj.user.nama,
               })),
@@ -356,7 +356,7 @@ export class RiwayatService {
                 namaTimAkreditasi: true,
               },
             },
-            pj: {
+            picPj: {
               include: {
                 user: {
                   select: {
@@ -395,7 +395,7 @@ export class RiwayatService {
                 id: item.pic.timAkreditasi.id,
                 namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
               },
-              pj: item.pic.pj.map((pj) => ({
+              pj: item.pic.picPj.map((pj) => ({
                 id: pj.user.id,
                 nama: pj.user.nama,
               })),
@@ -472,7 +472,7 @@ export class RiwayatService {
   //               namaTimAkreditasi: true,
   //             },
   //           },
-  //           pj: {
+  //           picPj: {
   //             include: {
   //               user: {
   //                 select: {
@@ -510,7 +510,7 @@ export class RiwayatService {
   //             id: result.pic.timAkreditasi.id,
   //             namaTimAkreditasi: result.pic.timAkreditasi.namaTimAkreditasi,
   //           },
-  //           pj: result.pic.pj.map((pj) => ({
+  //           pj: result.pic.picPj.map((pj) => ({
   //             id: pj.user.id,
   //             nama: pj.user.nama,
   //           })),

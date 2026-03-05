@@ -17,10 +17,10 @@ export class TimAkreditasiService {
     req: CreateTimAkreditasiType,
   ): Promise<ResponseTimAkreditasiType | null> {
     // call db
-    const result = await prisma.tim_Akreditasi.create({
+    const result = await prisma.timAkreditasi.create({
       data: {
         namaTimAkreditasi: req.namaTimAkreditasi,
-        user: {
+        userTimAkreditasi: {
           create: req.users.map((userId) => ({
             user: {
               connect: {
@@ -31,7 +31,7 @@ export class TimAkreditasiService {
         },
       },
       include: {
-        user: {
+        userTimAkreditasi: {
           include: {
             user: {
               select: {
@@ -50,7 +50,7 @@ export class TimAkreditasiService {
 
     return toResponseTimAkreditasiType({
       ...result,
-      user: result.user.map((user) => {
+      user: result.userTimAkreditasi.map((user) => {
         return {
           ...user.user,
           role: user.user.role as UserRole,
@@ -62,12 +62,12 @@ export class TimAkreditasiService {
   // read by id
   static async readById(id: number): Promise<ResponseTimAkreditasiType | null> {
     // call db
-    const result = await prisma.tim_Akreditasi.findUnique({
+    const result = await prisma.timAkreditasi.findUnique({
       where: {
         id,
       },
       include: {
-        user: {
+        userTimAkreditasi: {
           include: {
             user: {
               select: {
@@ -89,7 +89,7 @@ export class TimAkreditasiService {
 
     return toResponseTimAkreditasiType({
       ...result,
-      user: result.user.map((user) => {
+      user: result.userTimAkreditasi.map((user) => {
         return {
           ...user.user,
           role: user.user.role as UserRole,
@@ -107,7 +107,7 @@ export class TimAkreditasiService {
     const currentPage = page < 1 ? 1 : page;
 
     // get count data
-    const totalData = await prisma.tim_Akreditasi.count({
+    const totalData = await prisma.timAkreditasi.count({
       where: {
         namaTimAkreditasi: {
           contains: search,
@@ -120,7 +120,7 @@ export class TimAkreditasiService {
     const totalPage = Math.ceil(totalData / limit);
 
     // call db
-    const result = await prisma.tim_Akreditasi.findMany({
+    const result = await prisma.timAkreditasi.findMany({
       where: {
         namaTimAkreditasi: {
           contains: search,
@@ -129,7 +129,7 @@ export class TimAkreditasiService {
       skip: (currentPage - 1) * limit,
       take: limit,
       include: {
-        user: {
+        userTimAkreditasi: {
           include: {
             user: {
               select: {
@@ -150,7 +150,7 @@ export class TimAkreditasiService {
       data: result.map((item) => {
         return {
           ...item,
-          user: item.user.map((user) => {
+          user: item.userTimAkreditasi.map((user) => {
             return {
               ...user.user,
               role: user.user.role as UserRole,
@@ -176,7 +176,7 @@ export class TimAkreditasiService {
     const currentPage = page < 1 ? 1 : page;
 
     // get count data
-    const totalData = await prisma.tim_Akreditasi.count({
+    const totalData = await prisma.timAkreditasi.count({
       where: {
         namaTimAkreditasi: {
           contains: search,
@@ -189,7 +189,7 @@ export class TimAkreditasiService {
     const totalPage = Math.ceil(totalData / limit);
 
     // call db
-    const result = await prisma.tim_Akreditasi.findMany({
+    const result = await prisma.timAkreditasi.findMany({
       where: {
         namaTimAkreditasi: {
           contains: search,
@@ -200,7 +200,7 @@ export class TimAkreditasiService {
       select: {
         id: true,
         namaTimAkreditasi: true,
-        user: {
+        userTimAkreditasi: {
           select: {
             user: {
               select: {
@@ -217,7 +217,7 @@ export class TimAkreditasiService {
       data: result.map((item) => {
         return {
           ...item,
-          anggota: item.user.map((user) => {
+          anggota: item.userTimAkreditasi.map((user) => {
             return {
               ...user.user,
             };
@@ -239,13 +239,13 @@ export class TimAkreditasiService {
     req: UpdateTimAkreditasiType,
   ): Promise<ResponseTimAkreditasiType | null> {
     // call db
-    const result = await prisma.tim_Akreditasi.update({
+    const result = await prisma.timAkreditasi.update({
       where: {
         id,
       },
       data: {
         namaTimAkreditasi: req.namaTimAkreditasi,
-        user: {
+        userTimAkreditasi: {
           create:
             req.users &&
             req.users.map((userId) => ({
@@ -258,7 +258,7 @@ export class TimAkreditasiService {
         },
       },
       include: {
-        user: {
+        userTimAkreditasi: {
           include: {
             user: {
               select: {
@@ -277,7 +277,7 @@ export class TimAkreditasiService {
 
     return toResponseTimAkreditasiType({
       ...result,
-      user: result.user.map((user) => {
+      user: result.userTimAkreditasi.map((user) => {
         return {
           ...user.user,
           role: user.user.role as UserRole,
@@ -292,12 +292,12 @@ export class TimAkreditasiService {
     idUsers: number[],
   ): Promise<ResponseTimAkreditasiType | null> {
     // call db
-    const result = await prisma.tim_Akreditasi.update({
+    const result = await prisma.timAkreditasi.update({
       where: {
         id: idTim,
       },
       data: {
-        user: {
+        userTimAkreditasi: {
           deleteMany: [
             {
               userId: {
@@ -308,7 +308,7 @@ export class TimAkreditasiService {
         },
       },
       include: {
-        user: {
+        userTimAkreditasi: {
           include: {
             user: {
               select: {
@@ -329,7 +329,7 @@ export class TimAkreditasiService {
 
     return toResponseTimAkreditasiType({
       ...result,
-      user: result.user.map((user) => {
+      user: result.userTimAkreditasi.map((user) => {
         return {
           ...user.user,
           role: user.user.role as UserRole,
@@ -341,12 +341,12 @@ export class TimAkreditasiService {
   // delete by id
   static async delete(id: number): Promise<ResponseTimAkreditasiType | null> {
     // call db
-    const result = await prisma.tim_Akreditasi.delete({
+    const result = await prisma.timAkreditasi.delete({
       where: {
         id,
       },
       include: {
-        user: {
+        userTimAkreditasi: {
           include: {
             user: {
               select: {
@@ -370,7 +370,7 @@ export class TimAkreditasiService {
 
     return toResponseTimAkreditasiType({
       ...result,
-      user: result.user.map((user) => {
+      user: result.userTimAkreditasi.map((user) => {
         return {
           ...user.user,
           role: user.user.role as UserRole,

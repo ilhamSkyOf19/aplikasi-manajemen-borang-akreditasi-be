@@ -29,7 +29,7 @@ export class UserService {
         role: true,
         createdAt: true,
         updatedAt: true,
-        tims: {
+        userTimAkreditasi: {
           select: {
             timAkreditasi: {
               select: {
@@ -46,7 +46,7 @@ export class UserService {
 
     return toUserResponse({
       ...result,
-      tims: result.tims.map((tim) => tim.timAkreditasi),
+      tims: result.userTimAkreditasi.map((tim) => tim.timAkreditasi),
       role: result.role as UserRole,
     });
   }
@@ -187,7 +187,7 @@ export class UserService {
         role: true,
         createdAt: true,
         updatedAt: true,
-        tims: {
+        userTimAkreditasi: {
           select: {
             timAkreditasi: {
               select: {
@@ -211,7 +211,7 @@ export class UserService {
       data: result.map((user) =>
         toUserResponse({
           ...user,
-          tims: user.tims.map((tim) => tim.timAkreditasi),
+          tims: user.userTimAkreditasi.map((tim) => tim.timAkreditasi),
           role: user.role as UserRole,
         }),
       ),
@@ -254,6 +254,33 @@ export class UserService {
       email: result.email,
       role: result.role as UserRole,
     };
+  }
+
+  // find all user for get ids
+  static async findAllUserIds(): Promise<number[]> {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+      },
+    });
+    return users.map((user) => user.id);
+  }
+
+  // get wd1 id
+  static async getWD1Id(): Promise<number> {
+    const wd1 = await prisma.user.findFirstOrThrow({
+      where: { role: "wakil_dekan_1" },
+      select: { id: true },
+    });
+    return wd1.id;
+  }
+
+  static async getKaprodiId(): Promise<number> {
+    const kaprodi = await prisma.user.findFirstOrThrow({
+      where: { role: "kaprodi" },
+      select: { id: true },
+    });
+    return kaprodi.id;
   }
 
   // delete by id

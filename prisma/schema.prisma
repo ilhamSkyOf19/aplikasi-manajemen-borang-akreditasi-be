@@ -9,34 +9,10 @@ datasource db {
   provider = "mysql"
 }
 
-// enum role 
-enum Role {
-  wakil_dekan_1
-  kaprodi
-  tim_akreditasi
-}
+// =============================================
+// MODEL YANG SUDAH ADA (ringkasan)
+// =============================================
 
-// enum status
-enum Status {
-  menunggu
-  revisi
-  disetujui
-}
-
-// enum jenis revisi
-enum JenisRevisi {
-  dokumen_borang
-  pic
-}
-
-// enum flag revisi
-enum FlagRevisi {
-  dokumen_borang
-  kebutuhan_dokumen
-  pic
-}
-
-// model user
 model User {
   id        Int      @id @default(autoincrement())
   nama      String
@@ -46,150 +22,202 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // tims 
-  tims User_Tim_Akreditasi[]
-  pics Pic_pj[]
+  // Relasi existing
+  userTimAkreditasi UserTimAkreditasi[]
+  picPj             PicPj[]
+
+  // Relasi baru: notifikasi yang DITERIMA oleh user ini
+  notifications Notification[] @relation("NotificationRecipient")
+
+  @@map("user")
 }
 
-// kriteria 
+enum Role {
+  wakil_dekan_1
+  kaprodi
+  tim_akreditasi
+}
+
 model Kriteria {
+  id               Int                 @id @default(autoincrement())
+  kriteria         Int                 @unique
+  namaKriteria     String
+  revisi           Int                 @default(0)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  kebutuhanDokumen Kebutuhan_Dokumen[]
+
+  @@map("kriteria")
+}
+
+model Pendekatan {
+  id               Int                 @id @default(autoincrement())
+  tahap            String
+  keterangan       String              @unique
+  kebutuhanDokumen Kebutuhan_Dokumen[]
+
+  @@map("pendekatan")
+}
+
+model Kebutuhan_Dokumen {
   id           Int      @id @default(autoincrement())
-  kriteria     Int      @unique
-  namaKriteria String
-  revisi       Int      @default(0)
+  namaDokumen  String   @unique
+  keterangan   String   @db.VarChar(1000)
+  kriteriaId   Int
+  pendekatanId Int
+  status       Status   @default(menunggu)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // relation kebutuhan dokumen
-  dokumen Kebutuhan_Dokumen[]
-}
-
-model pendekatan {
-  id         Int    @id @default(autoincrement())
-  tahap      String
-  keterangan String @unique
-
-  // relation dokumen
-  dokumen Kebutuhan_Dokumen[]
-}
-
-// anggota 
-model Tim_Akreditasi {
-  id                Int      @id @default(autoincrement())
-  namaTimAkreditasi String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  // anggota 
-  user User_Tim_Akreditasi[]
-  pic  Pic[]
-}
-
-// kebutuhan dokumen
-model Kebutuhan_Dokumen {
-  id           Int    @id @default(autoincrement())
-  namaDokumen  String @unique
-  keterangan   String @db.VarChar(1000)
-  kriteriaId   Int
-  pendekatanId Int
-  status       Status @default(menunggu)
-
-  // relation kriteria
   kriteria   Kriteria   @relation(fields: [kriteriaId], references: [id], onDelete: Cascade)
-  pendekatan pendekatan @relation(fields: [pendekatanId], references: [id], onDelete: Cascade)
+  pendekatan Pendekatan @relation(fields: [pendekatanId], references: [id], onDelete: Cascade)
+  pic        Pic[]
+  riwayat    Riwayat[]  @relation("RiwayatKebutuhanDokumen")
 
-  pic Pic[]
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  riwayats  Riwayat[]
+  @@map("kebutuhan_dokumen")
 }
 
-// model riwayat 
-model Riwayat {
-  id Int @id @default(autoincrement())
+model TimAkreditasi {
+  id                Int                 @id @default(autoincrement())
+  namaTimAkreditasi String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  pic               Pic[]
+  userTimAkreditasi UserTimAkreditasi[]
 
-  jenis      JenisRevisi
-  keterangan String      @db.VarChar(1000)
-
-  status Status @default(menunggu)
-
-  // ===== OPTIONAL RELATIONS =====
-
-  picId Int?
-  pic   Pic? @relation(fields: [picId], references: [id], onDelete: Cascade)
-
-  // dokumenBorangId Int?
-  // dokumenBorang   Dokumen_Borang? @relation(fields: [dokumenBorangId], references: [id], onDelete: Cascade)
-
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  kebutuhanDokumen Kebutuhan_Dokumen? @relation(fields: [kebutuhan_DokumenId], references: [id])
-
-  kebutuhan_DokumenId Int?
-
-  // flag revisi 
-  flagRevisi Riwayat_flag_revisi[]
+  @@map("tim_akreditasi")
 }
 
-// pivot tabel 
-model Riwayat_flag_revisi {
-  id Int @id @default(autoincrement())
-
-  // relasi riwayat
-  riwayatId Int
-  riwatat   Riwayat @relation(fields: [riwayatId], references: [id], onDelete: Cascade)
-
-  flagRevisi FlagRevisi
-}
-
-// // ===== PIVOT TABLES ===== //
-
-// tim & kebutuhan dokumen
 model Pic {
-  id                 Int    @id @default(autoincrement())
+  id                 Int      @id @default(autoincrement())
   timAkreditasiId    Int
   kebutuhanDokumenId Int
-  status             Status @default(menunggu)
-  keterangan         String @db.VarChar(1000)
+  status             Status   @default(menunggu)
+  keterangan         String   @db.VarChar(1000)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  // relation 
-
-  timAkreditasi    Tim_Akreditasi    @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
+  timAkreditasi    TimAkreditasi     @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
   kebutuhanDokumen Kebutuhan_Dokumen @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
-
-  pj      Pic_pj[]
-  riwayat Riwayat[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  picPj            PicPj[]
+  riwayat          Riwayat[]
 
   @@unique([timAkreditasiId, kebutuhanDokumenId])
+  @@map("pic")
 }
 
-model Pic_pj {
-  picId  Int
-  userId Int
-
-  pic Pic @relation(fields: [picId], references: [id], onDelete: Cascade)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+model PicPj {
+  picId     Int
+  userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  pic  Pic  @relation(fields: [picId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@id([picId, userId])
+  @@map("pic_pj")
 }
 
-model User_Tim_Akreditasi {
+model Riwayat {
+  id                  Int          @id @default(autoincrement())
+  jenis               JenisRiwayat
+  keterangan          String       @db.VarChar(1000)
+  status              Status       @default(menunggu)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  picId               Int?
+  kebutuhan_DokumenId Int?
+
+  pic              Pic?                @relation(fields: [picId], references: [id], onDelete: Cascade)
+  kebutuhanDokumen Kebutuhan_Dokumen?  @relation("RiwayatKebutuhanDokumen", fields: [kebutuhan_DokumenId], references: [id], onDelete: SetNull)
+  flagRevisi       RiwayatFlagRevisi[]
+
+  @@map("riwayat")
+}
+
+model RiwayatFlagRevisi {
+  id         Int        @id @default(autoincrement())
+  riwayatId  Int
+  flagRevisi FlagRevisi
+
+  riwayat Riwayat @relation(fields: [riwayatId], references: [id], onDelete: Cascade)
+
+  @@map("riwayat_flag_revisi")
+}
+
+model UserTimAkreditasi {
   userId          Int
   timAkreditasiId Int
 
-  // user
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // tim akreditasi
-  timAkreditasi Tim_Akreditasi @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timAkreditasi TimAkreditasi @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
 
   @@id([timAkreditasiId, userId])
+  @@map("user_tim_akreditasi")
+}
+
+enum Status {
+  menunggu
+  revisi
+  disetujui
+}
+
+enum JenisRiwayat {
+  dokumen_borang
+  pic
+}
+
+enum FlagRevisi {
+  dokumen_borang
+  kebutuhan_dokumen
+  pic
+}
+
+// =============================================
+// ✅ MODEL BARU: NOTIFICATION
+// =============================================
+
+model Notification {
+  id Int @id @default(autoincrement())
+
+  // Penerima notifikasi
+  recipientId Int
+  recipient   User @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  // Tipe notifikasi (menentukan ikon & routing di frontend)
+  type NotificationType
+
+  // Judul & isi pesan
+  title   String @db.VarChar(255)
+  message String @db.VarChar(1000)
+
+  // Status baca
+  isRead Boolean @default(false)
+
+  // Referensi opsional ke entitas terkait (untuk deep-link di frontend)
+  picId            Int?
+  kebutuhanDokumen String?
+  kriteria         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([recipientId, isRead])
+  @@map("notification")
+}
+
+enum NotificationType {
+  // Dipicu oleh WD1 → diterima semua anggota
+  KRITERIA_DITAMBAH
+  KRITERIA_DIEDIT
+  KRITERIA_DIHAPUS
+
+  // Dipicu oleh Kaprodi → diterima WD1
+  PIC_BARU_PERLU_VERIFIKASI
+  PIC_DIREVISI_KAPRODI // Kaprodi mengedit ulang setelah revisi WD1
+
+  // Dipicu oleh WD1 → diterima Kaprodi
+  PIC_DISETUJUI_WD1
+  PIC_DIREVISI_WD1 // WD1 meminta revisi ke Kaprodi
 }

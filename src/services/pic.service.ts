@@ -9,7 +9,6 @@ import {
   UpdatePicType,
 } from "../models/pic.model";
 import { PaginationType } from "../types/pagination";
-import { ResponseStructure } from "../types/response";
 import { Status, UserRole } from "../utils/contstanst";
 
 export class PicService {
@@ -28,7 +27,7 @@ export class PicService {
             id: req.kebutuhanDokumenId,
           },
         },
-        pj: {
+        picPj: {
           create: req.pjId.map((id: number) => ({
             user: {
               connect: {
@@ -83,7 +82,7 @@ export class PicService {
             },
           },
         },
-        pj: {
+        picPj: {
           include: {
             user: {
               select: {
@@ -110,7 +109,7 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      pj: result.pj.map((item) => ({
+      pj: result.picPj.map((item) => ({
         id: item.user.id,
         email: item.user.email,
         nama: item.user.nama,
@@ -170,7 +169,7 @@ export class PicService {
             },
           },
         },
-        pj: {
+        picPj: {
           include: {
             user: {
               select: {
@@ -197,7 +196,7 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      pj: result.pj.map((item) => ({
+      pj: result.picPj.map((item) => ({
         id: item.user.id,
         email: item.user.email,
         nama: item.user.nama,
@@ -331,7 +330,7 @@ export class PicService {
             },
           },
         },
-        pj: {
+        picPj: {
           include: {
             user: {
               select: {
@@ -363,7 +362,7 @@ export class PicService {
             ...item.kebutuhanDokumen,
             status: item.kebutuhanDokumen.status as Status,
           },
-          pj: item.pj.map((item) => ({
+          pj: item.picPj.map((item) => ({
             id: item.user.id,
             email: item.user.email,
             nama: item.user.nama,
@@ -425,7 +424,7 @@ export class PicService {
             },
           },
         },
-        pj: {
+        picPj: {
           include: {
             user: {
               select: {
@@ -452,7 +451,7 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      pj: result.pj.map((item) => ({
+      pj: result.picPj.map((item) => ({
         id: item.user.id,
         email: item.user.email,
         nama: item.user.nama,
@@ -475,7 +474,7 @@ export class PicService {
       },
       data: {
         ...rest,
-        pj: pjId
+        picPj: pjId
           ? {
               deleteMany: {},
               create: pjId.map((userId) => ({
@@ -531,7 +530,7 @@ export class PicService {
             },
           },
         },
-        pj: {
+        picPj: {
           include: {
             user: {
               select: {
@@ -558,7 +557,7 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      pj: result.pj.map((item) => ({
+      pj: result.picPj.map((item) => ({
         id: item.user.id,
         email: item.user.email,
         nama: item.user.nama,
@@ -598,7 +597,7 @@ export class PicService {
             namaDokumen: true,
           },
         },
-        pj: {
+        picPj: {
           include: {
             user: {
               select: {
@@ -621,7 +620,7 @@ export class PicService {
       kebutuhanDokumen: {
         ...result.kebutuhanDokumen,
       },
-      pj: result.pj.map((item) => ({
+      pj: result.picPj.map((item) => ({
         id: item.user.id,
         nama: item.user.nama,
       })),
@@ -672,7 +671,7 @@ export class PicService {
   //   const result = await prisma.pic.update({
   //     where: { id: picId },
   //     data: {
-  //       pj: {
+  //       picPj: {
   //         delete: {
   //           picId_userId: {
   //             picId,

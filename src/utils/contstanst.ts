@@ -30,3 +30,16 @@ export enum FlagRevisi {
   kebutuhan_dokumen = "kebutuhan_dokumen",
   pic = "pic",
 }
+
+// type notifikasi
+export enum TypeNotifikasi {
+  KRITERIA_DITAMBAH = "KRITERIA_DITAMBAH",
+  KRITERIA_DIEDIT = "KRITERIA_DIEDIT",
+  KRITERIA_DIHAPUS = "KRITERIA_DIHAPUS",
+
+  PIC_BARU_PERLU_VERIFIKASI = "PIC_BARU_PERLU_VERIFIKASI",
+  PIC_DIREVISI_KAPRODI = "PIC_DIREVISI_KAPRODI",
+
+  PIC_DISETUJUI_WD1 = "PIC_DISETUJUI_WD1",
+  PIC_DIREVISI_WD1 = "PIC_DIREVISI_WD1",
+}
