@@ -52,17 +52,16 @@ export class NotifikasiService {
   // SKENARIO 1A — WD1 MENAMBAH KRITERIA
   // =============================================
 
-  static async notifyKriteriaDitambah(
-    kriteria: string,
-    namaKriteria: string,
-  ): Promise<void> {
-    const allUserIds = await UserService.findAllUserIds();
+  static async notifyKriteriaDitambah(namaKriteria: string): Promise<void> {
+    const allUserIdsNotWD1 = await UserService.findAllUserIds([
+      UserRole.wakil_dekan_1,
+    ]);
 
-    await this.createBulkNotifications(allUserIds, {
+    await this.createBulkNotifications(allUserIdsNotWD1, {
       type: TypeNotifikasi.KRITERIA_DITAMBAH,
       title: "Kriteria Baru Ditambahkan",
       message: `Kriteria "${namaKriteria}" telah ditambahkan oleh WD1.`,
-      kriteria,
+      kriteria: namaKriteria,
     });
   }
 
@@ -70,17 +69,16 @@ export class NotifikasiService {
   // SKENARIO 1B — WD1 EDIT KRITERIA
   // =============================================
 
-  static async notifyKriteriaDiedit(
-    kriteria: string,
-    namaKriteria: string,
-  ): Promise<void> {
-    const allUserIds = await UserService.findAllUserIds();
+  static async notifyKriteriaDiedit(namaKriteria: string): Promise<void> {
+    const allUserIdsNotWD1 = await UserService.findAllUserIds([
+      UserRole.wakil_dekan_1,
+    ]);
 
-    await this.createBulkNotifications(allUserIds, {
+    await this.createBulkNotifications(allUserIdsNotWD1, {
       type: TypeNotifikasi.KRITERIA_DIEDIT,
       title: "Kriteria Diperbarui",
       message: `Kriteria "${namaKriteria}" telah diperbarui oleh WD1.`,
-      kriteria,
+      kriteria: namaKriteria,
     });
   }
 
@@ -89,9 +87,11 @@ export class NotifikasiService {
   // =============================================
 
   static async notifyKriteriaDihapus(kriteria: string): Promise<void> {
-    const allUserIds = await UserService.findAllUserIds();
+    const allUserIdsNotWD1 = await UserService.findAllUserIds([
+      UserRole.wakil_dekan_1,
+    ]);
 
-    await this.createBulkNotifications(allUserIds, {
+    await this.createBulkNotifications(allUserIdsNotWD1, {
       type: TypeNotifikasi.KRITERIA_DIHAPUS,
       title: "Kriteria Dihapus",
       message: `Kriteria "${kriteria}" telah dihapus oleh WD1.`,
@@ -114,6 +114,7 @@ export class NotifikasiService {
       title: "PIC Baru Menunggu Verifikasi",
       message: `Kaprodi telah membuat PIC baru untuk dokumen "${namaDokumen}". Mohon lakukan verifikasi.`,
       picId,
+      kebutuhanDokumen: namaDokumen,
     });
   }
 
@@ -124,15 +125,20 @@ export class NotifikasiService {
   static async notifyPicRevisiKaprodiKeWD1(
     picId: number,
     namaDokumen: string,
+    title?: string,
+    message?: string,
   ): Promise<void> {
     const wd1Id = await UserService.getWD1Id();
 
     await this.createNotification({
       recipientId: wd1Id,
       type: TypeNotifikasi.PIC_DIREVISI_KAPRODI,
-      title: "Revisi PIC Menunggu Verifikasi",
-      message: `Kaprodi telah mengirimkan revisi untuk dokumen "${namaDokumen}". Mohon periksa kembali.`,
+      title: title ?? "Revisi PIC Menunggu Verifikasi",
+      message:
+        message ??
+        `Kaprodi telah mengirimkan revisi untuk dokumen "${namaDokumen}". Mohon periksa kembali.`,
       picId,
+      kebutuhanDokumen: namaDokumen,
     });
   }
 
@@ -152,6 +158,7 @@ export class NotifikasiService {
       title: "PIC Disetujui ✅",
       message: `Dokumen "${namaDokumen}" telah disetujui oleh WD1.`,
       picId,
+      kebutuhanDokumen: namaDokumen,
     });
   }
 
@@ -172,6 +179,7 @@ export class NotifikasiService {
       title: "PIC Perlu Direvisi 🔄",
       message: `WD1 meminta revisi untuk dokumen "${namaDokumen}". Catatan: ${keteranganRevisi}`,
       picId,
+      kebutuhanDokumen: namaDokumen,
     });
   }
 
@@ -183,6 +191,8 @@ export class NotifikasiService {
     },
   ): Promise<ResponseNotifikasiWithMetaType | null> {
     const { limit = 10, page = 1, search, isRead } = req;
+
+    console.log(isRead);
 
     const skip = (page - 1) * limit;
     const take = limit;
@@ -222,6 +232,28 @@ export class NotifikasiService {
           kriteria: item.kriteria ?? undefined,
         }),
       ),
+    });
+  }
+
+  // read
+  static async isRead(id: number): Promise<ResponseNotifikasiType> {
+    // call db
+    const result = await prisma.notification.update({
+      where: {
+        id,
+      },
+      data: {
+        isRead: true,
+      },
+    });
+
+    return toResponseNotifikasiType({
+      ...result,
+      recipient: result.recipientId,
+      type: result.type as TypeNotifikasi,
+      picId: result.picId ?? undefined,
+      kebutuhanDokumen: result.kebutuhanDokumen ?? undefined,
+      kriteria: result.kriteria ?? undefined,
     });
   }
 }

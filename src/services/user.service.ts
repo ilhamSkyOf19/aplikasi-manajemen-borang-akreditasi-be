@@ -257,12 +257,18 @@ export class UserService {
   }
 
   // find all user for get ids
-  static async findAllUserIds(): Promise<number[]> {
+  static async findAllUserIds(filter?: UserRole[]): Promise<number[]> {
     const users = await prisma.user.findMany({
+      where: {
+        role: {
+          notIn: filter,
+        },
+      },
       select: {
         id: true,
       },
     });
+
     return users.map((user) => user.id);
   }
 

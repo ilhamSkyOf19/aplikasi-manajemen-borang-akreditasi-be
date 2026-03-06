@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { PaginationType } from "../types/pagination";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { ResponseNotifikasiWithMetaType } from "../models/notifikasi.model";
+import {
+  ResponseNotifikasiType,
+  ResponseNotifikasiWithMetaType,
+} from "../models/notifikasi.model";
 import checkParamsId from "../utils/checkParamsId";
 import { NotifikasiService } from "../services/notifikasi.service";
 import { AuthRequest } from "../types/authRequest";
@@ -40,9 +43,36 @@ export class NotifikasiController {
       }
 
       // call service
-      const service = await NotifikasiService.findAll(id, { limit, page });
+      const service = await NotifikasiService.findAll(id, {
+        limit: checkQuery.limit,
+        page: checkQuery.page,
+        isRead: isRead === "true" ? true : false,
+      });
 
       // return success
+      return ResponseResult.success(service, res, 200);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // is read
+  static async isRead(
+    req: Request<{ id: string }>,
+    res: Response<ResponseStructure<ResponseNotifikasiType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get id from params
+      const { id } = req.params;
+
+      // check id
+      const checkId = checkParamsId(res, id);
+
+      // call service
+      const service = await NotifikasiService.isRead(checkId as number);
+
+      // return
       return ResponseResult.success(service, res, 200);
     } catch (error) {
       next(error);

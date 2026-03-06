@@ -10,6 +10,7 @@ import { KriteriaService } from "../services/kriteira.service";
 import { PaginationType } from "../types/pagination";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
 import checkParamsId from "../utils/checkParamsId";
+import { NotifikasiService } from "../services/notifikasi.service";
 
 export class KriteriaController {
   // create
@@ -24,6 +25,11 @@ export class KriteriaController {
 
       // call service
       const service = await KriteriaService.create({ kriteria, namaKriteria });
+
+      // push notifikasi
+      await NotifikasiService.notifyKriteriaDitambah(
+        service?.namaKriteria ?? "",
+      );
 
       //   return
       return ResponseResult.success<ResponseKriteriaType | null>(
@@ -146,6 +152,9 @@ export class KriteriaController {
         req.body,
       );
 
+      // push notifikasi
+      await NotifikasiService.notifyKriteriaDiedit(service?.namaKriteria ?? "");
+
       // return
       return ResponseResult.success<ResponseKriteriaType | null>(
         service,
@@ -177,6 +186,9 @@ export class KriteriaController {
 
       //   check
       if (!service) return ResponseResult.error(res, 404, "kriteria not found");
+
+      // push notifikasi
+      await NotifikasiService.notifyKriteriaDihapus(service.namaKriteria);
 
       // return
       return ResponseResult.success<null>(

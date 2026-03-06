@@ -8,8 +8,13 @@ const notifikasiRoute: Router = Router();
 // get notifikasi
 notifikasiRoute.get(
   "/read-all",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+
+  authMiddleware,
+
   NotifikasiController.getNotifikasi,
 );
+
+// is read
+notifikasiRoute.put("/isRead/:id", authMiddleware, NotifikasiController.isRead);
 
 export default notifikasiRoute;

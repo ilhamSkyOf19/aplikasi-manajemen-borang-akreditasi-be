@@ -18,6 +18,8 @@ import { UpdateStatusType } from "../models/status.model";
 import { RiwayatService } from "../services/riwayat.service";
 import { CreateRiwayatType } from "../models/riwayat.model";
 import { PicService } from "../services/pic.service";
+import { NotifikasiService } from "../services/notifikasi.service";
+import { title } from "node:process";
 
 export class kebutuhanDokumenController {
   // create
@@ -329,6 +331,14 @@ export class kebutuhanDokumenController {
       // check service
       if (!service)
         return ResponseResult.error(res, 500, "gagal update kebutuhan dokumen");
+
+      // push notifikasi
+      await NotifikasiService.notifyPicRevisiKaprodiKeWD1(
+        service.id,
+        service.namaDokumen,
+        `Kebutuhan Dokumen ${service.namaDokumen} telah diupdate`,
+        `Kebutuhan Dokumen ${service.namaDokumen} telah diupdate. Pesan: "${keteranganUpdate}", Mohon periksa kembali.`,
+      );
 
       // return
       return ResponseResult.success<ResponseKebutuhanDokumenType | null>(

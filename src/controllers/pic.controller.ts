@@ -14,6 +14,7 @@ import { checkQueryPagination } from "../utils/checkQueryPagination";
 import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 import checkParamsId from "../utils/checkParamsId";
 import { RiwayatService } from "../services/riwayat.service";
+import { NotifikasiService } from "../services/notifikasi.service";
 
 export class PicController {
   // create
@@ -63,6 +64,12 @@ export class PicController {
       // check
       if (!service)
         return ResponseResult.error(res, 500, "internal server error");
+
+      // push notifikasi
+      await NotifikasiService.notifyPicBaruKeWD1(
+        service.id,
+        findKebutuhanDokumen.namaDokumen,
+      );
 
       return ResponseResult.success<ResponsePicType | null>(
         service,
@@ -298,6 +305,12 @@ export class PicController {
           return ResponseResult.error(res, 404, "riwayat not found");
         }
       }
+
+      // push notifikasi
+      await NotifikasiService.notifyPicRevisiKaprodiKeWD1(
+        service.id,
+        service.kebutuhanDokumen.namaDokumen,
+      );
 
       // return success
       return ResponseResult.success<ResponsePicType | null>(

@@ -121,7 +121,7 @@ export class KriteriaService {
   }
 
   //   delete kriteria
-  static async delete(id: number): Promise<boolean> {
+  static async delete(id: number): Promise<ResponseKriteriaType | null> {
     const result = await prisma.kriteria.delete({
       where: {
         id,
@@ -129,8 +129,8 @@ export class KriteriaService {
     });
 
     //   check
-    if (!result) return false;
+    if (!result) return null;
 
-    return true;
+    return toKriteriaResponse(result);
   }
 }

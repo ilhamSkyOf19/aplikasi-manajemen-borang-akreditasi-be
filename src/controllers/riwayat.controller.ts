@@ -11,6 +11,7 @@ import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 import { UpdateStatusType } from "../models/status.model";
 import { ResponsePicUpdateStatusType } from "../models/pic.model";
 import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
+import { NotifikasiService } from "../services/notifikasi.service";
 
 export class RiwayatController {
   // update status
@@ -54,8 +55,9 @@ export class RiwayatController {
           return ResponseResult.error(res, 404, "pic not found");
         }
 
-        // check status revisi
+        // check status  revisi
         if (pic.status === "revisi" && status === "revisi") {
+          // find status revisi
           checkStatusRevisi = await RiwayatService.findByPicIdAndStatus(
             pic.id,
             Status.revisi,
@@ -68,7 +70,7 @@ export class RiwayatController {
           );
         }
 
-        // check if reqeust status di setujui
+        // check if request status di setujui
         if (
           status === Status.disetujui &&
           checkStatusSuccess &&
@@ -106,9 +108,9 @@ export class RiwayatController {
           }
         }
 
-        // check status success
+        // check status success or status revisi
         if (status === "disetujui" || status === "revisi") {
-          // check find pic by id and status
+          // check find pic by id and status menunggu
           const findPicByIdAndStatus =
             await RiwayatService.findByPicIdAndStatus(
               servicePic.id,
@@ -149,6 +151,7 @@ export class RiwayatController {
           });
         }
 
+        // check status revisi
         if (checkStatusRevisi && checkStatusRevisi.length > 0) {
           // delete status revisi terbaru
           await RiwayatService.delete({
@@ -164,12 +167,32 @@ export class RiwayatController {
         keterangan,
         status,
         picId: servicePic ? servicePic.id : 0,
+        // tambahkan dokumen borang
         flagRevisi,
       });
 
       // check riwayat
       if (!riwayat) {
         return ResponseResult.error(res, 404, "riwayat not found");
+      }
+
+      // check
+      if (servicePic) {
+        // push notifikasi
+        if (servicePic.status === Status.disetujui) {
+          await NotifikasiService.notifyPicDisetujuiWD1(
+            servicePic.id,
+            servicePic.kebutuhanDokumen.namaDokumen,
+          );
+        }
+
+        if (servicePic.status === Status.revisi) {
+          await NotifikasiService.notifyPicDirevisiWD1(
+            servicePic.id,
+            servicePic.kebutuhanDokumen.namaDokumen,
+            keterangan,
+          );
+        }
       }
 
       // return success
