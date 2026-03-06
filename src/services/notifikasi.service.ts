@@ -1,3 +1,5 @@
+import { cpuUsage } from "node:process";
+import { Prisma } from "../../generated/prisma/browser";
 import prisma from "../libs/prisma";
 import {
   CreateNotifikasiType,
@@ -59,8 +61,8 @@ export class NotifikasiService {
 
     await this.createBulkNotifications(allUserIdsNotWD1, {
       type: TypeNotifikasi.KRITERIA_DITAMBAH,
-      title: "Kriteria Baru Ditambahkan",
-      message: `Kriteria "${namaKriteria}" telah ditambahkan oleh WD1.`,
+      title: "Kriteria Baru",
+      message: `Kriteria "${namaKriteria}" telah ditambahkan oleh Wakil Dekan 1.`,
       kriteria: namaKriteria,
     });
   }
@@ -155,8 +157,8 @@ export class NotifikasiService {
     await this.createNotification({
       recipientId: kaprodiId,
       type: TypeNotifikasi.PIC_DISETUJUI_WD1,
-      title: "PIC Disetujui ✅",
-      message: `Dokumen "${namaDokumen}" telah disetujui oleh WD1.`,
+      title: "PIC Disetujui",
+      message: `Dokumen "${namaDokumen}" telah disetujui oleh Wakil Dekan 1.`,
       picId,
       kebutuhanDokumen: namaDokumen,
     });
@@ -176,8 +178,8 @@ export class NotifikasiService {
     await this.createNotification({
       recipientId: kaprodiId,
       type: TypeNotifikasi.PIC_DIREVISI_WD1,
-      title: "PIC Perlu Direvisi 🔄",
-      message: `WD1 meminta revisi untuk dokumen "${namaDokumen}". Catatan: ${keteranganRevisi}`,
+      title: "PIC Perlu Direvisi",
+      message: `Wakil Dekan 1 meminta revisi untuk dokumen "${namaDokumen}". Catatan: ${keteranganRevisi}`,
       picId,
       kebutuhanDokumen: namaDokumen,
     });
@@ -188,36 +190,46 @@ export class NotifikasiService {
     id: number,
     req: PaginationType & {
       isRead?: boolean;
+      sort?: string;
     },
   ): Promise<ResponseNotifikasiWithMetaType | null> {
-    const { limit = 10, page = 1, search, isRead } = req;
+    const { limit = 10, page = 1, search, isRead, sort = "desc" } = req;
 
-    console.log(isRead);
+    const currentPage = page < 1 ? 1 : page;
 
-    const skip = (page - 1) * limit;
-    const take = limit;
+    console.log(currentPage);
 
-    const totalData = await prisma.notification.count();
-    const totalPage = Math.ceil(totalData / limit);
-
-    // conditional
     const conditional = {
       where: {
         recipientId: id,
-        ...(search !== undefined && { message: { contains: search } }),
-        ...(isRead !== undefined && { isRead }),
+        title: search
+          ? {
+              contains: search,
+            }
+          : {},
+        isRead: isRead,
       },
     };
+
+    const totalData = await prisma.notification.count(conditional);
+
+    const totalPage = Math.ceil(totalData / limit);
+
+    const skip = (currentPage - 1) * limit;
+    const take = limit;
 
     const result = await prisma.notification.findMany({
       ...conditional,
       skip,
       take,
+      orderBy: {
+        createdAt: sort as Prisma.SortOrder,
+      },
     });
 
     return toResponseNotifikasiWithMetaType({
       meta: {
-        currentPage: page,
+        currentPage,
         limit,
         totalData,
         totalPage,

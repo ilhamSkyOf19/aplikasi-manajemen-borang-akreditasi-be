@@ -13,13 +13,18 @@ import { checkQueryPagination } from "../utils/checkQueryPagination";
 export class NotifikasiController {
   // create
   static async getNotifikasi(
-    req: AuthRequest<{}, {}, {}, PaginationType & { isRead?: string }>,
+    req: AuthRequest<
+      {},
+      {},
+      {},
+      PaginationType & { isRead?: string; sort?: string }
+    >,
     res: Response<ResponseStructure<ResponseNotifikasiWithMetaType | null>>,
     next: NextFunction,
   ) {
     try {
       // get query from params
-      const { limit, page, search, isRead } = req.query;
+      const { limit = 10, page, search, isRead } = req.query;
 
       //   check is read query
       if (isRead) {
@@ -46,7 +51,9 @@ export class NotifikasiController {
       const service = await NotifikasiService.findAll(id, {
         limit: checkQuery.limit,
         page: checkQuery.page,
-        isRead: isRead === "true" ? true : false,
+        isRead:
+          isRead === "true" ? true : isRead === "false" ? false : undefined,
+        search,
       });
 
       // return success

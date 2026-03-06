@@ -100,8 +100,15 @@ export class PicController {
   ) {
     try {
       // get query from params
-      const { limit, page, search, status, kriteriaId, pendekatanId, sort } =
-        req.query;
+      const {
+        limit,
+        page,
+        search,
+        status,
+        kriteriaId,
+        pendekatanId,
+        sort = "desc",
+      } = req.query;
 
       // check query
       const checkQuery = checkQueryPagination(page, limit);
