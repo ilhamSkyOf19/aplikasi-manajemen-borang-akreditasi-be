@@ -15,8 +15,9 @@ export interface IRiwayat {
   pic?:
     | (Pick<IPic, "id" | "status"> & {
         kebutuhanDokumen: Pick<IKebutuhanDokumen, "id" | "namaDokumen">;
-        timAkreditasi: Pick<ITimAkreditasi, "id" | "namaTimAkreditasi">;
-        pj: Pick<PayloadUserType, "id" | "nama">[];
+        timAkreditasi: Pick<ITimAkreditasi, "id" | "namaTimAkreditasi"> & {
+          anggota: PayloadUserType[];
+        };
       })
     | null;
   createdAt: Date;

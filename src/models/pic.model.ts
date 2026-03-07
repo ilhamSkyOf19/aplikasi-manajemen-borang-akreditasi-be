@@ -1,15 +1,13 @@
 import { MetaType, Status } from "../utils/contstanst";
 import { IKebutuhanDokumen } from "./kebutuhanDokumen.model";
 import { ITimAkreditasi } from "./timAkreditasi.model";
+import { PayloadUserType } from "./user.model";
 
 // type
 export interface IPic {
   id: number;
   timAkreditasi: Omit<ITimAkreditasi, "user"> & {
-    anggota: {
-      id: number;
-      nama: string;
-    }[];
+    anggota: PayloadUserType[];
   };
   kebutuhanDokumen: Omit<IKebutuhanDokumen, "createdAt" | "updatedAt">;
   statusRiwayat: Status | null;

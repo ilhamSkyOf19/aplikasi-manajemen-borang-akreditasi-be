@@ -79,7 +79,7 @@ model Kebutuhan_Dokumen {
 
 model TimAkreditasi {
   id                Int                 @id @default(autoincrement())
-  namaTimAkreditasi String
+  namaTimAkreditasi String // update menjadi uniqe
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   pic               Pic[]

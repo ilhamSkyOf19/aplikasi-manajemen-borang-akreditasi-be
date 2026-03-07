@@ -5,7 +5,12 @@ import {
   toResponseRiwayatType,
   UpdateRiwayatType,
 } from "../models/riwayat.model";
-import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
+import {
+  FlagRevisi,
+  JenisRiwayat,
+  Status,
+  UserRole,
+} from "../utils/contstanst";
 
 export class RiwayatService {
   // create
@@ -61,14 +66,16 @@ export class RiwayatService {
               select: {
                 id: true,
                 namaTimAkreditasi: true,
-              },
-            },
-            picPj: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -97,11 +104,15 @@ export class RiwayatService {
             timAkreditasi: {
               id: result.pic.timAkreditasi.id,
               namaTimAkreditasi: result.pic.timAkreditasi.namaTimAkreditasi,
+              anggota: result.pic.timAkreditasi.userTimAkreditasi.map(
+                (item) => ({
+                  id: item.user.id,
+                  nama: item.user.nama,
+                  email: item.user.email,
+                  role: item.user.role as UserRole,
+                }),
+              ),
             },
-            pj: result.pic.picPj.map((pj) => ({
-              id: pj.user.id,
-              nama: pj.user.nama,
-            })),
           }
         : null,
     });
@@ -165,14 +176,16 @@ export class RiwayatService {
               select: {
                 id: true,
                 namaTimAkreditasi: true,
-              },
-            },
-            picPj: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -212,11 +225,15 @@ export class RiwayatService {
               timAkreditasi: {
                 id: item.pic.timAkreditasi.id,
                 namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
+                anggota: item.pic.timAkreditasi.userTimAkreditasi.map(
+                  (item) => ({
+                    id: item.user.id,
+                    nama: item.user.nama,
+                    email: item.user.email,
+                    role: item.user.role as UserRole,
+                  }),
+                ),
               },
-              pj: item.pic.picPj.map((pj) => ({
-                id: pj.user.id,
-                nama: pj.user.nama,
-              })),
             }
           : null,
       }),
@@ -261,14 +278,16 @@ export class RiwayatService {
               select: {
                 id: true,
                 namaTimAkreditasi: true,
-              },
-            },
-            picPj: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -305,11 +324,15 @@ export class RiwayatService {
               timAkreditasi: {
                 id: item.pic.timAkreditasi.id,
                 namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
+                anggota: item.pic.timAkreditasi.userTimAkreditasi.map(
+                  (item) => ({
+                    id: item.user.id,
+                    nama: item.user.nama,
+                    email: item.user.email,
+                    role: item.user.role as UserRole,
+                  }),
+                ),
               },
-              pj: item.pic.picPj.map((pj) => ({
-                id: pj.user.id,
-                nama: pj.user.nama,
-              })),
             }
           : null,
       }),
@@ -354,14 +377,16 @@ export class RiwayatService {
               select: {
                 id: true,
                 namaTimAkreditasi: true,
-              },
-            },
-            picPj: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -394,11 +419,15 @@ export class RiwayatService {
               timAkreditasi: {
                 id: item.pic.timAkreditasi.id,
                 namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
+                anggota: item.pic.timAkreditasi.userTimAkreditasi.map(
+                  (item) => ({
+                    id: item.user.id,
+                    nama: item.user.nama,
+                    email: item.user.email,
+                    role: item.user.role as UserRole,
+                  }),
+                ),
               },
-              pj: item.pic.picPj.map((pj) => ({
-                id: pj.user.id,
-                nama: pj.user.nama,
-              })),
             }
           : null,
       }),

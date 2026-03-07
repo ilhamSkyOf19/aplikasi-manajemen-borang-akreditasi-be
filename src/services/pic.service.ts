@@ -55,6 +55,8 @@ export class PicService {
                   select: {
                     id: true,
                     nama: true,
+                    email: true,
+                    role: true,
                   },
                 },
               },
@@ -103,9 +105,11 @@ export class PicService {
         namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
         createdAt: result.timAkreditasi.createdAt,
         updatedAt: result.timAkreditasi.updatedAt,
-        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
-          id: user.user.id,
-          nama: user.user.nama,
+        anggota: result.timAkreditasi.userTimAkreditasi.map((item) => ({
+          id: item.user.id,
+          nama: item.user.nama,
+          email: item.user.email,
+          role: item.user.role as UserRole,
         })),
       },
     });
@@ -144,6 +148,8 @@ export class PicService {
                   select: {
                     id: true,
                     nama: true,
+                    email: true,
+                    role: true,
                   },
                 },
               },
@@ -192,9 +198,11 @@ export class PicService {
         namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
         createdAt: result.timAkreditasi.createdAt,
         updatedAt: result.timAkreditasi.updatedAt,
-        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
-          id: user.user.id,
-          nama: user.user.nama,
+        anggota: result.timAkreditasi.userTimAkreditasi.map((item) => ({
+          id: item.user.id,
+          nama: item.user.nama,
+          email: item.user.email,
+          role: item.user.role as UserRole,
         })),
       },
     });
@@ -307,6 +315,8 @@ export class PicService {
                   select: {
                     id: true,
                     nama: true,
+                    email: true,
+                    role: true,
                   },
                 },
               },
@@ -360,9 +370,11 @@ export class PicService {
             namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
             createdAt: item.timAkreditasi.createdAt,
             updatedAt: item.timAkreditasi.updatedAt,
-            anggota: item.timAkreditasi.userTimAkreditasi.map((user) => ({
-              id: user.user.id,
-              nama: user.user.nama,
+            anggota: item.timAkreditasi.userTimAkreditasi.map((item) => ({
+              id: item.user.id,
+              nama: item.user.nama,
+              email: item.user.email,
+              role: item.user.role as UserRole,
             })),
           },
         }),
@@ -403,6 +415,8 @@ export class PicService {
                   select: {
                     id: true,
                     nama: true,
+                    email: true,
+                    role: true,
                   },
                 },
               },
@@ -454,6 +468,8 @@ export class PicService {
         anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
           id: user.user.id,
           nama: user.user.nama,
+          email: user.user.email,
+          role: user.user.role as UserRole,
         })),
       },
     });
@@ -500,6 +516,8 @@ export class PicService {
                   select: {
                     id: true,
                     nama: true,
+                    email: true,
+                    role: true,
                   },
                 },
               },
@@ -551,6 +569,8 @@ export class PicService {
         anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
           id: user.user.id,
           nama: user.user.nama,
+          email: user.user.email,
+          role: user.user.role as UserRole,
         })),
       },
     });
