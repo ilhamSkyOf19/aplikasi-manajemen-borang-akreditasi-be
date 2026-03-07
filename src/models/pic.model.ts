@@ -1,15 +1,18 @@
-import { JenisRiwayat, MetaType, Status } from "../utils/contstanst";
+import { MetaType, Status } from "../utils/contstanst";
 import { IKebutuhanDokumen } from "./kebutuhanDokumen.model";
 import { ITimAkreditasi } from "./timAkreditasi.model";
-import { PayloadUserType } from "./user.model";
 
 // type
 export interface IPic {
   id: number;
-  timAkreditasi: Omit<ITimAkreditasi, "user">;
+  timAkreditasi: Omit<ITimAkreditasi, "user"> & {
+    anggota: {
+      id: number;
+      nama: string;
+    }[];
+  };
   kebutuhanDokumen: Omit<IKebutuhanDokumen, "createdAt" | "updatedAt">;
   statusRiwayat: Status | null;
-  pj: PayloadUserType[];
   status: Status;
   keterangan: string;
   createdAt: Date;
@@ -20,7 +23,6 @@ export interface IPic {
 export interface CreatePicType {
   timAkreditasiId: number;
   kebutuhanDokumenId: number;
-  pjId: number[];
   keterangan: string;
 }
 
@@ -52,15 +54,16 @@ export interface ResponsePicUpdateStatusType {
   timAkreditasi: {
     id: number;
     namaTimAkreditasi: string;
+    anggota: {
+      id: number;
+      nama: string;
+    }[];
   };
   kebutuhanDokumen: {
     id: number;
     namaDokumen: string;
   };
-  pj: {
-    id: number;
-    nama: string;
-  }[];
+
   status: string;
   keterangan: string;
   createdAt: Date;

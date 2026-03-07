@@ -27,15 +27,6 @@ export class PicService {
             id: req.kebutuhanDokumenId,
           },
         },
-        picPj: {
-          create: req.pjId.map((id: number) => ({
-            user: {
-              connect: {
-                id,
-              },
-            },
-          })),
-        },
         keterangan: req.keterangan,
       },
       select: {
@@ -58,6 +49,16 @@ export class PicService {
             namaTimAkreditasi: true,
             createdAt: true,
             updatedAt: true,
+            userTimAkreditasi: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    nama: true,
+                  },
+                },
+              },
+            },
           },
         },
         kebutuhanDokumen: {
@@ -82,18 +83,6 @@ export class PicService {
             },
           },
         },
-        picPj: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                nama: true,
-                email: true,
-                role: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -109,12 +98,16 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      pj: result.picPj.map((item) => ({
-        id: item.user.id,
-        email: item.user.email,
-        nama: item.user.nama,
-        role: item.user.role as UserRole,
-      })),
+      timAkreditasi: {
+        id: result.timAkreditasi.id,
+        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
+        createdAt: result.timAkreditasi.createdAt,
+        updatedAt: result.timAkreditasi.updatedAt,
+        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
+          id: user.user.id,
+          nama: user.user.nama,
+        })),
+      },
     });
   }
 
@@ -145,6 +138,16 @@ export class PicService {
             namaTimAkreditasi: true,
             createdAt: true,
             updatedAt: true,
+            userTimAkreditasi: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    nama: true,
+                  },
+                },
+              },
+            },
           },
         },
         kebutuhanDokumen: {
@@ -169,18 +172,6 @@ export class PicService {
             },
           },
         },
-        picPj: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                nama: true,
-                email: true,
-                role: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -196,12 +187,16 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      pj: result.picPj.map((item) => ({
-        id: item.user.id,
-        email: item.user.email,
-        nama: item.user.nama,
-        role: item.user.role as UserRole,
-      })),
+      timAkreditasi: {
+        id: result.timAkreditasi.id,
+        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
+        createdAt: result.timAkreditasi.createdAt,
+        updatedAt: result.timAkreditasi.updatedAt,
+        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
+          id: user.user.id,
+          nama: user.user.nama,
+        })),
+      },
     });
   }
 
@@ -306,6 +301,16 @@ export class PicService {
             namaTimAkreditasi: true,
             createdAt: true,
             updatedAt: true,
+            userTimAkreditasi: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    nama: true,
+                  },
+                },
+              },
+            },
           },
         },
         kebutuhanDokumen: {
@@ -330,18 +335,6 @@ export class PicService {
             },
           },
         },
-        picPj: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                nama: true,
-                email: true,
-                role: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -362,12 +355,16 @@ export class PicService {
             ...item.kebutuhanDokumen,
             status: item.kebutuhanDokumen.status as Status,
           },
-          pj: item.picPj.map((item) => ({
-            id: item.user.id,
-            email: item.user.email,
-            nama: item.user.nama,
-            role: item.user.role as UserRole,
-          })),
+          timAkreditasi: {
+            id: item.timAkreditasi.id,
+            namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
+            createdAt: item.timAkreditasi.createdAt,
+            updatedAt: item.timAkreditasi.updatedAt,
+            anggota: item.timAkreditasi.userTimAkreditasi.map((user) => ({
+              id: user.user.id,
+              nama: user.user.nama,
+            })),
+          },
         }),
       ),
     };
@@ -400,6 +397,16 @@ export class PicService {
             namaTimAkreditasi: true,
             createdAt: true,
             updatedAt: true,
+            userTimAkreditasi: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    nama: true,
+                  },
+                },
+              },
+            },
           },
         },
         kebutuhanDokumen: {
@@ -424,18 +431,6 @@ export class PicService {
             },
           },
         },
-        picPj: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                nama: true,
-                email: true,
-                role: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -451,12 +446,16 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      pj: result.picPj.map((item) => ({
-        id: item.user.id,
-        email: item.user.email,
-        nama: item.user.nama,
-        role: item.user.role as UserRole,
-      })),
+      timAkreditasi: {
+        id: result.timAkreditasi.id,
+        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
+        createdAt: result.timAkreditasi.createdAt,
+        updatedAt: result.timAkreditasi.updatedAt,
+        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
+          id: user.user.id,
+          nama: user.user.nama,
+        })),
+      },
     });
   }
 
@@ -466,24 +465,13 @@ export class PicService {
     req: Omit<UpdatePicType, "keteranganUpdate">,
   ): Promise<ResponsePicType | null> {
     // destroy pj
-    const { pjId, ...rest } = req;
     // call db
     const result = await prisma.pic.update({
       where: {
         id,
       },
       data: {
-        ...rest,
-        picPj: pjId
-          ? {
-              deleteMany: {},
-              create: pjId.map((userId) => ({
-                user: {
-                  connect: { id: userId },
-                },
-              })),
-            }
-          : undefined,
+        ...req,
         status: "menunggu",
       },
       select: {
@@ -506,6 +494,16 @@ export class PicService {
             namaTimAkreditasi: true,
             createdAt: true,
             updatedAt: true,
+            userTimAkreditasi: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    nama: true,
+                  },
+                },
+              },
+            },
           },
         },
         kebutuhanDokumen: {
@@ -530,18 +528,6 @@ export class PicService {
             },
           },
         },
-        picPj: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                nama: true,
-                email: true,
-                role: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -557,12 +543,16 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      pj: result.picPj.map((item) => ({
-        id: item.user.id,
-        email: item.user.email,
-        nama: item.user.nama,
-        role: item.user.role as UserRole,
-      })),
+      timAkreditasi: {
+        id: result.timAkreditasi.id,
+        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
+        createdAt: result.timAkreditasi.createdAt,
+        updatedAt: result.timAkreditasi.updatedAt,
+        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
+          id: user.user.id,
+          nama: user.user.nama,
+        })),
+      },
     });
   }
 
@@ -589,22 +579,22 @@ export class PicService {
           select: {
             id: true,
             namaTimAkreditasi: true,
+            userTimAkreditasi: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    nama: true,
+                  },
+                },
+              },
+            },
           },
         },
         kebutuhanDokumen: {
           select: {
             id: true,
             namaDokumen: true,
-          },
-        },
-        picPj: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                nama: true,
-              },
-            },
           },
         },
       },
@@ -620,10 +610,14 @@ export class PicService {
       kebutuhanDokumen: {
         ...result.kebutuhanDokumen,
       },
-      pj: result.picPj.map((item) => ({
-        id: item.user.id,
-        nama: item.user.nama,
-      })),
+      timAkreditasi: {
+        id: result.timAkreditasi.id,
+        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
+        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
+          id: user.user.id,
+          nama: user.user.nama,
+        })),
+      },
     });
   }
 

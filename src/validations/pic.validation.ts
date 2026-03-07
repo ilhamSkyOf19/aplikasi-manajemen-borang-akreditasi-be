@@ -43,7 +43,6 @@ export class PicValidation {
       timAkreditasiId: this.onlyNumberSchema("tim akreditasi", 1, 99999),
       kebutuhanDokumenId: this.onlyNumberSchema("kebutuhan dokumen", 1, 99999),
       keterangan: this.stringSchema("keterangan", 1, 1000),
-      pjId: this.numberArraySchema("penanggung jawab"),
     })
     .strict() satisfies z.ZodType<CreatePicType>;
 
@@ -52,12 +51,6 @@ export class PicValidation {
     .object({
       timAkreditasiId: this.onlyNumberSchema(
         "tim akreditasi",
-        1,
-        99999,
-      ).optional(),
-      pjId: this.numberArraySchema("penanggung jawab").optional(),
-      kebutuhanDokumenId: this.onlyNumberSchema(
-        "kebutuhan dokumen",
         1,
         99999,
       ).optional(),

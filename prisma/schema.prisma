@@ -24,7 +24,7 @@ model User {
 
   // Relasi existing
   userTimAkreditasi UserTimAkreditasi[]
-  picPj             PicPj[]
+  // picPj             PicPj[]
 
   // Relasi baru: notifikasi yang DITERIMA oleh user ini
   notifications Notification[] @relation("NotificationRecipient")
@@ -99,25 +99,25 @@ model Pic {
 
   timAkreditasi    TimAkreditasi     @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
   kebutuhanDokumen Kebutuhan_Dokumen @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
-  picPj            PicPj[]
+  // picPj            PicPj[]
   riwayat          Riwayat[]
 
   @@unique([timAkreditasiId, kebutuhanDokumenId])
   @@map("pic")
 }
 
-model PicPj {
-  picId     Int
-  userId    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// model PicPj {
+//   picId     Int
+//   userId    Int
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  pic  Pic  @relation(fields: [picId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   pic  Pic  @relation(fields: [picId], references: [id], onDelete: Cascade)
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([picId, userId])
-  @@map("pic_pj")
-}
+//   @@id([picId, userId])
+//   @@map("pic_pj")
+// }
 
 model Riwayat {
   id                  Int          @id @default(autoincrement())

@@ -73,8 +73,6 @@ export class AuthController {
       // get body
       const body = req.body;
 
-      console.log("body:", req.body);
-
       // call service
       const service = await UserService.findUser({
         identifier: body.identifier.trim(),

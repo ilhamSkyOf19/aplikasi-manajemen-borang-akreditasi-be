@@ -25,8 +25,7 @@ export class PicController {
   ) {
     try {
       // get body from params
-      const { kebutuhanDokumenId, keterangan, pjId, timAkreditasiId } =
-        req.body;
+      const { kebutuhanDokumenId, keterangan, timAkreditasiId } = req.body;
 
       // find kebutuhan dokumen id
       const findKebutuhanDokumen =
@@ -44,20 +43,10 @@ export class PicController {
       if (!findTimAkreditasi)
         return ResponseResult.error(res, 404, "tim akreditasi not found");
 
-      // find & check pj id
-      for (const pj of pjId) {
-        // find user by id
-        const findUser = findTimAkreditasi.user.find((u) => u.id === pj);
-
-        // check
-        if (!findUser) return ResponseResult.error(res, 404, "user not found");
-      }
-
       // call service
       const service = await PicService.create({
         kebutuhanDokumenId,
         keterangan,
-        pjId,
         timAkreditasiId,
       });
 
@@ -215,7 +204,6 @@ export class PicController {
       const {
         kebutuhanDokumenId,
         keterangan,
-        pjId,
         timAkreditasiId,
         keteranganUpdate,
       } = req.body;
@@ -232,15 +220,6 @@ export class PicController {
         }
       }
 
-      // jika salah satu diisi tapi yang lain tidak
-      if ((timAkreditasiId && !pjId) || (!timAkreditasiId && pjId)) {
-        return ResponseResult.error(
-          res,
-          400,
-          "tim akreditasi id dan pj id harus diisi bersamaan",
-        );
-      }
-
       // jika timAkreditasiId dikirim
       if (timAkreditasiId) {
         // cari tim
@@ -250,29 +229,12 @@ export class PicController {
         if (!timAkreditasi) {
           return ResponseResult.error(res, 404, "tim akreditasi not found");
         }
-
-        // jika pjId dikirim dan tidak kosong
-        if (pjId && pjId.length > 0) {
-          const userIdsInTim = new Set(timAkreditasi.user.map((u) => u.id));
-
-          // cek apakah ada pjId yang tidak ada di tim
-          const invalidPj = pjId.find((id) => !userIdsInTim.has(id));
-
-          if (invalidPj) {
-            return ResponseResult.error(
-              res,
-              404,
-              `user dengan id ${invalidPj} tidak ada dalam tim akreditasi`,
-            );
-          }
-        }
       }
 
       // call service
       const service = await PicService.update(checkId as number, {
         kebutuhanDokumenId,
         keterangan,
-        pjId,
         timAkreditasiId,
       });
 

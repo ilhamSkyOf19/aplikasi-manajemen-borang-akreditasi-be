@@ -197,8 +197,6 @@ export class NotifikasiService {
 
     const currentPage = page < 1 ? 1 : page;
 
-    console.log(currentPage);
-
     const conditional = {
       where: {
         recipientId: id,
