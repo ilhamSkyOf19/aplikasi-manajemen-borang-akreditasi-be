@@ -62,18 +62,22 @@ export class RiwayatService {
                 namaDokumen: true,
               },
             },
-            timAkreditasi: {
-              select: {
-                id: true,
-                namaTimAkreditasi: true,
-                userTimAkreditasi: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        nama: true,
-                        email: true,
-                        role: true,
+            picTimAkreditasi: {
+              include: {
+                timAkreditasi: {
+                  select: {
+                    id: true,
+                    namaTimAkreditasi: true,
+                    userTimAkreditasi: {
+                      include: {
+                        user: {
+                          select: {
+                            id: true,
+                            nama: true,
+                            email: true,
+                            role: true,
+                          },
+                        },
                       },
                     },
                   },
@@ -101,18 +105,16 @@ export class RiwayatService {
               id: result.pic.kebutuhanDokumen.id,
               namaDokumen: result.pic.kebutuhanDokumen.namaDokumen,
             },
-            timAkreditasi: {
-              id: result.pic.timAkreditasi.id,
-              namaTimAkreditasi: result.pic.timAkreditasi.namaTimAkreditasi,
-              anggota: result.pic.timAkreditasi.userTimAkreditasi.map(
-                (item) => ({
-                  id: item.user.id,
-                  nama: item.user.nama,
-                  email: item.user.email,
-                  role: item.user.role as UserRole,
-                }),
-              ),
-            },
+            timAkreditasi: result.pic.picTimAkreditasi.map((item) => ({
+              id: item.timAkreditasi.id,
+              namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
+              anggota: item.timAkreditasi.userTimAkreditasi.map((user) => ({
+                id: user.user.id,
+                nama: user.user.nama,
+                email: user.user.email,
+                role: user.user.role as UserRole,
+              })),
+            })),
           }
         : null,
     });
@@ -172,18 +174,22 @@ export class RiwayatService {
                 namaDokumen: true,
               },
             },
-            timAkreditasi: {
-              select: {
-                id: true,
-                namaTimAkreditasi: true,
-                userTimAkreditasi: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        nama: true,
-                        email: true,
-                        role: true,
+            picTimAkreditasi: {
+              include: {
+                timAkreditasi: {
+                  select: {
+                    id: true,
+                    namaTimAkreditasi: true,
+                    userTimAkreditasi: {
+                      include: {
+                        user: {
+                          select: {
+                            id: true,
+                            nama: true,
+                            email: true,
+                            role: true,
+                          },
+                        },
                       },
                     },
                   },
@@ -222,18 +228,16 @@ export class RiwayatService {
                 id: item.pic.kebutuhanDokumen.id,
                 namaDokumen: item.pic.kebutuhanDokumen.namaDokumen,
               },
-              timAkreditasi: {
-                id: item.pic.timAkreditasi.id,
-                namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
-                anggota: item.pic.timAkreditasi.userTimAkreditasi.map(
-                  (item) => ({
-                    id: item.user.id,
-                    nama: item.user.nama,
-                    email: item.user.email,
-                    role: item.user.role as UserRole,
-                  }),
-                ),
-              },
+              timAkreditasi: item.pic.picTimAkreditasi.map((tim) => ({
+                id: tim.timAkreditasi.id,
+                namaTimAkreditasi: tim.timAkreditasi.namaTimAkreditasi,
+                anggota: tim.timAkreditasi.userTimAkreditasi.map((user) => ({
+                  id: user.user.id,
+                  nama: user.user.nama,
+                  email: user.user.email,
+                  role: user.user.role as UserRole,
+                })),
+              })),
             }
           : null,
       }),
@@ -274,18 +278,22 @@ export class RiwayatService {
                 namaDokumen: true,
               },
             },
-            timAkreditasi: {
-              select: {
-                id: true,
-                namaTimAkreditasi: true,
-                userTimAkreditasi: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        nama: true,
-                        email: true,
-                        role: true,
+            picTimAkreditasi: {
+              include: {
+                timAkreditasi: {
+                  select: {
+                    id: true,
+                    namaTimAkreditasi: true,
+                    userTimAkreditasi: {
+                      include: {
+                        user: {
+                          select: {
+                            id: true,
+                            nama: true,
+                            email: true,
+                            role: true,
+                          },
+                        },
                       },
                     },
                   },
@@ -321,18 +329,16 @@ export class RiwayatService {
                 id: item.pic.kebutuhanDokumen.id,
                 namaDokumen: item.pic.kebutuhanDokumen.namaDokumen,
               },
-              timAkreditasi: {
-                id: item.pic.timAkreditasi.id,
-                namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
-                anggota: item.pic.timAkreditasi.userTimAkreditasi.map(
-                  (item) => ({
-                    id: item.user.id,
-                    nama: item.user.nama,
-                    email: item.user.email,
-                    role: item.user.role as UserRole,
-                  }),
-                ),
-              },
+              timAkreditasi: item.pic.picTimAkreditasi.map((tim) => ({
+                id: tim.timAkreditasi.id,
+                namaTimAkreditasi: tim.timAkreditasi.namaTimAkreditasi,
+                anggota: tim.timAkreditasi.userTimAkreditasi.map((user) => ({
+                  id: user.user.id,
+                  nama: user.user.nama,
+                  email: user.user.email,
+                  role: user.user.role as UserRole,
+                })),
+              })),
             }
           : null,
       }),
@@ -373,18 +379,22 @@ export class RiwayatService {
                 namaDokumen: true,
               },
             },
-            timAkreditasi: {
-              select: {
-                id: true,
-                namaTimAkreditasi: true,
-                userTimAkreditasi: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        nama: true,
-                        email: true,
-                        role: true,
+            picTimAkreditasi: {
+              include: {
+                timAkreditasi: {
+                  select: {
+                    id: true,
+                    namaTimAkreditasi: true,
+                    userTimAkreditasi: {
+                      include: {
+                        user: {
+                          select: {
+                            id: true,
+                            nama: true,
+                            email: true,
+                            role: true,
+                          },
+                        },
                       },
                     },
                   },
@@ -416,18 +426,16 @@ export class RiwayatService {
                 id: item.pic.kebutuhanDokumen.id,
                 namaDokumen: item.pic.kebutuhanDokumen.namaDokumen,
               },
-              timAkreditasi: {
-                id: item.pic.timAkreditasi.id,
-                namaTimAkreditasi: item.pic.timAkreditasi.namaTimAkreditasi,
-                anggota: item.pic.timAkreditasi.userTimAkreditasi.map(
-                  (item) => ({
-                    id: item.user.id,
-                    nama: item.user.nama,
-                    email: item.user.email,
-                    role: item.user.role as UserRole,
-                  }),
-                ),
-              },
+              timAkreditasi: item.pic.picTimAkreditasi.map((tim) => ({
+                id: tim.timAkreditasi.id,
+                namaTimAkreditasi: tim.timAkreditasi.namaTimAkreditasi,
+                anggota: tim.timAkreditasi.userTimAkreditasi.map((user) => ({
+                  id: user.user.id,
+                  nama: user.user.nama,
+                  email: user.user.email,
+                  role: user.user.role as UserRole,
+                })),
+              })),
             }
           : null,
       }),

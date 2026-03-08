@@ -247,9 +247,13 @@ export class PicService {
             ? {
                 OR: [
                   {
-                    timAkreditasi: {
-                      namaTimAkreditasi: {
-                        contains: search,
+                    picTimAkreditasi: {
+                      some: {
+                        timAkreditasi: {
+                          namaTimAkreditasi: {
+                            contains: search,
+                          },
+                        },
                       },
                     },
                   },
@@ -499,14 +503,30 @@ export class PicService {
     id: number,
     req: Omit<UpdatePicType, "keteranganUpdate">,
   ): Promise<ResponsePicType | null> {
-    // destroy pj
+    // destroy
+    const { kebutuhanDokumenId, timAkreditasiId, ...rest } = req;
     // call db
     const result = await prisma.pic.update({
       where: {
         id,
       },
       data: {
-        ...req,
+        ...rest,
+        kebutuhanDokumen: {
+          connect: {
+            id: req.kebutuhanDokumenId,
+          },
+        },
+        picTimAkreditasi: {
+          deleteMany: {},
+          create: req.timAkreditasiId?.map((idTim) => ({
+            timAkreditasi: {
+              connect: {
+                id: idTim,
+              },
+            },
+          })),
+        },
         status: "menunggu",
       },
       select: {

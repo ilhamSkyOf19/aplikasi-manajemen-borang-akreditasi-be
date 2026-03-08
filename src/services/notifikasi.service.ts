@@ -175,6 +175,8 @@ export class NotifikasiService {
   ): Promise<void> {
     const kaprodiId = await UserService.getKaprodiId();
 
+    console.log(kaprodiId);
+
     await this.createNotification({
       recipientId: kaprodiId,
       type: TypeNotifikasi.PIC_DIREVISI_WD1,
@@ -204,7 +206,7 @@ export class NotifikasiService {
           ? {
               contains: search,
             }
-          : {},
+          : undefined,
         isRead: isRead,
       },
     };
@@ -221,7 +223,7 @@ export class NotifikasiService {
       skip,
       take,
       orderBy: {
-        createdAt: sort as Prisma.SortOrder,
+        createdAt: sort ? (sort as Prisma.SortOrder) : "desc",
       },
     });
 

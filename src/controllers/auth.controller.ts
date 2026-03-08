@@ -24,11 +24,14 @@ export class AuthController {
       const body = req.body;
 
       // check role
-      if (body.role === UserRole.wakil_dekan_1) {
+      if (
+        body.role === UserRole.wakil_dekan_1 ||
+        body.role === UserRole.kaprodi
+      ) {
         return ResponseResult.error(
           res,
           400,
-          "Wakil Dekan 1 tidak boleh didaftarkan",
+          "Role yang dikirim tidak boleh didaftarkan lebih dari satu kali",
         );
       }
 
