@@ -11,7 +11,7 @@ import {
 } from "../models/user.model";
 import { PaginationType } from "../types/pagination";
 import { UserRole } from "../utils/contstanst";
-import { SortOrder } from "../../generated/prisma/internal/prismaNamespace";
+import { SortOrder } from "../../generated/prisma/internal/prismaNamespaceBrowser";
 
 export class UserService {
   // create
@@ -204,7 +204,7 @@ export class UserService {
       skip: (currentPage - 1) * limit,
       take: limit,
       orderBy: {
-        createdAt: (sort as SortOrder) ?? "desc",
+        createdAt: sort ? (sort as SortOrder) : "desc",
       },
     });
 

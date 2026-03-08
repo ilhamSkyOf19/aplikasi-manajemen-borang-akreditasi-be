@@ -79,8 +79,8 @@ export class PicController {
       {},
       PaginationType & {
         status?: string;
-        kriteriaId?: string;
-        pendekatanId?: string;
+        kriteria?: string;
+        pendekatan?: string;
         sort?: string;
       }
     >,
@@ -94,8 +94,8 @@ export class PicController {
         page,
         search,
         status,
-        kriteriaId,
-        pendekatanId,
+        kriteria,
+        pendekatan,
         sort = "desc",
       } = req.query;
 
@@ -114,24 +114,14 @@ export class PicController {
         }
       }
 
-      // check kriteria id
-      if (kriteriaId) {
-        checkParamsId(res, kriteriaId);
-      }
-
-      // check pendekatan id
-      if (pendekatanId) {
-        checkParamsId(res, pendekatanId);
-      }
-
       //   call service
       const service = await PicService.readAll({
         limit: checkQuery.limit,
         page: checkQuery.page,
         search,
         status: status as Status,
-        kriteriaId: kriteriaId,
-        pendekatanId: pendekatanId,
+        kriteria,
+        pendekatan,
         sort,
       });
 

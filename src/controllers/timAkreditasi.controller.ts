@@ -93,7 +93,7 @@ export class TimAkreditasiController {
   ) {
     try {
       // get params
-      const { limit, page, search } = req.query;
+      const { limit, page, search, sort } = req.query;
 
       // check query
       const checkQuery = checkQueryPagination(page, limit);
@@ -108,6 +108,7 @@ export class TimAkreditasiController {
         limit: checkQuery.limit,
         page: checkQuery.page,
         search,
+        sort,
       });
 
       // return success

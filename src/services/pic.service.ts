@@ -223,8 +223,8 @@ export class PicService {
   static async readAll(
     query: PaginationType & {
       status?: Status;
-      kriteriaId?: string;
-      pendekatanId?: string;
+      kriteria?: string;
+      pendekatan?: string;
       sort?: string;
     },
   ): Promise<ResponsePicWithMetaType | null> {
@@ -234,8 +234,8 @@ export class PicService {
       page: currentPage = 1,
       search,
       status,
-      kriteriaId,
-      pendekatanId,
+      kriteria,
+      pendekatan,
       sort,
     } = query;
 
@@ -264,20 +264,20 @@ export class PicService {
               }
             : {},
           status ? { status: status } : {},
-          kriteriaId
+          kriteria
             ? {
                 kebutuhanDokumen: {
                   kriteria: {
-                    id: +kriteriaId,
+                    namaKriteria: kriteria,
                   },
                 },
               }
             : {},
-          pendekatanId
+          pendekatan
             ? {
                 kebutuhanDokumen: {
                   pendekatan: {
-                    id: +pendekatanId,
+                    keterangan: pendekatan,
                   },
                 },
               }

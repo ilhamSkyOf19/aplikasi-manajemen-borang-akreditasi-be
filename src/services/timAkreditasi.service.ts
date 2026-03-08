@@ -1,3 +1,4 @@
+import { SortOrder } from "../../generated/prisma/internal/prismaNamespaceBrowser";
 import prisma from "../libs/prisma";
 import {
   CreateTimAkreditasiType,
@@ -147,7 +148,7 @@ export class TimAkreditasiService {
   static async readAll(
     query: PaginationType,
   ): Promise<ResponseTimAkreditasiWithMetaType | null> {
-    const { limit = 8, page = 1, search } = query;
+    const { limit = 8, page = 1, search, sort } = query;
     // get current page
     const currentPage = page < 1 ? 1 : page;
 
@@ -188,6 +189,9 @@ export class TimAkreditasiService {
             },
           },
         },
+      },
+      orderBy: {
+        createdAt: sort ? (sort as SortOrder) : "desc",
       },
     });
 
