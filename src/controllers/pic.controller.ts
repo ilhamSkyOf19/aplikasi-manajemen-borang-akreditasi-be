@@ -37,7 +37,7 @@ export class PicController {
 
       // find tim akreditasi id
       const findTimAkreditasi =
-        await TimAkreditasiService.readById(timAkreditasiId);
+        await TimAkreditasiService.readManyByIds(timAkreditasiId);
 
       // check
       if (!findTimAkreditasi)
@@ -221,10 +221,10 @@ export class PicController {
       }
 
       // jika timAkreditasiId dikirim
-      if (timAkreditasiId) {
+      if (timAkreditasiId && timAkreditasiId?.length > 0) {
         // cari tim
         const timAkreditasi =
-          await TimAkreditasiService.readById(timAkreditasiId);
+          await TimAkreditasiService.readManyByIds(timAkreditasiId);
 
         if (!timAkreditasi) {
           return ResponseResult.error(res, 404, "tim akreditasi not found");

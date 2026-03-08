@@ -6,9 +6,9 @@ import { PayloadUserType } from "./user.model";
 // type
 export interface IPic {
   id: number;
-  timAkreditasi: Omit<ITimAkreditasi, "user"> & {
+  timAkreditasi: (Omit<ITimAkreditasi, "user"> & {
     anggota: PayloadUserType[];
-  };
+  })[];
   kebutuhanDokumen: Omit<IKebutuhanDokumen, "createdAt" | "updatedAt">;
   statusRiwayat: Status | null;
   status: Status;
@@ -19,7 +19,7 @@ export interface IPic {
 
 // create
 export interface CreatePicType {
-  timAkreditasiId: number;
+  timAkreditasiId: number[];
   kebutuhanDokumenId: number;
   keterangan: string;
 }
@@ -56,7 +56,7 @@ export interface ResponsePicUpdateStatusType {
       id: number;
       nama: string;
     }[];
-  };
+  }[];
   kebutuhanDokumen: {
     id: number;
     namaDokumen: string;

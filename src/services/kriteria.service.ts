@@ -1,3 +1,4 @@
+import { SortOrder } from "../../generated/prisma/internal/prismaNamespaceBrowser";
 import prisma from "../libs/prisma";
 import {
   CreateKriteriaType,
@@ -44,6 +45,7 @@ export class KriteriaService {
     limit = 8,
     search,
     status,
+    sort = "asc",
   }: PaginationType & {
     status?: "baru" | "revisi";
   }): Promise<ResponseKriteriaWithMetaType | null> {
@@ -85,7 +87,7 @@ export class KriteriaService {
       skip: (currentPage - 1) * limit,
       take: limit,
       orderBy: {
-        kriteria: "asc",
+        kriteria: sort ? (sort as SortOrder) : "asc",
       },
     });
 

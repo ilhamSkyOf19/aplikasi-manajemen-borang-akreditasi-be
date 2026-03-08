@@ -98,6 +98,51 @@ export class TimAkreditasiService {
     });
   }
 
+  // read many by id
+  static async readManyByIds(
+    ids: number[],
+  ): Promise<ResponseTimAkreditasiType[] | null> {
+    // call db
+    const result = await prisma.timAkreditasi.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      include: {
+        userTimAkreditasi: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                nama: true,
+                email: true,
+                role: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // check
+    if (!result) return null;
+
+    return result.map((item) =>
+      toResponseTimAkreditasiType({
+        ...item,
+        user: item.userTimAkreditasi.map((user) => {
+          return {
+            ...user.user,
+            role: user.user.role as UserRole,
+          };
+        }),
+      }),
+    );
+  }
+
   // read all
   static async readAll(
     query: PaginationType,

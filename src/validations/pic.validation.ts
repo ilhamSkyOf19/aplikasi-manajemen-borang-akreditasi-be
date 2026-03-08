@@ -40,7 +40,7 @@ export class PicValidation {
   //   create
   static readonly CREATE = z
     .object({
-      timAkreditasiId: this.onlyNumberSchema("tim akreditasi", 1, 99999),
+      timAkreditasiId: this.numberArraySchema("tim akreditasi"),
       kebutuhanDokumenId: this.onlyNumberSchema("kebutuhan dokumen", 1, 99999),
       keterangan: this.stringSchema("keterangan", 1, 1000),
     })
@@ -49,8 +49,9 @@ export class PicValidation {
   // update
   static readonly UPDATE = z
     .object({
-      timAkreditasiId: this.onlyNumberSchema(
-        "tim akreditasi",
+      timAkreditasiId: z.array(z.number().int().positive()).optional(),
+      kebutuhanDokumenId: this.onlyNumberSchema(
+        "kebutuhan dokumen",
         1,
         99999,
       ).optional(),

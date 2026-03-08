@@ -6,7 +6,7 @@ import {
   UpdateKriteriaType,
 } from "../models/kriteria.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { KriteriaService } from "../services/kriteira.service";
+import { KriteriaService } from "../services/kriteria.service";
 import { PaginationType } from "../types/pagination";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
 import checkParamsId from "../utils/checkParamsId";
@@ -84,7 +84,14 @@ export class KriteriaController {
   ) {
     try {
       // get params
-      const { limit, page, search, status } = req.query;
+      const { limit, page, search, status, sort } = req.query;
+
+      // check sort
+      if (sort) {
+        if (sort !== "asc" && sort !== "desc") {
+          return ResponseResult.error(res, 400, "sort must be asc or desc");
+        }
+      }
 
       // check query
       const checkQuery = checkQueryPagination(page, limit);
@@ -111,6 +118,7 @@ export class KriteriaController {
         page: checkQuery.page,
         search,
         status,
+        sort,
       });
 
       // return

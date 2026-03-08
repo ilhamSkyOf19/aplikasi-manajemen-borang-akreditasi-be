@@ -1,3 +1,4 @@
+import { connect } from "node:http2";
 import prisma from "../libs/prisma";
 import {
   CreatePicType,
@@ -17,10 +18,12 @@ export class PicService {
     // call db
     const result = await prisma.pic.create({
       data: {
-        timAkreditasi: {
-          connect: {
-            id: req.timAkreditasiId,
-          },
+        picTimAkreditasi: {
+          create: req.timAkreditasiId.map((id) => ({
+            timAkreditasi: {
+              connect: { id },
+            },
+          })),
         },
         kebutuhanDokumen: {
           connect: {
@@ -43,20 +46,24 @@ export class PicService {
             createdAt: "desc",
           },
         },
-        timAkreditasi: {
-          select: {
-            id: true,
-            namaTimAkreditasi: true,
-            createdAt: true,
-            updatedAt: true,
-            userTimAkreditasi: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
-                    email: true,
-                    role: true,
+        picTimAkreditasi: {
+          include: {
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+                createdAt: true,
+                updatedAt: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -100,18 +107,18 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      timAkreditasi: {
-        id: result.timAkreditasi.id,
-        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
-        createdAt: result.timAkreditasi.createdAt,
-        updatedAt: result.timAkreditasi.updatedAt,
-        anggota: result.timAkreditasi.userTimAkreditasi.map((item) => ({
-          id: item.user.id,
-          nama: item.user.nama,
-          email: item.user.email,
-          role: item.user.role as UserRole,
+      timAkreditasi: result.picTimAkreditasi.map((item) => ({
+        id: item.timAkreditasi.id,
+        namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
+        createdAt: item.timAkreditasi.createdAt,
+        updatedAt: item.timAkreditasi.updatedAt,
+        anggota: item.timAkreditasi.userTimAkreditasi.map((user) => ({
+          id: user.user.id,
+          nama: user.user.nama,
+          email: user.user.email,
+          role: user.user.role as UserRole,
         })),
-      },
+      })),
     });
   }
 
@@ -136,20 +143,24 @@ export class PicService {
             createdAt: "desc",
           },
         },
-        timAkreditasi: {
-          select: {
-            id: true,
-            namaTimAkreditasi: true,
-            createdAt: true,
-            updatedAt: true,
-            userTimAkreditasi: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
-                    email: true,
-                    role: true,
+        picTimAkreditasi: {
+          include: {
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+                createdAt: true,
+                updatedAt: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -193,18 +204,18 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      timAkreditasi: {
-        id: result.timAkreditasi.id,
-        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
-        createdAt: result.timAkreditasi.createdAt,
-        updatedAt: result.timAkreditasi.updatedAt,
-        anggota: result.timAkreditasi.userTimAkreditasi.map((item) => ({
-          id: item.user.id,
-          nama: item.user.nama,
-          email: item.user.email,
-          role: item.user.role as UserRole,
+      timAkreditasi: result.picTimAkreditasi.map((item) => ({
+        id: item.timAkreditasi.id,
+        namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
+        createdAt: item.timAkreditasi.createdAt,
+        updatedAt: item.timAkreditasi.updatedAt,
+        anggota: item.timAkreditasi.userTimAkreditasi.map((user) => ({
+          id: user.user.id,
+          nama: user.user.nama,
+          email: user.user.email,
+          role: user.user.role as UserRole,
         })),
-      },
+      })),
     });
   }
 
@@ -303,20 +314,24 @@ export class PicService {
             createdAt: "desc",
           },
         },
-        timAkreditasi: {
-          select: {
-            id: true,
-            namaTimAkreditasi: true,
-            createdAt: true,
-            updatedAt: true,
-            userTimAkreditasi: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
-                    email: true,
-                    role: true,
+        picTimAkreditasi: {
+          include: {
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+                createdAt: true,
+                updatedAt: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -365,18 +380,18 @@ export class PicService {
             ...item.kebutuhanDokumen,
             status: item.kebutuhanDokumen.status as Status,
           },
-          timAkreditasi: {
-            id: item.timAkreditasi.id,
-            namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
-            createdAt: item.timAkreditasi.createdAt,
-            updatedAt: item.timAkreditasi.updatedAt,
-            anggota: item.timAkreditasi.userTimAkreditasi.map((item) => ({
-              id: item.user.id,
-              nama: item.user.nama,
-              email: item.user.email,
-              role: item.user.role as UserRole,
+          timAkreditasi: item.picTimAkreditasi.map((tim) => ({
+            id: tim.timAkreditasi.id,
+            namaTimAkreditasi: tim.timAkreditasi.namaTimAkreditasi,
+            createdAt: tim.timAkreditasi.createdAt,
+            updatedAt: tim.timAkreditasi.updatedAt,
+            anggota: tim.timAkreditasi.userTimAkreditasi.map((user) => ({
+              id: user.user.id,
+              nama: user.user.nama,
+              email: user.user.email,
+              role: user.user.role as UserRole,
             })),
-          },
+          })),
         }),
       ),
     };
@@ -403,20 +418,24 @@ export class PicService {
             createdAt: "desc",
           },
         },
-        timAkreditasi: {
-          select: {
-            id: true,
-            namaTimAkreditasi: true,
-            createdAt: true,
-            updatedAt: true,
-            userTimAkreditasi: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
-                    email: true,
-                    role: true,
+        picTimAkreditasi: {
+          include: {
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+                createdAt: true,
+                updatedAt: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -460,18 +479,18 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      timAkreditasi: {
-        id: result.timAkreditasi.id,
-        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
-        createdAt: result.timAkreditasi.createdAt,
-        updatedAt: result.timAkreditasi.updatedAt,
-        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
+      timAkreditasi: result.picTimAkreditasi.map((item) => ({
+        id: item.timAkreditasi.id,
+        namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
+        createdAt: item.timAkreditasi.createdAt,
+        updatedAt: item.timAkreditasi.updatedAt,
+        anggota: item.timAkreditasi.userTimAkreditasi.map((user) => ({
           id: user.user.id,
           nama: user.user.nama,
           email: user.user.email,
           role: user.user.role as UserRole,
         })),
-      },
+      })),
     });
   }
 
@@ -504,20 +523,24 @@ export class PicService {
             createdAt: "desc",
           },
         },
-        timAkreditasi: {
-          select: {
-            id: true,
-            namaTimAkreditasi: true,
-            createdAt: true,
-            updatedAt: true,
-            userTimAkreditasi: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
-                    email: true,
-                    role: true,
+        picTimAkreditasi: {
+          include: {
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+                createdAt: true,
+                updatedAt: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -561,18 +584,18 @@ export class PicService {
         ...result.kebutuhanDokumen,
         status: result.kebutuhanDokumen.status as Status,
       },
-      timAkreditasi: {
-        id: result.timAkreditasi.id,
-        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
-        createdAt: result.timAkreditasi.createdAt,
-        updatedAt: result.timAkreditasi.updatedAt,
-        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
+      timAkreditasi: result.picTimAkreditasi.map((item) => ({
+        id: item.timAkreditasi.id,
+        namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
+        createdAt: item.timAkreditasi.createdAt,
+        updatedAt: item.timAkreditasi.updatedAt,
+        anggota: item.timAkreditasi.userTimAkreditasi.map((user) => ({
           id: user.user.id,
           nama: user.user.nama,
           email: user.user.email,
           role: user.user.role as UserRole,
         })),
-      },
+      })),
     });
   }
 
@@ -595,16 +618,24 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
-        timAkreditasi: {
-          select: {
-            id: true,
-            namaTimAkreditasi: true,
-            userTimAkreditasi: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nama: true,
+        picTimAkreditasi: {
+          include: {
+            timAkreditasi: {
+              select: {
+                id: true,
+                namaTimAkreditasi: true,
+                createdAt: true,
+                updatedAt: true,
+                userTimAkreditasi: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
@@ -630,14 +661,18 @@ export class PicService {
       kebutuhanDokumen: {
         ...result.kebutuhanDokumen,
       },
-      timAkreditasi: {
-        id: result.timAkreditasi.id,
-        namaTimAkreditasi: result.timAkreditasi.namaTimAkreditasi,
-        anggota: result.timAkreditasi.userTimAkreditasi.map((user) => ({
+      timAkreditasi: result.picTimAkreditasi.map((item) => ({
+        id: item.timAkreditasi.id,
+        namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
+        createdAt: item.timAkreditasi.createdAt,
+        updatedAt: item.timAkreditasi.updatedAt,
+        anggota: item.timAkreditasi.userTimAkreditasi.map((user) => ({
           id: user.user.id,
           nama: user.user.nama,
+          email: user.user.email,
+          role: user.user.role as UserRole,
         })),
-      },
+      })),
     });
   }
 

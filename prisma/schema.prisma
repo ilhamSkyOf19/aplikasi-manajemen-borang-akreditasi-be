@@ -78,11 +78,13 @@ model Kebutuhan_Dokumen {
 }
 
 model TimAkreditasi {
-  id                Int                 @id @default(autoincrement())
-  namaTimAkreditasi String // update menjadi uniqe
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  pic               Pic[]
+  id                Int      @id @default(autoincrement())
+  namaTimAkreditasi String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Ganti pic Pic[] dengan junction table
+  picTimAkreditasi  PicTimAkreditasi[]
   userTimAkreditasi UserTimAkreditasi[]
 
   @@map("tim_akreditasi")
@@ -90,20 +92,31 @@ model TimAkreditasi {
 
 model Pic {
   id                 Int      @id @default(autoincrement())
-  timAkreditasiId    Int
-  kebutuhanDokumenId Int
+  kebutuhanDokumenId Int      @unique
   status             Status   @default(menunggu)
   keterangan         String   @db.VarChar(1000)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  timAkreditasi    TimAkreditasi     @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
-  kebutuhanDokumen Kebutuhan_Dokumen @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
-  // picPj            PicPj[]
+  // Hapus timAkreditasiId dari sini
+  kebutuhanDokumen Kebutuhan_Dokumen  @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
+  picTimAkreditasi PicTimAkreditasi[]
   riwayat          Riwayat[]
 
-  @@unique([timAkreditasiId, kebutuhanDokumenId])
   @@map("pic")
+}
+
+model PicTimAkreditasi {
+  id              Int      @id @default(autoincrement())
+  picId           Int
+  timAkreditasiId Int
+  createdAt       DateTime @default(now())
+
+  pic           Pic           @relation(fields: [picId], references: [id], onDelete: Cascade)
+  timAkreditasi TimAkreditasi @relation(fields: [timAkreditasiId], references: [id], onDelete: Cascade)
+
+  @@unique([picId, timAkreditasiId]) // Mencegah duplikasi 
+  @@map("pic_tim_akreditasi")
 }
 
 // model PicPj {

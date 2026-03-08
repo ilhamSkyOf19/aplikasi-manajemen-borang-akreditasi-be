@@ -19,7 +19,14 @@ export class UserController {
   ) {
     try {
       // get params
-      const { limit, page, search, role } = req.query;
+      const { limit, page, search, role, sort } = req.query;
+
+      // check sort
+      if (sort) {
+        if (sort !== "asc" && sort !== "desc") {
+          return ResponseResult.error(res, 400, "sort tidak valid");
+        }
+      }
 
       // check query
       const checkQuery = checkQueryPagination(page, limit);
@@ -50,6 +57,7 @@ export class UserController {
         page: checkQuery.page,
         search,
         role: role as UserRole,
+        sort,
       });
 
       // return success

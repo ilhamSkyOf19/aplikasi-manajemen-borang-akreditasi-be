@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { KriteriaService } from "../services/kriteira.service";
+import { KriteriaService } from "../services/kriteria.service";
 import {
   CreateKebutuhanDokumenType,
   ResponseKebutuhanDokumenChooseWithMetaType,
@@ -17,6 +17,7 @@ import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 import { RiwayatService } from "../services/riwayat.service";
 import { CreateRiwayatType } from "../models/riwayat.model";
 import { NotifikasiService } from "../services/notifikasi.service";
+import { PicService } from "../services/pic.service";
 
 export class kebutuhanDokumenController {
   // create
@@ -146,8 +147,9 @@ export class kebutuhanDokumenController {
       {},
       {},
       PaginationType & {
-        kriteria: string;
-        status: Status;
+        kriteria?: string;
+        status?: Status;
+        pendekatan?: string;
       }
     >,
     res: Response<
@@ -157,7 +159,8 @@ export class kebutuhanDokumenController {
   ) {
     try {
       // get params
-      const { limit, page, search, status, kriteria } = req.query;
+      const { limit, page, search, status, kriteria, pendekatan, sort } =
+        req.query;
 
       // check query
       const checkQuery = checkQueryPagination(page, limit);
@@ -189,6 +192,8 @@ export class kebutuhanDokumenController {
         kriteria,
         search,
         status: status as Status,
+        pendekatan,
+        sort,
       });
 
       // check
@@ -299,6 +304,16 @@ export class kebutuhanDokumenController {
         const picids = [
           ...new Set(checkRiwayat.map((item) => item.pic?.id ?? 0)),
         ];
+
+        // update status
+        const updateStatusPics = await PicService.updateManyStatus(
+          picids,
+          Status.menunggu,
+        );
+
+        // check
+        if (!updateStatusPics)
+          return ResponseResult.error(res, 500, "gagal update status pic");
 
         // data riwayat
         const dataRiwayat: CreateRiwayatType[] = picids.map((id) => ({

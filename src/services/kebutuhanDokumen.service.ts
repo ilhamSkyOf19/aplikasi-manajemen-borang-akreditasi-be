@@ -1,3 +1,4 @@
+import { SortOrder } from "../../generated/prisma/internal/prismaNamespaceBrowser";
 import prisma from "../libs/prisma";
 import {
   CreateKebutuhanDokumenType,
@@ -123,9 +124,18 @@ export class KebutuhanDokumenService {
     query: PaginationType & {
       kriteria?: string;
       status?: Status;
+      pendekatan?: string;
     },
   ): Promise<ResponseKebutuhanDokumenWithMetaType | null> {
-    const { limit = 8, page = 1, search, kriteria, status } = query;
+    const {
+      limit = 8,
+      page = 1,
+      search,
+      kriteria,
+      status,
+      pendekatan,
+      sort = "desc",
+    } = query;
 
     // get current page
     const currentPage = page < 1 ? 1 : page;
@@ -141,6 +151,7 @@ export class KebutuhanDokumenService {
             : {},
           kriteria ? { kriteria: { namaKriteria: kriteria } } : {},
           status ? { status: status } : {},
+          pendekatan ? { pendekatan: { keterangan: pendekatan } } : {},
         ],
       },
     };
@@ -179,7 +190,7 @@ export class KebutuhanDokumenService {
       skip: (currentPage - 1) * limit,
       take: limit,
       orderBy: {
-        createdAt: "desc",
+        createdAt: sort ? (sort as SortOrder) : "desc",
       },
     });
 

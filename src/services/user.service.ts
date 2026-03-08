@@ -11,6 +11,7 @@ import {
 } from "../models/user.model";
 import { PaginationType } from "../types/pagination";
 import { UserRole } from "../utils/contstanst";
+import { SortOrder } from "../../generated/prisma/internal/prismaNamespace";
 
 export class UserService {
   // create
@@ -149,7 +150,7 @@ export class UserService {
     },
   ): Promise<ResponseUserWithMetaType | null> {
     // call db
-    const { limit = 8, page = 1, search, role } = query;
+    const { limit = 8, page = 1, search, role, sort } = query;
 
     // get current page
     const currentPage = page < 1 ? 1 : page;
@@ -203,7 +204,7 @@ export class UserService {
       skip: (currentPage - 1) * limit,
       take: limit,
       orderBy: {
-        createdAt: "desc",
+        createdAt: (sort as SortOrder) ?? "desc",
       },
     });
 
