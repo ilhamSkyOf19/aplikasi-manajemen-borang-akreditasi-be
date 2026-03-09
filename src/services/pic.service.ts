@@ -231,13 +231,16 @@ export class PicService {
     // destruct query
     const {
       limit = 8,
-      page: currentPage = 1,
+      page,
       search,
       status,
       kriteria,
       pendekatan,
       sort,
     } = query;
+
+    // currrent page
+    const currentPage = page ? page : 1;
 
     // conditional
     const conditional = {

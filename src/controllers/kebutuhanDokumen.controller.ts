@@ -282,7 +282,7 @@ export class kebutuhanDokumenController {
         return ResponseResult.error(
           res,
           409,
-          "kebutuhan dokumen menunggu verifikasi",
+          "Document requirement pending verification",
         );
       }
 
