@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   CreatePicType,
+  MyPIcResponse,
   ResponsePicType,
   ResponsePicWithMetaType,
   UpdatePicType,
@@ -15,6 +16,7 @@ import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
 import checkParamsId from "../utils/checkParamsId";
 import { RiwayatService } from "../services/riwayat.service";
 import { NotifikasiService } from "../services/notifikasi.service";
+import { AuthRequest } from "../types/authRequest";
 
 export class PicController {
   // create
@@ -169,6 +171,36 @@ export class PicController {
     }
   }
 
+  //   read by id user
+  static async readByUserId(
+    req: AuthRequest,
+    res: Response<ResponseStructure<MyPIcResponse[] | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get id from params
+      const id = req?.data?.id;
+
+      // call service
+      const service = await PicService.readByUserId(id!);
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(res, 404, "pic not found");
+      }
+
+      // return success
+      return ResponseResult.success<MyPIcResponse[] | null>(
+        service,
+        res,
+        200,
+        "success read pic by id",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   //   update
   static async update(
     req: Request<{ id: string }, {}, UpdatePicType>,
@@ -239,7 +271,7 @@ export class PicController {
       // check riwayat
       if (findRiwayat && findRiwayat.length > 0) {
         // check status di setujui
-        if (findRiwayat.find((item) => item.status === Status.disetujui)) {
+        if (findRiwayat.some((item) => item.status === Status.disetujui)) {
           const dataRiwayatDisetujui = findRiwayat.filter(
             (item) => item.status === Status.disetujui,
           );

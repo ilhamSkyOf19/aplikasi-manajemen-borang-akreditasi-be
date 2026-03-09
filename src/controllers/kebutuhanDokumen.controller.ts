@@ -289,7 +289,7 @@ export class kebutuhanDokumenController {
       //  check status
       if (checkRiwayat && checkRiwayat.length > 0) {
         // check status disetujui
-        if (checkRiwayat.find((item) => item.status === Status.disetujui)) {
+        if (checkRiwayat.some((item) => item.status === Status.disetujui)) {
           const dataRiwayatDisetujui = checkRiwayat.filter(
             (item) => item.status === Status.disetujui,
           );

@@ -28,6 +28,19 @@ picRouter.get(
   PicController.readById,
 );
 
+// read pic by id user
+picRouter.get("/read-my-pic", [authMiddleware], PicController.readByUserId);
+
+// read detail
+picRouter.get(
+  "/read-by-id/:id",
+  [
+    authMiddleware,
+    aclMiddleware(["kaprodi", "wakil_dekan_1", "tim_akreditasi"]),
+  ],
+  PicController.readById,
+);
+
 // create
 picRouter.post(
   "/create",

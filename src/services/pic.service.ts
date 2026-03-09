@@ -2,6 +2,9 @@ import { connect } from "node:http2";
 import prisma from "../libs/prisma";
 import {
   CreatePicType,
+  KriteriaGrouped,
+  MyPIcResponse,
+  PicItem,
   ResponsePicType,
   ResponsePicUpdateStatusType,
   ResponsePicWithMetaType,
@@ -404,6 +407,132 @@ export class PicService {
     };
   }
 
+  //   read by id user
+  static async readByUserId(userId: number): Promise<MyPIcResponse[] | null> {
+    // call db
+    const result = await prisma.userTimAkreditasi.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        timAkreditasi: {
+          select: {
+            picTimAkreditasi: {
+              select: {
+                pic: {
+                  select: {
+                    id: true,
+                    status: true,
+                    keterangan: true,
+                    kebutuhanDokumen: {
+                      select: {
+                        id: true,
+                        namaDokumen: true,
+                        keterangan: true,
+                        status: true,
+                        kriteria: {
+                          select: {
+                            id: true,
+                            kriteria: true,
+                            namaKriteria: true,
+                          },
+                        },
+                        pendekatan: {
+                          select: {
+                            id: true,
+                            tahap: true,
+                            keterangan: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // flatten pic
+    const allPics: PicItem[] = result.flatMap((uta) =>
+      uta.timAkreditasi.picTimAkreditasi.map((pta) => ({
+        ...pta.pic,
+        status: pta.pic.status as Status,
+      })),
+    );
+
+    // group kriteria -> pendekatan -> dokumen
+    const grouped = allPics.reduce<Record<number, KriteriaGrouped>>(
+      (acc, pic) => {
+        // destruct
+        const {
+          kriteria,
+          pendekatan,
+          namaDokumen,
+          id: dokumenId,
+        } = pic.kebutuhanDokumen;
+
+        // kriteria id
+        const kriteriaKey = kriteria.id;
+
+        // pendekatan id
+        const pendekatanKey = pendekatan.id;
+
+        // inisialisasi kriteria jika blm ada array nya
+        if (!acc[kriteriaKey]) {
+          acc[kriteriaKey] = {
+            kriteriaId: kriteria.id,
+            namaKriteria: kriteria.namaKriteria,
+            nomorKriteria: kriteria.kriteria,
+            pendekatan: {},
+          };
+        }
+
+        // inisialiasi pendekatan jika belum ada array nya
+        if (!acc[kriteriaKey].pendekatan[pendekatanKey]) {
+          acc[kriteriaKey].pendekatan[pendekatanKey] = {
+            pendekatanId: pendekatan.id,
+            tahap: pendekatan.tahap,
+            keterangan: pendekatan.keterangan,
+            kebutuhanDokumen: [],
+          };
+        }
+
+        // check dokumen
+        if (
+          acc[kriteriaKey].pendekatan[pendekatanKey].kebutuhanDokumen.some(
+            (item) => item.dokumenId === dokumenId,
+          )
+        ) {
+          return acc;
+        }
+
+        // push dokumen
+        acc[kriteriaKey].pendekatan[pendekatanKey].kebutuhanDokumen.push({
+          picId: pic.id,
+          dokumenId: dokumenId,
+          keterangan: pic.keterangan,
+          namaDokumen: namaDokumen,
+          status: pic.status,
+        });
+
+        return acc;
+      },
+      {},
+    );
+
+    // convert objek menjadi array
+    const response: MyPIcResponse[] = Object.values(grouped)
+      .map((kriteria) => ({
+        ...kriteria,
+        pendekatan: Object.values(kriteria.pendekatan),
+      }))
+      .sort((a, b) => a.kriteriaId - b.kriteriaId);
+
+    return response;
+  }
   //   read by id
   static async readById(id: number): Promise<ResponsePicType | null> {
     // call db

@@ -72,3 +72,51 @@ export interface ResponsePicUpdateStatusType {
 export const toResponsePicUpdateStatusType = (
   pic: ResponsePicUpdateStatusType,
 ) => pic;
+
+// type for my pic
+
+export interface PicItem {
+  id: number;
+  status: Status;
+  keterangan: string;
+  kebutuhanDokumen: {
+    id: number;
+    namaDokumen: string;
+    kriteria: {
+      id: number;
+      kriteria: number;
+      namaKriteria: string;
+    };
+    pendekatan: {
+      id: number;
+      tahap: string;
+      keterangan: string;
+    };
+  };
+}
+
+export interface DokumenItem {
+  picId: number;
+  dokumenId: number;
+  namaDokumen: string;
+  status: Status;
+  keterangan: string;
+}
+
+export interface PendekatanGrouped {
+  pendekatanId: number;
+  tahap: string;
+  keterangan: string;
+  kebutuhanDokumen: DokumenItem[];
+}
+
+export interface KriteriaGrouped {
+  kriteriaId: number;
+  nomorKriteria: number;
+  namaKriteria: string;
+  pendekatan: Record<number, PendekatanGrouped>;
+}
+
+export interface MyPIcResponse extends Omit<KriteriaGrouped, "pendekatan"> {
+  pendekatan: PendekatanGrouped[];
+}

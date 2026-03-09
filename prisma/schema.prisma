@@ -119,17 +119,11 @@ model PicTimAkreditasi {
   @@map("pic_tim_akreditasi")
 }
 
-// model PicPj {
-//   picId     Int
-//   userId    Int
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
+// modal kebutuhan dokumen 
+// model DokumenBorang {
+//   id Int @id @default(autoincrement())
 
-//   pic  Pic  @relation(fields: [picId], references: [id], onDelete: Cascade)
-//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   @@id([picId, userId])
-//   @@map("pic_pj")
+//   @@map("dokumen_borang")
 // }
 
 model Riwayat {
