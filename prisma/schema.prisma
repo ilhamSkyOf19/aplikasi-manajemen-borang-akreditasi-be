@@ -24,10 +24,13 @@ model User {
 
   // Relasi existing
   userTimAkreditasi UserTimAkreditasi[]
-  // picPj             PicPj[]
+  // dokumen borang
+  dokumenBorang     DokumenBorang[]
 
   // Relasi baru: notifikasi yang DITERIMA oleh user ini
   notifications Notification[] @relation("NotificationRecipient")
+
+  picDokumenAssigned PicDokumenBorang[] @relation("PicDokumenAssignedBy")
 
   @@map("user")
 }
@@ -102,6 +105,7 @@ model Pic {
   kebutuhanDokumen Kebutuhan_Dokumen  @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
   picTimAkreditasi PicTimAkreditasi[]
   riwayat          Riwayat[]
+  picDokumen       PicDokumenBorang[]
 
   @@map("pic")
 }
@@ -119,12 +123,36 @@ model PicTimAkreditasi {
   @@map("pic_tim_akreditasi")
 }
 
-// modal kebutuhan dokumen 
-// model DokumenBorang {
-//   id Int @id @default(autoincrement())
+model DokumenBorang {
+  id           Int       @id @default(autoincrement())
+  filename     String
+  keterangan   String    @db.VarChar(1000)
+  lokasi_file  LokasFile
+  status       Status
+  uploadedById Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-//   @@map("dokumen_borang")
-// }
+  uploadedBy User               @relation(fields: [uploadedById], references: [id])
+  picDokumen PicDokumenBorang[]
+
+  @@map("dokumen_borang")
+}
+
+model PicDokumenBorang {
+  id              Int      @id @default(autoincrement())
+  picId           Int
+  dokumenBorangId Int
+  assignedById    Int
+  createdAt       DateTime @default(now())
+
+  pic           Pic           @relation(fields: [picId], references: [id], onDelete: Cascade)
+  dokumenBorang DokumenBorang @relation(fields: [dokumenBorangId], references: [id], onDelete: Cascade)
+  assignedBy    User          @relation("PicDokumenAssignedBy", fields: [assignedById], references: [id])
+
+  @@unique([picId, dokumenBorangId])
+  @@map("pic_dokumen_borang")
+}
 
 model Riwayat {
   id                  Int          @id @default(autoincrement())
@@ -162,6 +190,12 @@ model UserTimAkreditasi {
 
   @@id([timAkreditasiId, userId])
   @@map("user_tim_akreditasi")
+}
+
+// enum lokasi
+enum LokasFile {
+  GDRIVE
+  SISTEM
 }
 
 enum Status {

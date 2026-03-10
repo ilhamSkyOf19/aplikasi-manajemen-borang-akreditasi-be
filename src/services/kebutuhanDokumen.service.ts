@@ -119,6 +119,34 @@ export class KebutuhanDokumenService {
     });
   }
 
+  // get count kebutuhan dokumen by user id
+  static async getCountKebutuhanDokumenByUserId(
+    userId: number,
+  ): Promise<number> {
+    // call db
+    const result = await prisma.kebutuhan_Dokumen.count({
+      where: {
+        pic: {
+          some: {
+            picTimAkreditasi: {
+              some: {
+                timAkreditasi: {
+                  userTimAkreditasi: {
+                    some: {
+                      userId,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return result;
+  }
+
   //   read all
   static async readAll(
     query: PaginationType & {

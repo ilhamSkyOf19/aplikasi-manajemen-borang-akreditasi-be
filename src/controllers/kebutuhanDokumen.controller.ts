@@ -19,7 +19,7 @@ import { CreateRiwayatType } from "../models/riwayat.model";
 import { NotifikasiService } from "../services/notifikasi.service";
 import { PicService } from "../services/pic.service";
 
-export class kebutuhanDokumenController {
+export class KebutuhanDokumenController {
   // create
   static async create(
     req: Request<{}, {}, CreateKebutuhanDokumenType>,

@@ -9,6 +9,7 @@ import kebutuhanDokumenRoute from "./kebutuhanDokumen.route";
 import picRouter from "./pic.route";
 import riwayatRouter from "./riwayat.route";
 import notifikasiRoute from "./notifikasi.route";
+import dokumenBorangRoute from "./dokumenBorang.route";
 
 const appRoute: Router = Router();
 
@@ -41,5 +42,8 @@ appRoute.use("/api/riwayat", riwayatRouter);
 
 // notifikasi router
 appRoute.use("/api/notifikasi", notifikasiRoute);
+
+// dokumen borang router
+appRoute.use("/api/dokumen-borang", dokumenBorangRoute);
 
 export default appRoute;
