@@ -2,23 +2,58 @@ import { object } from "zod";
 import prisma from "../libs/prisma";
 import {
   DaftarDokumenBorang,
+  DaftarDokumenBorangWithMeta,
   DaftarKebutuhanDokumentasiItemType,
   KriteriaGrouped,
   PicItem,
 } from "../models/dokumenBorang.model";
 import { Status } from "../utils/contstanst";
 import { KebutuhanDokumenService } from "./kebutuhanDokumen.service";
+import { PaginationType } from "../types/pagination";
 
 export class DokumenBorangService {
   // read daftar dokumen by user id
   static async readDaftarDokumen(
     userId: number,
-  ): Promise<DaftarDokumenBorang[] | null> {
-    // call db
-    const result = await prisma.userTimAkreditasi.findMany({
+    pagination: PaginationType,
+  ): Promise<DaftarDokumenBorangWithMeta | null> {
+    // destruct
+    const { page = 1, limit = 10, search, sort } = pagination;
+
+    // currrent page
+    const currentPage = page ? page : 1;
+
+    // search
+    const conditional = {
       where: {
         userId,
+        timAkreditasi: {
+          picTimAkreditasi: {
+            some: {
+              pic: {
+                kebutuhanDokumen: {
+                  namaDokumen: {
+                    contains: search,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
+    };
+
+    // get total
+    const totalData = await prisma.userTimAkreditasi.count(conditional);
+
+    // get total
+    const totalPage = Math.ceil(totalData / limit);
+
+    // call db
+    const result = await prisma.userTimAkreditasi.findMany({
+      ...conditional,
+      skip: (currentPage - 1) * limit,
+      take: limit,
       select: {
         timAkreditasi: {
           select: {
@@ -157,9 +192,21 @@ export class DokumenBorangService {
         pendekatan: Object.values(kriteria.pendekatan),
         progress,
       }))
-      .sort((a, b) => a.kriteriaId - b.kriteriaId);
+      .sort((a, b) =>
+        sort === "asc"
+          ? a.kriteriaId + b.kriteriaId
+          : a.kriteriaId - b.kriteriaId,
+      );
 
-    return response;
+    return {
+      data: response,
+      meta: {
+        currentPage,
+        limit,
+        totalData,
+        totalPage,
+      },
+    };
   }
 
   //   get kebutuhan dokumentasi by user id and kriteria and pendekatan

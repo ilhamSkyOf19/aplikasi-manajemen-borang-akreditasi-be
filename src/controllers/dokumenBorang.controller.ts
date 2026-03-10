@@ -4,6 +4,7 @@ import { DokumenBorangService } from "../services/dokumenBorang.service";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import {
   DaftarDokumenBorang,
+  DaftarDokumenBorangWithMeta,
   DaftarKebutuhanDokumentasiItemType,
 } from "../models/dokumenBorang.model";
 import checkParamsId from "../utils/checkParamsId";
@@ -12,7 +13,7 @@ export class DokumenBorangController {
   // read daftar dokumen by user id
   static async readDaftarDokumen(
     req: AuthRequest,
-    res: Response<ResponseStructure<DaftarDokumenBorang[] | null>>,
+    res: Response<ResponseStructure<DaftarDokumenBorangWithMeta | null>>,
     next: NextFunction,
   ) {
     try {
@@ -20,9 +21,9 @@ export class DokumenBorangController {
       const id = req?.data?.id;
 
       // call service
-      const service = await DokumenBorangService.readDaftarDokumen(id!);
+      const service = await DokumenBorangService.readDaftarDokumen(id!, {});
 
-      return ResponseResult.success<DaftarDokumenBorang[] | null>(
+      return ResponseResult.success<DaftarDokumenBorangWithMeta | null>(
         service,
         res,
         200,

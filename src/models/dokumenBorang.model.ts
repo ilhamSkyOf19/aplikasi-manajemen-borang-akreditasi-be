@@ -1,6 +1,6 @@
 // type pic
 
-import { Status } from "../utils/contstanst";
+import { MetaType, Status } from "../utils/contstanst";
 
 // pic item
 export interface PicItem {
@@ -47,6 +47,12 @@ export interface DaftarDokumenBorang extends Omit<
 > {
   pendekatan: PendekatanGrouped[];
   progress: number;
+}
+
+// daftar dokumen with meta
+export interface DaftarDokumenBorangWithMeta {
+  data: DaftarDokumenBorang[];
+  meta: MetaType;
 }
 
 // type daftar kebutuhan dokumentasi
