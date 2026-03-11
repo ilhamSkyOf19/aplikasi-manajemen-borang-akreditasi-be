@@ -1,17 +1,150 @@
 import { object } from "zod";
 import prisma from "../libs/prisma";
 import {
+  CreateDokumenBorangType,
   DaftarDokumenBorangByKriteriaWithMeta,
   DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta,
   DaftarKebutuhanDokumentasiItemType,
   KriteriaGrouped,
   PicItem,
+  ResponseDokumenBorangType,
 } from "../models/dokumenBorang.model";
-import { Status } from "../utils/contstanst";
+import { LokasiFile, Status } from "../utils/contstanst";
 import { KebutuhanDokumenService } from "./kebutuhanDokumen.service";
 import { PaginationType } from "../types/pagination";
+import { Prisma } from "../../generated/prisma/browser";
 
 export class DokumenBorangService {
+  // create
+  static async createWithFile(
+    tx: Prisma.TransactionClient,
+    data: {
+      filename: string;
+      uploadedBy: number;
+      keterangan: string;
+      lokasiFile: LokasiFile;
+      picId: number;
+      assignedBy: number;
+    },
+  ) {
+    const dokumen = await tx.dokumenBorang.create({
+      data: {
+        filename: data.filename,
+        keterangan: data.keterangan,
+        lokasi_file: data.lokasiFile,
+        status: Status.menunggu,
+        uploadedById: data.uploadedBy,
+      },
+    });
+
+    await DokumenBorangService.createPicDokumen(tx, {
+      dokumenBorangId: dokumen.id,
+      picId: data.picId,
+      assignedBy: data.assignedBy,
+    });
+
+    return dokumen;
+  }
+
+  // create pic dokumen
+  static async createPicDokumen(
+    tx: Prisma.TransactionClient,
+    data: {
+      dokumenBorangId: number;
+      picId: number;
+      assignedBy: number;
+    },
+  ) {
+    return tx.picDokumenBorang.create({
+      data: {
+        dokumenBorangId: data.dokumenBorangId,
+        picId: data.picId,
+        assignedById: data.assignedBy,
+      },
+    });
+  }
+
+  // create
+  static async create(
+    req: Omit<CreateDokumenBorangType, "filename">,
+    uploadedFiles: Express.Multer.File[],
+  ) {
+    const { assignedBy, uploadedBy, picId, keterangan, lokasiFile, files } =
+      req;
+
+    let uploadIndex = 0;
+
+    const results = await prisma.$transaction(async (tx) => {
+      return Promise.all(
+        files.map((file) => {
+          // File lama — hanya create pivot
+          if (file.useOldFile) {
+            return DokumenBorangService.createPicDokumen(tx, {
+              dokumenBorangId: file.oldDokumenBorangId!,
+              picId,
+              assignedBy,
+            });
+          }
+
+          // File baru — create dokumen + pivot
+          const multerFile = uploadedFiles[uploadIndex++];
+          return this.createWithFile(tx, {
+            filename: multerFile.filename,
+            uploadedBy,
+            keterangan,
+            lokasiFile: lokasiFile,
+            picId,
+            assignedBy,
+          });
+        }),
+      );
+    });
+
+    return results;
+  }
+
+  // static async create(req: CreateDokumenBorangType): Promise<any | null> {
+  //   // destructure
+  //   const { assignedBy, uploadedBy, filename, keterangan, lokasiFile, picId } =
+  //     req;
+
+  //   // call db
+  //   const result = await prisma.$transaction(async (tx) => {
+  //     // create many dokumen borang
+  //     await tx.dokumenBorang.createMany({
+  //       data: filename.map((file) => ({
+  //         filename: file,
+  //         keterangan,
+  //         lokasi_file: lokasiFile,
+  //         status: Status.menunggu,
+  //         uploadedById: uploadedBy!,
+  //       })),
+  //     });
+
+  //     // find many file
+  //     const createdDokumens = await tx.dokumenBorang.findMany({
+  //       where: {
+  //         uploadedById: uploadedBy,
+  //         filename: { in: filename.map((file) => file) },
+  //       },
+  //       select: { id: true },
+  //     });
+
+  //     // create pic dokumen borang
+  //     await tx.picDokumenBorang.createMany({
+  //       data: createdDokumens.map((dokumen) => ({
+  //         dokumenBorangId: dokumen.id,
+  //         picId,
+  //         assignedById: assignedBy,
+  //       })),
+  //     });
+
+  //     return createdDokumens;
+  //   });
+
+  //   return result;
+  // }
+
   // read daftar dokumen by user id
   static async readDaftarDokumen(
     userId: number,

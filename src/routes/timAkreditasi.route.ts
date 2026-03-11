@@ -7,7 +7,7 @@ import {
   CreateTimAkreditasiType,
   UpdateTimAkreditasiType,
 } from "../models/timAkreditasi.model";
-import { TimAkreditasivalidation } from "../validations/timAkreditasi.validation";
+import { TimAkreditasiValidation } from "../validations/timAkreditasi.validation";
 
 const timAkreditasiRoute: Router = Router();
 
@@ -15,7 +15,7 @@ const timAkreditasiRoute: Router = Router();
 timAkreditasiRoute.post(
   "/create",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
-  zodValidation<CreateTimAkreditasiType>(TimAkreditasivalidation.CREATE),
+  zodValidation<CreateTimAkreditasiType>(TimAkreditasiValidation.CREATE),
   TimAkreditasiController.create,
 );
 
@@ -50,7 +50,7 @@ timAkreditasiRoute.get(
 timAkreditasiRoute.patch(
   "/update/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
-  zodValidation<UpdateTimAkreditasiType>(TimAkreditasivalidation.UPDATE),
+  zodValidation<UpdateTimAkreditasiType>(TimAkreditasiValidation.UPDATE),
   TimAkreditasiController.update,
 );
 

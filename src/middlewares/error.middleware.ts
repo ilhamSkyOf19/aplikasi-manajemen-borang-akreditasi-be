@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { ZodError } from "zod";
 import { Prisma } from "../../generated/prisma/client";
+import multer from "multer";
 
 export const errorMiddleware = (
   err: any,
@@ -33,6 +34,40 @@ export const errorMiddleware = (
       res,
       400,
       err.issues[0]?.message || "Invalid input",
+    );
+  }
+
+  // error from multer
+  // ===============================
+  // MULTER ERROR
+  // ===============================
+  if (err instanceof multer.MulterError) {
+    switch (err.code) {
+      case "LIMIT_FILE_SIZE":
+        return ResponseResult.error(res, 400, "file terlalu besar");
+
+      case "LIMIT_FILE_COUNT":
+        return ResponseResult.error(res, 400, "file terlalu banyak");
+
+      case "MISSING_FIELD_NAME":
+        return ResponseResult.error(res, 400, "file tidak ada");
+
+      case "LIMIT_UNEXPECTED_FILE":
+        return ResponseResult.error(res, 400, "file tidak sesuai");
+
+      default:
+        return ResponseResult.error(res, 500, "Internal server error");
+    }
+  }
+
+  // ===============================
+  // CUSTOM FILE TYPE ERROR
+  // ===============================
+  if (err instanceof Error && err.message === "Invalid file type") {
+    return ResponseResult.error(
+      res,
+      400,
+      "Tipe file tidak sesuai, hanya PDF yang diizinkan",
     );
   }
 

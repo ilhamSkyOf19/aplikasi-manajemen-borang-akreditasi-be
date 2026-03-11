@@ -1,8 +1,22 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { DokumenBorangController } from "../controllers/dokumenBorang.controller";
+import { FileService } from "../services/file.service";
 
 const dokumenBorangRoute: Router = Router();
+
+// file upload
+const upload = FileService.uploadFile({
+  uploadPaths: { dokumen: "public/uploads/dokumen-borang" },
+});
+
+// create
+dokumenBorangRoute.post(
+  "/upload",
+  authMiddleware,
+  upload.array("dokumen", 4),
+  DokumenBorangController.create,
+);
 
 // read all
 dokumenBorangRoute.get(

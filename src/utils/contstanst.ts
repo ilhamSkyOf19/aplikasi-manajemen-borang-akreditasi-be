@@ -43,3 +43,9 @@ export enum TypeNotifikasi {
   PIC_DISETUJUI_WD1 = "PIC_DISETUJUI_WD1",
   PIC_DIREVISI_WD1 = "PIC_DIREVISI_WD1",
 }
+
+// lokasi file
+export enum LokasiFile {
+  GDRIVE = "GDRIVE",
+  SISTEM = "SISTEM",
+}
