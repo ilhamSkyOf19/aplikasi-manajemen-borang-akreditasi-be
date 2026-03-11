@@ -3,17 +3,20 @@ import { AuthRequest } from "../types/authRequest";
 import { DokumenBorangService } from "../services/dokumenBorang.service";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import {
-  DaftarDokumenBorang,
-  DaftarDokumenBorangWithMeta,
+  DaftarDokumenBorangByKriteriaWithMeta,
+  DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta,
   DaftarKebutuhanDokumentasiItemType,
 } from "../models/dokumenBorang.model";
 import checkParamsId from "../utils/checkParamsId";
+import { PaginationType } from "../types/pagination";
 
 export class DokumenBorangController {
   // read daftar dokumen by user id
   static async readDaftarDokumen(
     req: AuthRequest,
-    res: Response<ResponseStructure<DaftarDokumenBorangWithMeta | null>>,
+    res: Response<
+      ResponseStructure<DaftarDokumenBorangByKriteriaWithMeta | null>
+    >,
     next: NextFunction,
   ) {
     try {
@@ -23,7 +26,7 @@ export class DokumenBorangController {
       // call service
       const service = await DokumenBorangService.readDaftarDokumen(id!, {});
 
-      return ResponseResult.success<DaftarDokumenBorangWithMeta | null>(
+      return ResponseResult.success<DaftarDokumenBorangByKriteriaWithMeta | null>(
         service,
         res,
         200,
@@ -34,10 +37,15 @@ export class DokumenBorangController {
   }
 
   //   get daftar kebutuhan dokumentasi by user id & krieria, pendekatan
-  static async readDaftarKebutuhanDokumentasi(
-    req: AuthRequest<{ kriteria: string; pendekatan: string }>,
+  static async readDaftarKebutuhanDokumentasiByKriteriaAndPendekatan(
+    req: AuthRequest<
+      { kriteria: string; pendekatan: string },
+      {},
+      {},
+      PaginationType
+    >,
     res: Response<
-      ResponseStructure<DaftarKebutuhanDokumentasiItemType[] | null>
+      ResponseStructure<DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta | null>
     >,
     next: NextFunction,
   ) {
@@ -51,17 +59,23 @@ export class DokumenBorangController {
       //   check kriteria
       const checkKriteria = checkParamsId(res, kriteria);
 
+      // get data from query
+      const { limit = 10, page, search } = req.query;
+
       // call service
       const service =
         await DokumenBorangService.findKebutuhanDokumentasiByUserAndKriteriaAndPendekatan(
           id!,
           checkKriteria as number,
           pendekatan,
+          { page, limit, search },
         );
 
-      return ResponseResult.success<
-        DaftarKebutuhanDokumentasiItemType[] | null
-      >(service, res, 200);
+      return ResponseResult.success<DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta | null>(
+        service,
+        res,
+        200,
+      );
     } catch (error) {
       next(error);
     }

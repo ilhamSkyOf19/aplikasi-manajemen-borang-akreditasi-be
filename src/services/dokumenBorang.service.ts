@@ -1,8 +1,8 @@
 import { object } from "zod";
 import prisma from "../libs/prisma";
 import {
-  DaftarDokumenBorang,
-  DaftarDokumenBorangWithMeta,
+  DaftarDokumenBorangByKriteriaWithMeta,
+  DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta,
   DaftarKebutuhanDokumentasiItemType,
   KriteriaGrouped,
   PicItem,
@@ -16,7 +16,7 @@ export class DokumenBorangService {
   static async readDaftarDokumen(
     userId: number,
     pagination: PaginationType,
-  ): Promise<DaftarDokumenBorangWithMeta | null> {
+  ): Promise<DaftarDokumenBorangByKriteriaWithMeta | null> {
     // destruct
     const { page = 1, limit = 10, search, sort } = pagination;
 
@@ -32,9 +32,11 @@ export class DokumenBorangService {
             some: {
               pic: {
                 kebutuhanDokumen: {
-                  namaDokumen: {
-                    contains: search,
-                  },
+                  namaDokumen: search
+                    ? {
+                        contains: search,
+                      }
+                    : {},
                 },
               },
             },
@@ -214,19 +216,58 @@ export class DokumenBorangService {
     userId: number,
     kriteria: number,
     pendekatan: string,
-  ): Promise<DaftarKebutuhanDokumentasiItemType[] | null> {
+    pagination: PaginationType,
+  ): Promise<DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta | null> {
+    const { page = 1, limit = 10, search } = pagination;
+
+    // current page
+    const currentPage = page ? page : 1;
+
+    // get total data
+    const totalData = await prisma.pic.count({
+      where: {
+        picTimAkreditasi: {
+          some: {
+            timAkreditasi: {
+              userTimAkreditasi: {
+                some: {
+                  userId,
+                },
+              },
+            },
+          },
+        },
+        kebutuhanDokumen: {
+          namaDokumen: search ? { contains: search } : {},
+          kriteria: {
+            kriteria,
+          },
+          pendekatan: {
+            keterangan: pendekatan.toLowerCase(),
+          },
+        },
+      },
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
+
     // call db
     const result = await prisma.userTimAkreditasi.findMany({
       where: {
         userId,
       },
+      skip: (currentPage - 1) * limit,
+      take: limit,
       select: {
         timAkreditasi: {
           select: {
             picTimAkreditasi: {
               where: {
+                // ← TAMBAHKAN INI
                 pic: {
                   kebutuhanDokumen: {
+                    namaDokumen: search ? { contains: search } : {},
                     kriteria: {
                       kriteria,
                     },
@@ -279,6 +320,26 @@ export class DokumenBorangService {
         })),
       );
 
-    return allKebutuhanDokumenAndStatus;
+    // final data
+    const finalData = Array.from(
+      allKebutuhanDokumenAndStatus
+        .reduce((map, item) => {
+          if (!map.has(item.kebutuhanDokumen.id)) {
+            map.set(item.kebutuhanDokumen.id, item);
+          }
+          return map;
+        }, new Map<number, DaftarKebutuhanDokumentasiItemType>())
+        .values(),
+    );
+
+    return {
+      data: finalData,
+      meta: {
+        currentPage,
+        limit,
+        totalData,
+        totalPage,
+      },
+    };
   }
 }

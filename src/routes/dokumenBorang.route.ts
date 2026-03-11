@@ -15,7 +15,7 @@ dokumenBorangRoute.get(
 dokumenBorangRoute.get(
   "/read-daftar-kebutuhan-dokumentasi/:kriteria/:pendekatan",
   authMiddleware,
-  DokumenBorangController.readDaftarKebutuhanDokumentasi,
+  DokumenBorangController.readDaftarKebutuhanDokumentasiByKriteriaAndPendekatan,
 );
 
 export default dokumenBorangRoute;

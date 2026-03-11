@@ -41,7 +41,7 @@ export interface KriteriaGrouped {
 }
 
 // daftar dokumen
-export interface DaftarDokumenBorang extends Omit<
+export interface DaftarDokumenBorangByKriteria extends Omit<
   KriteriaGrouped,
   "pendekatan"
 > {
@@ -50,8 +50,8 @@ export interface DaftarDokumenBorang extends Omit<
 }
 
 // daftar dokumen with meta
-export interface DaftarDokumenBorangWithMeta {
-  data: DaftarDokumenBorang[];
+export interface DaftarDokumenBorangByKriteriaWithMeta {
+  data: DaftarDokumenBorangByKriteria[];
   meta: MetaType;
 }
 
@@ -62,4 +62,10 @@ export interface DaftarKebutuhanDokumentasiItemType {
     namaDokumen: string;
   };
   dokumenBorangStatus: Status[];
+}
+
+// daftar kebutuhan dokumentasi by kriteria and pendekatan
+export interface DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta {
+  data: DaftarKebutuhanDokumentasiItemType[];
+  meta: MetaType;
 }
