@@ -222,6 +222,19 @@ export class PicService {
     });
   }
 
+  // check id pic
+  static async checkPicById(id: number): Promise<boolean> {
+    // call db
+    const result = await prisma.pic.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    // return
+    return result ? true : false;
+  }
+
   //   read all
   static async readAll(
     query: PaginationType & {

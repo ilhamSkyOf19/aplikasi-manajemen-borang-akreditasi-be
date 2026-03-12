@@ -7,12 +7,14 @@ import {
   DaftarDokumenBorangByKriteriaWithMeta,
   DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta,
   FileItem,
+  ResponseCreateDokumenBorangType,
 } from "../models/dokumenBorang.model";
 import checkParamsId from "../utils/checkParamsId";
 import { PaginationType } from "../types/pagination";
 import { validation } from "../validations/validation";
 import { DokumenBorangValidation } from "../validations/dokumenBorang.validation";
 import { FileService } from "../services/file.service";
+import { PicService } from "../services/pic.service";
 
 export class DokumenBorangController {
   // create
@@ -24,10 +26,9 @@ export class DokumenBorangController {
         files: string;
       }
     >,
-    res: Response<ResponseStructure<any | null>>,
+    res: Response<ResponseStructure<ResponseCreateDokumenBorangType | null>>,
     next: NextFunction,
   ) {
-    console.log("BODY:", req.body);
     // filenames
     let filenamesGlobal: Express.Multer.File[] = [];
     try {
@@ -60,6 +61,13 @@ export class DokumenBorangController {
           body.meta.statusCode,
           body.meta.message,
         );
+      }
+
+      // check pic
+      const pic = await PicService.checkPicById(body?.data?.picId!);
+
+      if (!pic) {
+        return ResponseResult.error(res, 400, "Pic tidak ditemukan");
       }
 
       // find dokumen borang by id

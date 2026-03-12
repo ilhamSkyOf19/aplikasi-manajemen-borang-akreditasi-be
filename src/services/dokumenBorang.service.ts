@@ -7,6 +7,8 @@ import {
   DaftarKebutuhanDokumentasiItemType,
   KriteriaGrouped,
   PicItem,
+  ResponseCreateDokumenBorangType,
+  toResponseCreateDokumenBorangType,
 } from "../models/dokumenBorang.model";
 import { LokasiFile, Status } from "../utils/contstanst";
 import { KebutuhanDokumenService } from "./kebutuhanDokumen.service";
@@ -29,7 +31,7 @@ export class DokumenBorangService {
       picId: number;
       assignedBy: number;
     },
-  ) {
+  ): Promise<ResponseCreateDokumenBorangType | null> {
     const dokumen = await tx.dokumenBorang.create({
       data: {
         filename: data.filename,
@@ -40,7 +42,7 @@ export class DokumenBorangService {
       },
     });
 
-    const result = await DokumenBorangService.createPicDokumen(tx, {
+    const result = await this.createPicDokumen(tx, {
       dokumenBorangId: dokumen.id,
       picId: data.picId,
       assignedBy: data.assignedBy,
@@ -68,8 +70,8 @@ export class DokumenBorangService {
       picId: number;
       assignedBy: number;
     },
-  ) {
-    return tx.picDokumenBorang.create({
+  ): Promise<ResponseCreateDokumenBorangType | null> {
+    const result = await tx.picDokumenBorang.create({
       data: {
         dokumenBorangId: data.dokumenBorangId,
         picId: data.picId,
@@ -77,7 +79,8 @@ export class DokumenBorangService {
       },
       select: {
         pic: {
-          include: {
+          select: {
+            id: true,
             kebutuhanDokumen: {
               select: {
                 id: true,
@@ -115,6 +118,7 @@ export class DokumenBorangService {
                     createdAt: true,
                     updatedAt: true,
                     status: true,
+                    lokasi_file: true,
                     uploadedBy: {
                       select: {
                         id: true,
@@ -130,13 +134,32 @@ export class DokumenBorangService {
         },
       },
     });
+
+    return toResponseCreateDokumenBorangType({
+      ...result,
+      kebutuhanDokumen: {
+        id: result.pic.kebutuhanDokumen.id,
+        namaDokumen: result.pic.kebutuhanDokumen.namaDokumen,
+        kriteria: result.pic.kebutuhanDokumen.kriteria,
+        pendekatan: result.pic.kebutuhanDokumen.pendekatan,
+        dokumenBorang: result.pic.picDokumen.map((item) => ({
+          ...item.dokumenBorang,
+          assignedBy: item.assignedBy,
+          dokumen: {
+            ...item.dokumenBorang,
+            lokasiFile: item.dokumenBorang.lokasi_file as LokasiFile,
+            status: item.dokumenBorang.status as Status,
+          },
+        })),
+      },
+    });
   }
 
   // create
   static async create(
     req: Omit<CreateDokumenBorangType, "filename">,
     uploadedFiles: Express.Multer.File[],
-  ): Promise<any> {
+  ): Promise<ResponseCreateDokumenBorangType | null> {
     const { assignedBy, uploadedBy, picId, keterangan, files } = req;
 
     const uploadedGdriveIds: string[] = [];
@@ -178,7 +201,7 @@ export class DokumenBorangService {
               uploadedGdriveIds.push(gdrive.fileId!);
 
               // create data dokumen borang
-              return this.createWithFile(tx, {
+              return await this.createWithFile(tx, {
                 filename: finalName,
                 uploadedBy: uploadedBy,
                 keterangan: keterangan,
@@ -216,7 +239,7 @@ export class DokumenBorangService {
         );
       });
 
-      return result;
+      return result[0];
     } catch (error) {
       // delete file
       await Promise.all(

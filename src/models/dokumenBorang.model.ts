@@ -1,4 +1,6 @@
 import { LokasiFile, MetaType, Status } from "../utils/contstanst";
+import { IKriteria } from "./kriteria.model";
+import { IPendekatan } from "./pendekatan.model";
 import { IPic } from "./pic.model";
 import { PayloadUserType } from "./user.model";
 
@@ -39,6 +41,39 @@ export interface ResponseDokumenBorangType extends IDokumenBorang {}
 // to response
 export const toResponseDokumenBorangType = (
   dokumenBorang: ResponseDokumenBorangType,
+) => dokumenBorang;
+
+// response create dokumen borang
+export interface ResponseCreateDokumenBorangType {
+  pic: {
+    id: number;
+  };
+  kebutuhanDokumen: {
+    id: number;
+    namaDokumen: string;
+    kriteria: Pick<IKriteria, "id" | "kriteria" | "namaKriteria">;
+    pendekatan: Pick<IPendekatan, "id" | "tahap" | "keterangan">;
+    dokumenBorang: {
+      assignedBy: Pick<PayloadUserType, "id" | "nama" | "email">;
+      dokumen: Pick<
+        IDokumenBorang,
+        | "id"
+        | "filename"
+        | "keterangan"
+        | "lokasiFile"
+        | "createdAt"
+        | "updatedAt"
+        | "uploadedBy"
+        | "status"
+      >;
+      uploadedBy: Pick<PayloadUserType, "id" | "nama" | "email">;
+    }[];
+  };
+}
+
+// to response create
+export const toResponseCreateDokumenBorangType = (
+  dokumenBorang: ResponseCreateDokumenBorangType,
 ) => dokumenBorang;
 
 // pic item
