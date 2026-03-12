@@ -1,4 +1,3 @@
-import { object } from "zod";
 import prisma from "../libs/prisma";
 import {
   CreateDokumenBorangType,
@@ -8,7 +7,9 @@ import {
   KriteriaGrouped,
   PicItem,
   ResponseCreateDokumenBorangType,
+  ResponseDokumenBorangType,
   toResponseCreateDokumenBorangType,
+  toResponseDokumenBorangType,
 } from "../models/dokumenBorang.model";
 import { LokasiFile, Status } from "../utils/contstanst";
 import { KebutuhanDokumenService } from "./kebutuhanDokumen.service";
@@ -18,8 +19,16 @@ import path from "path";
 import { DriveApiService } from "./driveapi.service";
 import fs from "fs";
 import { FileService } from "./file.service";
+import { Response } from "express";
+import archiver from "archiver";
 
 export class DokumenBorangService {
+  private static folderPath = path.join(
+    process.cwd(),
+    "public",
+    "uploads",
+    "dokumen-borang",
+  );
   // create with file
   static async createWithFile(
     tx: Prisma.TransactionClient,
@@ -136,7 +145,9 @@ export class DokumenBorangService {
     });
 
     return toResponseCreateDokumenBorangType({
-      ...result,
+      pic: {
+        id: result.pic.id,
+      },
       kebutuhanDokumen: {
         id: result.pic.kebutuhanDokumen.id,
         namaDokumen: result.pic.kebutuhanDokumen.namaDokumen,
@@ -185,8 +196,7 @@ export class DokumenBorangService {
 
             // generate filename
             const ext = path.extname(multerFile.originalname);
-            const dateString = new Date().toISOString().replace(/[:.]/g, "-");
-            const finalName = `${file.filename}-${dateString}${ext}`;
+            const finalName = `${file.filename}${ext}`;
 
             // check lokasi file
             if (file.lokasiFile === LokasiFile.GDRIVE) {
@@ -253,48 +263,6 @@ export class DokumenBorangService {
     }
   }
 
-  // static async create(req: CreateDokumenBorangType): Promise<any | null> {
-  //   // destructure
-  //   const { assignedBy, uploadedBy, filename, keterangan, lokasiFile, picId } =
-  //     req;
-
-  //   // call db
-  //   const result = await prisma.$transaction(async (tx) => {
-  //     // create many dokumen borang
-  //     await tx.dokumenBorang.createMany({
-  //       data: filename.map((file) => ({
-  //         filename: file,
-  //         keterangan,
-  //         lokasi_file: lokasiFile,
-  //         status: Status.menunggu,
-  //         uploadedById: uploadedBy!,
-  //       })),
-  //     });
-
-  //     // find many file
-  //     const createdDokumens = await tx.dokumenBorang.findMany({
-  //       where: {
-  //         uploadedById: uploadedBy,
-  //         filename: { in: filename.map((file) => file) },
-  //       },
-  //       select: { id: true },
-  //     });
-
-  //     // create pic dokumen borang
-  //     await tx.picDokumenBorang.createMany({
-  //       data: createdDokumens.map((dokumen) => ({
-  //         dokumenBorangId: dokumen.id,
-  //         picId,
-  //         assignedById: assignedBy,
-  //       })),
-  //     });
-
-  //     return createdDokumens;
-  //   });
-
-  //   return result;
-  // }
-
   // read daftar dokumen by user id
   static async readDaftarDokumen(
     userId: number,
@@ -348,15 +316,7 @@ export class DokumenBorangService {
                   select: {
                     id: true,
                     keterangan: true,
-                    picDokumen: {
-                      select: {
-                        dokumenBorang: {
-                          select: {
-                            status: true,
-                          },
-                        },
-                      },
-                    },
+
                     kebutuhanDokumen: {
                       select: {
                         id: true,
@@ -372,6 +332,15 @@ export class DokumenBorangService {
                             id: true,
                             tahap: true,
                             keterangan: true,
+                          },
+                        },
+                      },
+                    },
+                    picDokumen: {
+                      select: {
+                        dokumenBorang: {
+                          select: {
+                            status: true,
                           },
                         },
                       },
@@ -445,18 +414,25 @@ export class DokumenBorangService {
         // pendekatan id
         const pendekatanKey = pendekatan.id;
 
+        console.log(
+          "status dokumen borang :",
+          pic.picDokumen.map((pd) => pd.dokumenBorang.status),
+        );
+
         // inisialisasi kriteria jika blm ada array nya
         if (!acc[kriteriaKey]) {
           acc[kriteriaKey] = {
             kriteriaId: kriteria.id,
             namaKriteria: kriteria.namaKriteria,
             nomorKriteria: kriteria.kriteria,
-            dokumenBorangStatus: pic.picDokumen.map(
-              (pd) => pd.dokumenBorang.status,
-            ),
+            dokumenBorangStatus: [],
             pendekatan: {},
           };
         }
+
+        // push dokumen status
+        const newStatuses = pic.picDokumen.map((pd) => pd.dokumenBorang.status);
+        acc[kriteriaKey].dokumenBorangStatus.push(...newStatuses);
 
         // inisialiasi pendekatan jika belum ada array nya
         if (!acc[kriteriaKey].pendekatan[pendekatanKey]) {
@@ -624,5 +600,150 @@ export class DokumenBorangService {
         totalPage,
       },
     };
+  }
+
+  // get dokumen borang by kebutuhan dokumentasi id
+  static async findDokumenBorangByKebutuhanDokumentasiId(
+    kebutuhanDokumentasiId: number,
+  ): Promise<ResponseDokumenBorangType[] | null> {
+    // call db
+    const result = await prisma.dokumenBorang.findMany({
+      where: {
+        picDokumen: {
+          some: {
+            pic: {
+              kebutuhanDokumen: {
+                id: kebutuhanDokumentasiId,
+              },
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+        filename: true,
+        keterangan: true,
+        lokasi_file: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        picDokumen: {
+          select: {
+            assignedBy: {
+              select: {
+                id: true,
+                nama: true,
+                email: true,
+              },
+            },
+          },
+        },
+        uploadedBy: {
+          select: {
+            id: true,
+            nama: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return result.map((item) =>
+      toResponseDokumenBorangType({
+        dokumen: {
+          id: item.id,
+          filename: item.filename,
+          keterangan: item.keterangan,
+          status: item.status as Status,
+          lokasiFile: item.lokasi_file as LokasiFile,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+        },
+        assignedBy: {
+          id: item.picDokumen[0].assignedBy.id,
+          nama: item.picDokumen[0].assignedBy.nama,
+          email: item.picDokumen[0].assignedBy.email,
+        },
+        uploadedBy: {
+          id: item.uploadedBy.id,
+          nama: item.uploadedBy.nama,
+          email: item.uploadedBy.email,
+        },
+      }),
+    );
+  }
+
+  // check filenames by filename
+  static async findFileNamesByFilename(filename: string[]): Promise<string[]> {
+    // map , split and join (-)
+    const filenameMap = filename.map((item) => `${item}.pdf`);
+
+    const result = await prisma.dokumenBorang.findMany({
+      where: {
+        filename: {
+          in: filenameMap,
+        },
+      },
+      select: {
+        filename: true,
+      },
+    });
+
+    return result.map((item) => item.filename);
+  }
+
+  // download file
+  static async downloadSingleFile(
+    filename: string,
+    res: Response,
+  ): Promise<void> {
+    // check
+    if (filename.includes("..")) throw new Error("FIlename tidak valid");
+
+    // file path
+    const filepath = path.join(this.folderPath, filename);
+
+    // check existing file
+    if (!fs.existsSync(filepath)) throw new Error("File tidak ada");
+
+    // download
+    res.download(filepath, filename);
+  }
+
+  // download multiple file
+  static async downloadMultipleFile(
+    filenames: string[],
+    res: Response,
+  ): Promise<void> {
+    // set header
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=dokumen-borang.zip",
+    );
+
+    // set header
+    res.header("Content-Type", "application/zip");
+
+    // archive
+    const archive = archiver("zip", {
+      zlib: { level: 9 },
+    });
+
+    // archive pipe
+    archive.pipe(res);
+
+    // iterasi
+    for (const filename of filenames) {
+      if (filename.includes("..")) continue;
+
+      const filePath = path.join(this.folderPath, filename);
+
+      // check
+      if (fs.existsSync(filePath)) {
+        archive.file(filePath, { name: filename });
+      }
+    }
+
+    await archive.finalize();
   }
 }

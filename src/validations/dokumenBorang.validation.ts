@@ -21,5 +21,11 @@ export class DokumenBorangValidation {
     })
     .strict() satisfies z.ZodType<Omit<CreateDokumenBorangType, "assignedBy">>;
 
+  static readonly DOWNLOAD = z
+    .object({
+      filenames: z.array(z.string()),
+    })
+    .strict() satisfies z.ZodType<{ filenames: string[] }>;
+
   static UPDATE = {};
 }

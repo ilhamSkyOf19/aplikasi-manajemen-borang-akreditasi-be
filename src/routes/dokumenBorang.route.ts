@@ -2,6 +2,8 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { DokumenBorangController } from "../controllers/dokumenBorang.controller";
 import { FileService } from "../services/file.service";
+import { zodValidation } from "../middlewares/validation.middleware";
+import { DokumenBorangValidation } from "../validations/dokumenBorang.validation";
 
 const dokumenBorangRoute: Router = Router();
 
@@ -30,6 +32,26 @@ dokumenBorangRoute.get(
   "/read-daftar-kebutuhan-dokumentasi/:kriteria/:pendekatan",
   authMiddleware,
   DokumenBorangController.readDaftarKebutuhanDokumentasiByKriteriaAndPendekatan,
+);
+
+// read dokumentasi borang by kebutuhan dokumen id
+dokumenBorangRoute.get(
+  "/read-dokumen-borang/:kebutuhanDokumenId",
+  authMiddleware,
+  DokumenBorangController.findDokumenBorangByKebutuhanDokumenId,
+);
+
+// download borang
+dokumenBorangRoute.get(
+  "/download/:filename",
+  DokumenBorangController.downloadSingleFile,
+);
+
+// download borang
+dokumenBorangRoute.post(
+  "/download-multiple",
+  zodValidation<{ filenames: string[] }>(DokumenBorangValidation.DOWNLOAD),
+  DokumenBorangController.downloadMultipleFile,
 );
 
 export default dokumenBorangRoute;

@@ -19,7 +19,6 @@ export interface IDokumenBorang {
 }
 
 // create dokumen borang
-// types.ts
 export type FileItem = {
   useOldFile: boolean;
   oldDokumenBorangId?: number;
@@ -36,9 +35,22 @@ export type CreateDokumenBorangType = {
 };
 
 // response dokumen borang
-export interface ResponseDokumenBorangType extends IDokumenBorang {}
+export interface ResponseDokumenBorangType {
+  assignedBy: Pick<PayloadUserType, "id" | "nama" | "email">;
+  dokumen: Pick<
+    IDokumenBorang,
+    | "id"
+    | "filename"
+    | "keterangan"
+    | "lokasiFile"
+    | "createdAt"
+    | "updatedAt"
+    | "status"
+  >;
+  uploadedBy: Pick<PayloadUserType, "id" | "nama" | "email">;
+}
 
-// to response
+// to response dokumen borang type
 export const toResponseDokumenBorangType = (
   dokumenBorang: ResponseDokumenBorangType,
 ) => dokumenBorang;
@@ -53,21 +65,7 @@ export interface ResponseCreateDokumenBorangType {
     namaDokumen: string;
     kriteria: Pick<IKriteria, "id" | "kriteria" | "namaKriteria">;
     pendekatan: Pick<IPendekatan, "id" | "tahap" | "keterangan">;
-    dokumenBorang: {
-      assignedBy: Pick<PayloadUserType, "id" | "nama" | "email">;
-      dokumen: Pick<
-        IDokumenBorang,
-        | "id"
-        | "filename"
-        | "keterangan"
-        | "lokasiFile"
-        | "createdAt"
-        | "updatedAt"
-        | "uploadedBy"
-        | "status"
-      >;
-      uploadedBy: Pick<PayloadUserType, "id" | "nama" | "email">;
-    }[];
+    dokumenBorang: ResponseDokumenBorangType[];
   };
 }
 
