@@ -21,6 +21,8 @@ export interface IDokumenBorang {
 export type FileItem = {
   useOldFile: boolean;
   oldDokumenBorangId?: number;
+  lokasiFile?: LokasiFile;
+  filename?: string;
 };
 
 export type CreateDokumenBorangType = {
@@ -28,9 +30,7 @@ export type CreateDokumenBorangType = {
   assignedBy: number;
   picId: number;
   keterangan: string;
-  lokasiFile: LokasiFile;
   files: FileItem[];
-  filename: string[];
 };
 
 // response dokumen borang

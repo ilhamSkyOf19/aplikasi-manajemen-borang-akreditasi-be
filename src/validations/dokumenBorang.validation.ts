@@ -6,6 +6,10 @@ export class DokumenBorangValidation {
   static readonly fileItemSchema = z.object({
     useOldFile: z.boolean(),
     oldDokumenBorangId: z.number().int().positive().optional(),
+    lokasiFile: z
+      .enum(["GDRIVE", "SISTEM"] as LokasiFile[], "lokasi file tidak falid")
+      .optional(),
+    filename: z.string().optional(),
   });
 
   static readonly CREATE = z
@@ -13,11 +17,6 @@ export class DokumenBorangValidation {
       uploadedBy: z.number().int().positive(),
       keterangan: z.string().min(1).max(1000),
       picId: z.number().int().positive(),
-      filename: z.array(z.string()).min(1).max(4),
-      lokasiFile: z.enum(
-        ["GDRIVE", "SISTEM"] as LokasiFile[],
-        "lokasi file tidak falid",
-      ),
       files: z.array(this.fileItemSchema).min(1).max(4),
     })
     .strict() satisfies z.ZodType<Omit<CreateDokumenBorangType, "assignedBy">>;

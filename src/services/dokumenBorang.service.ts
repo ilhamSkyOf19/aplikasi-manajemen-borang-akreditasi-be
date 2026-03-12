@@ -7,15 +7,18 @@ import {
   DaftarKebutuhanDokumentasiItemType,
   KriteriaGrouped,
   PicItem,
-  ResponseDokumenBorangType,
 } from "../models/dokumenBorang.model";
 import { LokasiFile, Status } from "../utils/contstanst";
 import { KebutuhanDokumenService } from "./kebutuhanDokumen.service";
 import { PaginationType } from "../types/pagination";
 import { Prisma } from "../../generated/prisma/browser";
+import path from "path";
+import { DriveApiService } from "./driveapi.service";
+import fs from "fs";
+import { FileService } from "./file.service";
 
 export class DokumenBorangService {
-  // create
+  // create with file
   static async createWithFile(
     tx: Prisma.TransactionClient,
     data: {
@@ -37,13 +40,24 @@ export class DokumenBorangService {
       },
     });
 
-    await DokumenBorangService.createPicDokumen(tx, {
+    const result = await DokumenBorangService.createPicDokumen(tx, {
       dokumenBorangId: dokumen.id,
       picId: data.picId,
       assignedBy: data.assignedBy,
     });
 
-    return dokumen;
+    return result;
+  }
+
+  // find dokumen borang by id
+  static async findByIds(ids: number[]) {
+    return await prisma.dokumenBorang.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
   }
 
   // create pic dokumen
@@ -61,6 +75,60 @@ export class DokumenBorangService {
         picId: data.picId,
         assignedById: data.assignedBy,
       },
+      select: {
+        pic: {
+          include: {
+            kebutuhanDokumen: {
+              select: {
+                id: true,
+                namaDokumen: true,
+                kriteria: {
+                  select: {
+                    id: true,
+                    kriteria: true,
+                    namaKriteria: true,
+                  },
+                },
+                pendekatan: {
+                  select: {
+                    id: true,
+                    tahap: true,
+                    keterangan: true,
+                  },
+                },
+              },
+            },
+            picDokumen: {
+              select: {
+                assignedBy: {
+                  select: {
+                    id: true,
+                    nama: true,
+                    email: true,
+                  },
+                },
+                dokumenBorang: {
+                  select: {
+                    id: true,
+                    filename: true,
+                    keterangan: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    status: true,
+                    uploadedBy: {
+                      select: {
+                        id: true,
+                        nama: true,
+                        email: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -68,39 +136,98 @@ export class DokumenBorangService {
   static async create(
     req: Omit<CreateDokumenBorangType, "filename">,
     uploadedFiles: Express.Multer.File[],
-  ) {
-    const { assignedBy, uploadedBy, picId, keterangan, lokasiFile, files } =
-      req;
+  ): Promise<any> {
+    const { assignedBy, uploadedBy, picId, keterangan, files } = req;
+
+    const uploadedGdriveIds: string[] = [];
+    const uploadedSistemPaths: string[] = [];
 
     let uploadIndex = 0;
 
-    const results = await prisma.$transaction(async (tx) => {
-      return Promise.all(
-        files.map((file) => {
-          // File lama — hanya create pivot
-          if (file.useOldFile) {
-            return DokumenBorangService.createPicDokumen(tx, {
-              dokumenBorangId: file.oldDokumenBorangId!,
-              picId,
-              assignedBy,
-            });
-          }
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        return Promise.all(
+          files.map(async (file) => {
+            // file lama - create pivot pic dokumen borang
+            if (file.useOldFile) {
+              return DokumenBorangService.createPicDokumen(tx, {
+                dokumenBorangId: file.oldDokumenBorangId!,
+                picId: picId,
+                assignedBy: assignedBy,
+              });
+            }
 
-          // File baru — create dokumen + pivot
-          const multerFile = uploadedFiles[uploadIndex++];
-          return this.createWithFile(tx, {
-            filename: multerFile.filename,
-            uploadedBy,
-            keterangan,
-            lokasiFile: lokasiFile,
-            picId,
-            assignedBy,
-          });
-        }),
+            // multer
+            const multerFile = uploadedFiles[uploadIndex++];
+
+            // generate filename
+            const ext = path.extname(multerFile.originalname);
+            const dateString = new Date().toISOString().replace(/[:.]/g, "-");
+            const finalName = `${file.filename}-${dateString}${ext}`;
+
+            // check lokasi file
+            if (file.lokasiFile === LokasiFile.GDRIVE) {
+              const gdrive = await DriveApiService.upload({
+                fileBuffer: multerFile.buffer,
+                filename: finalName,
+                mimeType: multerFile.mimetype,
+                allowMimeType: ["application/pdf"],
+              });
+
+              // push gdrive id
+              uploadedGdriveIds.push(gdrive.fileId!);
+
+              // create data dokumen borang
+              return this.createWithFile(tx, {
+                filename: finalName,
+                uploadedBy: uploadedBy,
+                keterangan: keterangan,
+                lokasiFile: LokasiFile.GDRIVE,
+                picId: picId,
+                assignedBy: assignedBy,
+              });
+            } else {
+              const folder = "public/uploads/dokumen-borang";
+
+              // check existing folder
+              if (!fs.existsSync(folder))
+                fs.mkdirSync(folder, { recursive: true });
+
+              // file path
+              const filePath = path.join(folder, finalName);
+
+              // create file
+              fs.writeFileSync(filePath, multerFile.buffer);
+
+              // push to upload sistem paths
+              uploadedSistemPaths.push(filePath);
+
+              // create with file
+              return await this.createWithFile(tx, {
+                filename: finalName,
+                uploadedBy: uploadedBy,
+                keterangan: keterangan,
+                lokasiFile: LokasiFile.SISTEM,
+                picId: picId,
+                assignedBy: assignedBy,
+              });
+            }
+          }),
+        );
+      });
+
+      return result;
+    } catch (error) {
+      // delete file
+      await Promise.all(
+        uploadedGdriveIds.map((id) => DriveApiService.deleteFile(id)),
       );
-    });
 
-    return results;
+      // delete files
+      uploadedSistemPaths.forEach((path) => FileService.deleteFile(path));
+
+      throw error;
+    }
   }
 
   // static async create(req: CreateDokumenBorangType): Promise<any | null> {

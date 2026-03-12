@@ -3,10 +3,8 @@ import multer, { FileFilterCallback } from "multer";
 import fs from "fs";
 import path from "path";
 import fsAsync from "fs/promises";
-import { FileItem } from "../models/dokumenBorang.model";
 
 type FileConfig = {
-  uploadPaths?: Record<string, string>;
   allowedMimeTypes?: RegExp;
 };
 
@@ -14,53 +12,17 @@ export class FileService {
   // create
   static uploadFile(config: FileConfig = {}) {
     // destructure
-    const { uploadPaths = {}, allowedMimeTypes = /pdf/ } = config;
+    const { allowedMimeTypes = /pdf/ } = config;
 
     // storage
-    const storage = multer.diskStorage({
-      // lokasi file
-      destination: (
-        _req: Request,
-        file: Express.Multer.File,
-        cb: (error: Error | null, destination: string) => void,
-      ) => {
-        // path
-        const folder = uploadPaths[file.fieldname] || "uploads/other";
-
-        // check folder
-        if (!fs.existsSync(folder)) {
-          fs.mkdirSync(folder, { recursive: true });
-        }
-
-        // callback
-        cb(null, folder);
-      },
-
-      // filename
-      filename: (
-        req: Request,
-        file: Express.Multer.File,
-        cb: (error: Error | null, filename: string) => void,
-      ) => {
-        console.log(req.body);
-
-        const ext = path.extname(file.originalname);
-
-        const suffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-
-        cb(null, file.fieldname + "-" + suffix + ext);
-      },
-    });
+    const storage = multer.memoryStorage();
 
     const fileFilter = (
       req: Request,
       file: Express.Multer.File,
       cb: FileFilterCallback,
     ) => {
-      if (req.body.useOldFile === "true") {
-        cb(null, false);
-        return;
-      }
+      console.log(req.body);
 
       const extname = allowedMimeTypes.test(
         path.extname(file.originalname).toLowerCase(),

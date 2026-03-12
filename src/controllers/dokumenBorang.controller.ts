@@ -13,8 +13,6 @@ import { PaginationType } from "../types/pagination";
 import { validation } from "../validations/validation";
 import { DokumenBorangValidation } from "../validations/dokumenBorang.validation";
 import { FileService } from "../services/file.service";
-import path from "path";
-import fs from "fs";
 
 export class DokumenBorangController {
   // create
@@ -22,17 +20,14 @@ export class DokumenBorangController {
     req: AuthRequest<
       {},
       {},
-      Omit<
-        CreateDokumenBorangType,
-        "assignedBy" | "files" | "uploadedBy" | "filename"
-      > & {
+      Omit<CreateDokumenBorangType, "assignedBy" | "files" | "uploadedBy"> & {
         files: string;
-        filename: string;
       }
     >,
     res: Response<ResponseStructure<any | null>>,
     next: NextFunction,
   ) {
+    console.log("BODY:", req.body);
     // filenames
     let filenamesGlobal: Express.Multer.File[] = [];
     try {
@@ -50,7 +45,6 @@ export class DokumenBorangController {
           picId: Number(req.body.picId),
           uploadedBy: id!,
           files: JSON.parse(req.body.files),
-          filename: JSON.parse(req.body.filename),
         },
       );
 
@@ -65,6 +59,38 @@ export class DokumenBorangController {
           res,
           body.meta.statusCode,
           body.meta.message,
+        );
+      }
+
+      // find dokumen borang by id
+      if (body?.data && body?.data?.files.length > 0) {
+        const oldDokumenIds = body?.data?.files
+          .map((f) => f.oldDokumenBorangId)
+          .filter((f) => f !== undefined);
+
+        // check
+        if (oldDokumenIds.length > 0) {
+          const findDokumenBorang = await DokumenBorangService.findByIds(
+            oldDokumenIds as number[],
+          );
+
+          if (findDokumenBorang.length !== oldDokumenIds.length) {
+            return ResponseResult.error(res, 400, "File lama tidak ditemukan");
+          }
+        }
+      }
+
+      // Validasi file baru wajib ada filename & lokasiFile
+      const invalidNewFile = body?.data?.files.some(
+        (f) => !f.useOldFile && (!f.filename || !f.lokasiFile),
+      );
+      if (invalidNewFile) {
+        if (uploadedFiles.length > 0)
+          await FileService.deleteFiles(uploadedFiles);
+        return ResponseResult.error(
+          res,
+          400,
+          "File baru wajib menyertakan filename dan lokasiFile",
         );
       }
 
@@ -92,41 +118,6 @@ export class DokumenBorangController {
         return ResponseResult.error(res, 400, "File lama wajib ada");
       }
 
-      // replace file name
-      const filenames: string[] = body?.data?.filename ?? [];
-
-      // check filenames length
-      if (filenames.length !== uploadedFiles.length) {
-        // delete file
-        if (req.files) {
-          await FileService.deleteFiles(req.files as Express.Multer.File[]);
-        }
-        return ResponseResult.error(res, 400, "Jumlah file tidak sesuai");
-      }
-
-      // renamed files
-      const renamedFiles = uploadedFiles.map((file, index) => {
-        const customFilename = filenames[index];
-
-        if (customFilename) {
-          const ext = path.extname(file.originalname);
-          const suffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-          const newFilename = customFilename + "-" + suffix + ext;
-          const newPath = path.join(path.dirname(file.path), newFilename);
-
-          // renamed
-          fs.renameSync(file.path, newPath);
-
-          return { ...file, filename: newFilename, path: newPath };
-        }
-
-        // push filename
-        filenamesGlobal.push(file);
-
-        // return
-        return file;
-      });
-
       // create
       const result = await DokumenBorangService.create(
         {
@@ -135,7 +126,7 @@ export class DokumenBorangController {
           assignedBy: id!,
           files: body?.data?.files as FileItem[],
         },
-        renamedFiles,
+        uploadedFiles,
       );
 
       // check result
@@ -149,12 +140,11 @@ export class DokumenBorangController {
 
       return ResponseResult.success<any>(result, res, 200);
     } catch (error) {
-      // delete files
-      if (filenamesGlobal?.length > 0) {
-        await FileService.deleteFiles(filenamesGlobal);
-      } else if (req.files) {
+      // Fallback delete jika ada file yang lolos
+      if (req.files) {
         await FileService.deleteFiles(req.files as Express.Multer.File[]);
       }
+
       next(error);
     }
   }

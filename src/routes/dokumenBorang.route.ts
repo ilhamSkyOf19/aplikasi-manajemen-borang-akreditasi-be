@@ -7,7 +7,7 @@ const dokumenBorangRoute: Router = Router();
 
 // file upload
 const upload = FileService.uploadFile({
-  uploadPaths: { dokumen: "public/uploads/dokumen-borang" },
+  allowedMimeTypes: /pdf/,
 });
 
 // create
