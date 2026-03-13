@@ -55,7 +55,21 @@ export interface ResponseDokumenBorangType {
 // to response dokumen borang type
 export const toResponseDokumenBorangType = (
   dokumenBorang: ResponseDokumenBorangType,
-) => dokumenBorang;
+): ResponseDokumenBorangType => dokumenBorang;
+
+// response dokumen borang by kebutuhan dokumen
+export interface ResponseDaftarDokumenBorangByKebutuhanDokumenType {
+  kebutuhanDokumen: {
+    id: number;
+    namaDokumen: string;
+  };
+  daftarDokumen: ResponseDokumenBorangType[];
+}
+
+// to response dokumen borang by kebutuhan dokumen
+export const toResponseDaftarDokumenBorangByKebutuhanDokumenType = (
+  daftarDokumen: ResponseDaftarDokumenBorangByKebutuhanDokumenType,
+) => daftarDokumen;
 
 // response create dokumen borang
 export interface ResponseCreateDokumenBorangType {

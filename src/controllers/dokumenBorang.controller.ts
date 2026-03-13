@@ -8,6 +8,7 @@ import {
   DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta,
   FileItem,
   ResponseCreateDokumenBorangType,
+  ResponseDaftarDokumenBorangByKebutuhanDokumenType,
   ResponseDokumenBorangType,
 } from "../models/dokumenBorang.model";
 import checkParamsId from "../utils/checkParamsId";
@@ -191,7 +192,7 @@ export class DokumenBorangController {
       const id = req?.data?.id;
 
       // call service
-      const service = await DokumenBorangService.readDaftarDokumen(id!, {});
+      const service = await DokumenBorangService.findDaftarDokumen(id!, {});
 
       return ResponseResult.success<DaftarDokumenBorangByKriteriaWithMeta | null>(
         service,
@@ -251,7 +252,9 @@ export class DokumenBorangController {
   // find dokumen borang by kebutuhan dokumen
   static async findDokumenBorangByKebutuhanDokumenId(
     req: Request<{ kebutuhanDokumenId: string }>,
-    res: Response<ResponseStructure<ResponseDokumenBorangType[] | null>>,
+    res: Response<
+      ResponseStructure<ResponseDaftarDokumenBorangByKebutuhanDokumenType | null>
+    >,
     next: NextFunction,
   ) {
     try {
@@ -283,7 +286,11 @@ export class DokumenBorangController {
         );
 
       // return success
-      return ResponseResult.success<any | null>(service, res, 200);
+      return ResponseResult.success<ResponseDaftarDokumenBorangByKebutuhanDokumenType | null>(
+        service,
+        res,
+        200,
+      );
     } catch (error) {
       next(error);
     }
