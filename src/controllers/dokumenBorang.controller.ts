@@ -112,7 +112,7 @@ export class DokumenBorangController {
 
       // Validasi file baru wajib ada filename & lokasiFile
       const invalidNewFile = body?.data?.files.some(
-        (f) => !f.useOldFile && (!f.filename || !f.lokasiFile),
+        (f) => !f.useOldFile && (!f.filename || !f.lokasiFile || !f.keterangan),
       );
       if (invalidNewFile) {
         if (uploadedFiles.length > 0)
@@ -120,7 +120,7 @@ export class DokumenBorangController {
         return ResponseResult.error(
           res,
           400,
-          "File baru wajib menyertakan filename dan lokasiFile",
+          "File baru wajib menyertakan filename, lokasiFile dan keterangan",
         );
       }
 
@@ -268,8 +268,6 @@ export class DokumenBorangController {
       const checkKebutuhanDokumentasi = await KebutuhanDokumenService.findById(
         checkId as number,
       );
-
-      console.log(checkKebutuhanDokumentasi);
 
       if (!checkKebutuhanDokumentasi) {
         return ResponseResult.error(

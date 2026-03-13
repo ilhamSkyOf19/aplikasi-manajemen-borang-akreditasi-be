@@ -241,7 +241,7 @@ export class DokumenBorangService {
     req: Omit<CreateDokumenBorangType, "filename">,
     uploadedFiles: Express.Multer.File[],
   ): Promise<ResponseCreateDokumenBorangType | null> {
-    const { assignedBy, uploadedBy, picId, keterangan, files } = req;
+    const { assignedBy, uploadedBy, picId, files } = req;
 
     const uploadedGdriveIds: string[] = [];
     const uploadedSistemPaths: string[] = [];
@@ -284,7 +284,7 @@ export class DokumenBorangService {
               return await this.createWithFile(tx, {
                 filename: finalName,
                 uploadedBy: uploadedBy,
-                keterangan: keterangan,
+                keterangan: file.keterangan!,
                 lokasiFile: LokasiFile.GDRIVE,
                 picId: picId,
                 assignedBy: assignedBy,
@@ -310,7 +310,7 @@ export class DokumenBorangService {
               return await this.createWithFile(tx, {
                 filename: finalName,
                 uploadedBy: uploadedBy,
-                keterangan: keterangan,
+                keterangan: file.keterangan!,
                 lokasiFile: LokasiFile.SISTEM,
                 picId: picId,
                 assignedBy: assignedBy,

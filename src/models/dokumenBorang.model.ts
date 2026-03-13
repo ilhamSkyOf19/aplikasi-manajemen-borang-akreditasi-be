@@ -25,13 +25,13 @@ export type FileItem = {
   oldDokumenBorangId?: number;
   lokasiFile?: LokasiFile;
   filename?: string;
+  keterangan?: string;
 };
 
 export type CreateDokumenBorangType = {
   uploadedBy: number;
   assignedBy: number;
   picId: number;
-  keterangan: string;
   files: FileItem[];
 };
 

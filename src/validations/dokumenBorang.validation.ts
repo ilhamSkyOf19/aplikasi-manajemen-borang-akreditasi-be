@@ -10,12 +10,12 @@ export class DokumenBorangValidation {
       .enum(["GDRIVE", "SISTEM"] as LokasiFile[], "lokasi file tidak falid")
       .optional(),
     filename: z.string().optional(),
+    keterangan: z.string().min(1).max(1000),
   });
 
   static readonly CREATE = z
     .object({
       uploadedBy: z.number().int().positive(),
-      keterangan: z.string().min(1).max(1000),
       picId: z.number().int().positive(),
       files: z.array(this.fileItemSchema).min(1).max(4),
     })
