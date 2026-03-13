@@ -125,7 +125,8 @@ model PicTimAkreditasi {
 
 model DokumenBorang {
   id           Int       @id @default(autoincrement())
-  filename     String
+  filename     String    @unique
+  file_id      String?   @unique
   keterangan   String    @db.VarChar(1000)
   lokasi_file  LokasFile
   status       Status

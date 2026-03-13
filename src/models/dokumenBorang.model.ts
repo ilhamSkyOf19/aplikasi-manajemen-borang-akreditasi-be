@@ -10,6 +10,7 @@ export interface IDokumenBorang {
   keterangan: string;
   lokasiFile: LokasiFile;
   status: Status;
+  fileId?: string | null;
   uploadedBy: PayloadUserType;
   pic: Omit<IPic, "statusRiwayat" | "status" | "keterangan"> & {
     assignedBy: PayloadUserType;
@@ -46,6 +47,7 @@ export interface ResponseDokumenBorangType {
     | "createdAt"
     | "updatedAt"
     | "status"
+    | "fileId"
   >;
   uploadedBy: Pick<PayloadUserType, "id" | "nama" | "email">;
 }

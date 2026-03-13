@@ -193,12 +193,7 @@ export class UserController {
       }
 
       // return success
-      return ResponseResult.success<null>(
-        null,
-        res,
-        200,
-        "success delete user",
-      );
+      return ResponseResult.successNoContent(null, res, "success delete user");
     } catch (error) {
       next(error);
     }

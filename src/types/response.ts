@@ -26,6 +26,20 @@ export class ResponseResult {
       data: data,
     });
   }
+
+  static successNoContent(
+    data: null,
+    res: Response<ResponseStructure<null>>,
+    message?: string,
+  ) {
+    return res.status(204).json({
+      meta: {
+        statusCode: 204,
+        message: message || "success",
+      },
+      data: data,
+    });
+  }
   // error
   static error(
     res: Response<ResponseStructure<null>>,

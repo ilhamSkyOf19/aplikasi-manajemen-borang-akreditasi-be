@@ -54,4 +54,12 @@ dokumenBorangRoute.post(
   DokumenBorangController.downloadMultipleFile,
 );
 
+// delete
+dokumenBorangRoute.delete(
+  "/delete",
+  authMiddleware,
+  zodValidation<{ ids: number[] }>(DokumenBorangValidation.DELETE),
+  DokumenBorangController.deleteDokumenBorang,
+);
+
 export default dokumenBorangRoute;

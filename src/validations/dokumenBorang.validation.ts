@@ -27,5 +27,12 @@ export class DokumenBorangValidation {
     })
     .strict() satisfies z.ZodType<{ filenames: string[] }>;
 
+  // DELETE
+  static readonly DELETE = z
+    .object({
+      ids: z.array(z.number().int().positive()),
+    })
+    .strict() satisfies z.ZodType<{ ids: number[] }>;
+
   static UPDATE = {};
 }

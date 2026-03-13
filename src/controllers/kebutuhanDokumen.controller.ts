@@ -383,12 +383,7 @@ export class KebutuhanDokumenController {
         return ResponseResult.error(res, 500, "gagal delete kebutuhan dokumen");
 
       // return
-      return ResponseResult.success<null>(
-        null,
-        res,
-        200,
-        "success delete kebutuhan dokumen",
-      );
+      return ResponseResult.successNoContent(null, res, "success delete");
     } catch (error) {
       next(error);
     }

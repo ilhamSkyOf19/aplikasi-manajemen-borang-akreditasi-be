@@ -337,7 +337,7 @@ export class PicController {
       }
 
       // return success
-      return ResponseResult.success<null>(null, res, 200, "success delete pic");
+      return ResponseResult.successNoContent(null, res, "success delete pic");
     } catch (error) {
       next(error);
     }

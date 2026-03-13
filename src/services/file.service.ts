@@ -3,6 +3,7 @@ import multer, { FileFilterCallback } from "multer";
 import fs from "fs";
 import path from "path";
 import fsAsync from "fs/promises";
+import driveApi from "../configs/driveapi.config";
 
 type FileConfig = {
   allowedMimeTypes?: RegExp;
@@ -52,19 +53,12 @@ export class FileService {
 
   //   delete file
   static async deleteFile(path: string): Promise<void> {
-    try {
-      // check file
-      await fsAsync.access(path);
+    // check file
+    await fsAsync.access(path);
 
-      // delete file
-      await fsAsync.unlink(path);
-
-      console.log("file deleted");
-    } catch (error) {
-      // cek error
-      console.log(error);
-      console.warn("file not found");
-    }
+    // delete file
+    await fsAsync.unlink(path);
+    console.log("file deleted");
   }
 
   static async deleteFiles(files: Express.Multer.File[]): Promise<void> {
@@ -88,33 +82,72 @@ export class FileService {
     fileName: string,
     filePath: string,
   ): Promise<{ success: boolean; message: string }> {
-    // cek file path
-    if (!filePath || !fileName)
-      return {
-        success: false,
-        message: "File not exist",
-      };
+    if (!filePath || !fileName) {
+      throw new Error(`Invalid path or filename: ${fileName}`);
+    }
 
-    // path file
     const filePathFull = path.join(
       process.cwd(),
       `public/uploads/${filePath}/${fileName}`,
     );
 
-    // delete file
-    try {
-      // cek file
-      await fsAsync.access(filePathFull);
-      // delete file
-      await fsAsync.unlink(filePathFull);
+    await fsAsync.access(filePathFull);
+    await fsAsync.unlink(filePathFull);
 
+    return {
+      success: true,
+      message: "File deleted successfully",
+    };
+  }
+
+  // delete multiple
+  static async deleteMultipleFilesFormPath(
+    files: { fileName: string; filePath: string }[],
+  ): Promise<{ success: boolean; message: string; file: string }[]> {
+    // delete
+    const results = await Promise.allSettled(
+      files.map(({ fileName, filePath }) =>
+        this.deleteFormPath(fileName, filePath),
+      ),
+    );
+
+    // result
+    return results.map((result, index) => {
+      const file = files[index].fileName;
+
+      // check
+      if (result.status === "fulfilled") {
+        return {
+          success: true,
+          message: result.value.message,
+          file,
+        };
+      }
+
+      // error
+      return {
+        success: false,
+        message: result.reason?.message ?? "Failed to delete",
+        file,
+      };
+    });
+  }
+
+  // delete form gdrive
+  static async deleteFileFormGDrive(
+    fileId: string,
+  ): Promise<{ success: boolean; message: string }> {
+    const result = await driveApi.files.delete({
+      fileId,
+    });
+
+    // check result
+    if (result.status === 204) {
       return {
         success: true,
         message: "File deleted successfully",
       };
-    } catch (error) {
-      // cek error
-      console.log(error);
+    } else {
       return {
         success: false,
         message: "File not found or failed to delete",

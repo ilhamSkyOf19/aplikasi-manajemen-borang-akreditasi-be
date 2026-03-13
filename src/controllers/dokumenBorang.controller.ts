@@ -100,7 +100,10 @@ export class DokumenBorangController {
             oldDokumenIds as number[],
           );
 
-          if (findDokumenBorang.length !== oldDokumenIds.length) {
+          if (
+            findDokumenBorang &&
+            findDokumenBorang.length !== oldDokumenIds.length
+          ) {
             return ResponseResult.error(res, 400, "File lama tidak ditemukan");
           }
         }
@@ -314,6 +317,87 @@ export class DokumenBorangController {
 
       // call service
       await DokumenBorangService.downloadMultipleFile(filenames, res);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // delete dokumen borang
+  static async deleteDokumenBorang(
+    req: Request<{}, {}, { ids: number[] }>,
+    res: Response<ResponseStructure<null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get data from body
+      const { ids } = req.body;
+
+      // find dokumen borang
+      const findDokumenBorang = await DokumenBorangService.findByIds(ids);
+
+      // check
+      if (!findDokumenBorang) {
+        return ResponseResult.error(res, 404, "dokumen borang not found");
+      }
+
+      // check
+      if (findDokumenBorang.length === 0) {
+        return ResponseResult.error(res, 404, "dokumen borang not found");
+      }
+
+      // delete dokumen borang
+      await DokumenBorangService.deleteByIds(ids);
+
+      // get filename
+      const filenameFormSistem = findDokumenBorang
+        .filter((item) => item.dokumen.filename && !item.dokumen.fileId)
+        .map((item) => item.dokumen.filename);
+
+      // delete dokumen borang by filename
+      if (filenameFormSistem && filenameFormSistem.length > 0) {
+        const resultDeleteFromSistem =
+          await FileService.deleteMultipleFilesFormPath(
+            filenameFormSistem.map((item) => ({
+              fileName: item,
+              filePath: "dokumen-borang",
+            })),
+          );
+
+        // error
+        const catchError = resultDeleteFromSistem.find((item) => !item.success);
+
+        // check
+        if (catchError) {
+          return ResponseResult.error(
+            res,
+            404,
+            `${catchError.file} : ${catchError.message}`,
+          );
+        }
+      }
+
+      // get file id
+      const fileId = findDokumenBorang
+        .filter((item) => item.dokumen.fileId)
+        .map((item) => item.dokumen.fileId);
+
+      // check
+      if (fileId && fileId.length > 0) {
+        const result = await Promise.all(
+          fileId.map((item) => FileService.deleteFileFormGDrive(item!)),
+        );
+
+        // check
+        const catchError = result.find((item) => item.success === false);
+
+        // check error
+        if (catchError) {
+          return ResponseResult.error(res, 404, catchError.message);
+        }
+      }
+
+      // return success
+      return ResponseResult.successNoContent(null, res, "success delete");
     } catch (error) {
       next(error);
     }

@@ -21,6 +21,7 @@ import fs from "fs";
 import { FileService } from "./file.service";
 import { Response } from "express";
 import archiver from "archiver";
+import driveApi from "../configs/driveapi.config";
 
 export class DokumenBorangService {
   private static folderPath = path.join(
@@ -39,6 +40,7 @@ export class DokumenBorangService {
       lokasiFile: LokasiFile;
       picId: number;
       assignedBy: number;
+      fileId?: string;
     },
   ): Promise<ResponseCreateDokumenBorangType | null> {
     const dokumen = await tx.dokumenBorang.create({
@@ -48,6 +50,7 @@ export class DokumenBorangService {
         lokasi_file: data.lokasiFile,
         status: Status.menunggu,
         uploadedById: data.uploadedBy,
+        file_id: data.fileId,
       },
     });
 
@@ -61,14 +64,72 @@ export class DokumenBorangService {
   }
 
   // find dokumen borang by id
-  static async findByIds(ids: number[]) {
-    return await prisma.dokumenBorang.findMany({
+  static async findByIds(
+    ids: number[],
+  ): Promise<ResponseDokumenBorangType[] | null> {
+    const result = await prisma.dokumenBorang.findMany({
       where: {
         id: {
           in: ids,
         },
       },
+      select: {
+        id: true,
+        filename: true,
+        keterangan: true,
+        lokasi_file: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        file_id: true,
+        picDokumen: {
+          select: {
+            assignedBy: {
+              select: {
+                id: true,
+                nama: true,
+                email: true,
+              },
+            },
+          },
+        },
+        uploadedBy: {
+          select: {
+            id: true,
+            nama: true,
+            email: true,
+          },
+        },
+      },
     });
+
+    // check
+    if (!result) return null;
+
+    return result.map((item) =>
+      toResponseDokumenBorangType({
+        dokumen: {
+          id: item.id,
+          filename: item.filename,
+          keterangan: item.keterangan,
+          status: item.status as Status,
+          lokasiFile: item.lokasi_file as LokasiFile,
+          fileId: item.file_id,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+        },
+        assignedBy: {
+          id: item.picDokumen[0].assignedBy.id,
+          nama: item.picDokumen[0].assignedBy.nama,
+          email: item.picDokumen[0].assignedBy.email,
+        },
+        uploadedBy: {
+          id: item.uploadedBy.id,
+          nama: item.uploadedBy.nama,
+          email: item.uploadedBy.email,
+        },
+      }),
+    );
   }
 
   // create pic dokumen
@@ -128,6 +189,7 @@ export class DokumenBorangService {
                     updatedAt: true,
                     status: true,
                     lokasi_file: true,
+                    file_id: true,
                     uploadedBy: {
                       select: {
                         id: true,
@@ -154,10 +216,16 @@ export class DokumenBorangService {
         kriteria: result.pic.kebutuhanDokumen.kriteria,
         pendekatan: result.pic.kebutuhanDokumen.pendekatan,
         dokumenBorang: result.pic.picDokumen.map((item) => ({
-          ...item.dokumenBorang,
+          id: item.dokumenBorang.id,
+          uploadedBy: item.dokumenBorang.uploadedBy,
           assignedBy: item.assignedBy,
           dokumen: {
-            ...item.dokumenBorang,
+            id: item.dokumenBorang.id,
+            filename: item.dokumenBorang.filename,
+            keterangan: item.dokumenBorang.keterangan,
+            fileId: item.dokumenBorang.file_id,
+            createdAt: item.dokumenBorang.createdAt,
+            updatedAt: item.dokumenBorang.updatedAt,
             lokasiFile: item.dokumenBorang.lokasi_file as LokasiFile,
             status: item.dokumenBorang.status as Status,
           },
@@ -218,6 +286,7 @@ export class DokumenBorangService {
                 lokasiFile: LokasiFile.GDRIVE,
                 picId: picId,
                 assignedBy: assignedBy,
+                fileId: gdrive.fileId,
               });
             } else {
               const folder = "public/uploads/dokumen-borang";
@@ -316,7 +385,6 @@ export class DokumenBorangService {
                   select: {
                     id: true,
                     keterangan: true,
-
                     kebutuhanDokumen: {
                       select: {
                         id: true,
@@ -627,6 +695,7 @@ export class DokumenBorangService {
         status: true,
         createdAt: true,
         updatedAt: true,
+        file_id: true,
         picDokumen: {
           select: {
             assignedBy: {
@@ -656,6 +725,7 @@ export class DokumenBorangService {
           keterangan: item.keterangan,
           status: item.status as Status,
           lokasiFile: item.lokasi_file as LokasiFile,
+          fileId: item.file_id,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
         },
@@ -690,6 +760,71 @@ export class DokumenBorangService {
     });
 
     return result.map((item) => item.filename);
+  }
+
+  // find dokumen borang by id
+  static async dokumenBorangById(
+    id: number,
+  ): Promise<ResponseDokumenBorangType | null> {
+    const result = await prisma.dokumenBorang.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        filename: true,
+        keterangan: true,
+        lokasi_file: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        file_id: true,
+        picDokumen: {
+          select: {
+            assignedBy: {
+              select: {
+                id: true,
+                nama: true,
+                email: true,
+              },
+            },
+          },
+        },
+        uploadedBy: {
+          select: {
+            id: true,
+            nama: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // check result
+    if (!result) return null;
+
+    return toResponseDokumenBorangType({
+      dokumen: {
+        id: result.id,
+        filename: result.filename,
+        keterangan: result.keterangan,
+        status: result.status as Status,
+        lokasiFile: result.lokasi_file as LokasiFile,
+        fileId: result.file_id,
+        createdAt: result.createdAt,
+        updatedAt: result.updatedAt,
+      },
+      assignedBy: {
+        id: result.picDokumen[0].assignedBy.id,
+        nama: result.picDokumen[0].assignedBy.nama,
+        email: result.picDokumen[0].assignedBy.email,
+      },
+      uploadedBy: {
+        id: result.uploadedBy.id,
+        nama: result.uploadedBy.nama,
+        email: result.uploadedBy.email,
+      },
+    });
   }
 
   // download file
@@ -745,5 +880,18 @@ export class DokumenBorangService {
     }
 
     await archive.finalize();
+  }
+
+  // delete dokumen borang by ids
+  static async deleteByIds(ids: number[]): Promise<boolean> {
+    const result = await prisma.dokumenBorang.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    return result ? true : false;
   }
 }

@@ -255,10 +255,9 @@ export class TimAkreditasiController {
       }
 
       // return success
-      return ResponseResult.success<null>(
+      return ResponseResult.successNoContent(
         null,
         res,
-        200,
         "Success delete tim akreditasi",
       );
     } catch (error) {

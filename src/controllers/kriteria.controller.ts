@@ -199,12 +199,7 @@ export class KriteriaController {
       await NotifikasiService.notifyKriteriaDihapus(service.namaKriteria);
 
       // return
-      return ResponseResult.success<null>(
-        null,
-        res,
-        200,
-        "success delete kriteria",
-      );
+      return ResponseResult.successNoContent(null, res, "success delete");
     } catch (error) {
       next(error);
     }
