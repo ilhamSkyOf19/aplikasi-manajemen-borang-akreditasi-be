@@ -7,10 +7,8 @@ import {
   KriteriaGrouped,
   PicItem,
   ResponseCreateDokumenBorangType,
-  ResponseDaftarDokumenBorangByKebutuhanDokumenType,
   ResponseDokumenBorangType,
   toResponseCreateDokumenBorangType,
-  toResponseDaftarDokumenBorangByKebutuhanDokumenType,
   toResponseDokumenBorangType,
 } from "../models/dokumenBorang.model";
 import { LokasiFile, Status } from "../utils/contstanst";
@@ -335,7 +333,7 @@ export class DokumenBorangService {
   }
 
   // read daftar dokumen by user id
-  static async findDaftarDokumen(
+  static async readDaftarDokumen(
     userId: number,
     pagination: PaginationType,
   ): Promise<DaftarDokumenBorangByKriteriaWithMeta | null> {
@@ -593,6 +591,7 @@ export class DokumenBorangService {
           select: {
             picTimAkreditasi: {
               where: {
+                // ← TAMBAHKAN INI
                 pic: {
                   kebutuhanDokumen: {
                     namaDokumen: search ? { contains: search } : {},
@@ -674,92 +673,74 @@ export class DokumenBorangService {
   // get dokumen borang by kebutuhan dokumentasi id
   static async findDokumenBorangByKebutuhanDokumentasiId(
     kebutuhanDokumentasiId: number,
-  ): Promise<ResponseDaftarDokumenBorangByKebutuhanDokumenType | null> {
+  ): Promise<ResponseDokumenBorangType[] | null> {
     // call db
-    const result = await prisma.kebutuhan_Dokumen.findFirst({
+    const result = await prisma.dokumenBorang.findMany({
       where: {
-        id: kebutuhanDokumentasiId,
-      },
-      select: {
-        id: true,
-        namaDokumen: true,
-        pic: {
-          where: {
-            kebutuhanDokumen: {
-              id: kebutuhanDokumentasiId,
-            },
-          },
-          select: {
-            picDokumen: {
-              select: {
-                assignedBy: {
-                  select: {
-                    id: true,
-                    nama: true,
-                    email: true,
-                  },
-                },
-                dokumenBorang: {
-                  select: {
-                    id: true,
-                    filename: true,
-                    keterangan: true,
-                    file_id: true,
-                    status: true,
-                    lokasi_file: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    uploadedBy: {
-                      select: {
-                        id: true,
-                        nama: true,
-                        email: true,
-                      },
-                    },
-                  },
-                },
+        picDokumen: {
+          some: {
+            pic: {
+              kebutuhanDokumen: {
+                id: kebutuhanDokumentasiId,
               },
             },
           },
         },
       },
-    });
-
-    // if not found
-    if (!result) return null;
-
-    return toResponseDaftarDokumenBorangByKebutuhanDokumenType({
-      kebutuhanDokumen: {
-        id: result?.id,
-        namaDokumen: result?.namaDokumen,
-      },
-      daftarDokumen: result?.pic.flatMap((pd) =>
-        pd.picDokumen.map((item) =>
-          toResponseDokumenBorangType({
-            dokumen: {
-              id: item.dokumenBorang.id,
-              filename: item.dokumenBorang.filename,
-              keterangan: item.dokumenBorang.keterangan,
-              status: item.dokumenBorang.status as Status,
-              lokasiFile: item.dokumenBorang.lokasi_file as LokasiFile,
-              fileId: item.dokumenBorang.file_id,
-              createdAt: item.dokumenBorang.createdAt,
-              updatedAt: item.dokumenBorang.updatedAt,
-            },
+      select: {
+        id: true,
+        filename: true,
+        keterangan: true,
+        lokasi_file: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        file_id: true,
+        picDokumen: {
+          select: {
             assignedBy: {
-              id: item.assignedBy.id,
-              nama: item.assignedBy.nama,
-              email: item.assignedBy.email,
+              select: {
+                id: true,
+                nama: true,
+                email: true,
+              },
             },
-            uploadedBy: {
-              id: item.dokumenBorang.uploadedBy.id,
-              nama: item.dokumenBorang.uploadedBy.nama,
-              email: item.dokumenBorang.uploadedBy.email,
-            },
-          }),
-        ),
-      ),
+          },
+        },
+        uploadedBy: {
+          select: {
+            id: true,
+            nama: true,
+            email: true,
+          },
+        },
+      },
     });
+
+    return result.map((item) =>
+      toResponseDokumenBorangType({
+        dokumen: {
+          id: item.id,
+          filename: item.filename,
+          keterangan: item.keterangan,
+          status: item.status as Status,
+          lokasiFile: item.lokasi_file as LokasiFile,
+          fileId: item.file_id,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+        },
+        assignedBy: {
+          id: item.picDokumen[0].assignedBy.id,
+          nama: item.picDokumen[0].assignedBy.nama,
+          email: item.picDokumen[0].assignedBy.email,
+        },
+        uploadedBy: {
+          id: item.uploadedBy.id,
+          nama: item.uploadedBy.nama,
+          email: item.uploadedBy.email,
+        },
+      }),
+    );
   }
 
   // check filenames by filename

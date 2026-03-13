@@ -36,7 +36,7 @@ dokumenBorangRoute.get(
 
 // read dokumentasi borang by kebutuhan dokumen id
 dokumenBorangRoute.get(
-  "/read-daftar-dokumen-borang/:kebutuhanDokumenId",
+  "/read-dokumen-borang/:kebutuhanDokumenId",
   authMiddleware,
   DokumenBorangController.findDokumenBorangByKebutuhanDokumenId,
 );
