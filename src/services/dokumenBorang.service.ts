@@ -264,57 +264,54 @@ export class DokumenBorangService {
     const preparedFiles: PreparedFile[] = [];
 
     try {
-      await Promise.all(
-        files.map(async (file, index) => {
-          if (file.useOldFile) {
-            preparedFiles.push({
-              useOldFile: true,
-              oldDokumenBorangId: file.oldDokumenBorangId,
-            });
-            return;
-          }
+      let uploadIndex = 0;
 
-          const multerFile = uploadedFiles[index];
-          const ext = path.extname(multerFile.originalname);
-          const finalName = `${file.filename}${ext}`;
+      for (const file of files) {
+        if (file.useOldFile) {
+          preparedFiles.push({
+            useOldFile: true,
+            oldDokumenBorangId: file.oldDokumenBorangId,
+          });
+          continue;
+        }
 
-          if (file.lokasiFile === LokasiFile.GDRIVE) {
-            console.time("gdrive-upload");
-            const gdrive = await DriveApiService.upload({
-              fileBuffer: multerFile.buffer,
-              filename: finalName,
-              mimeType: multerFile.mimetype,
-              allowMimeType: ["application/pdf"],
-            });
-            console.timeEnd("gdrive-upload");
+        const multerFile = uploadedFiles[uploadIndex++];
+        const ext = path.extname(multerFile.originalname);
+        const finalName = `${file.filename}${ext}`;
 
-            uploadedGdriveIds.push(gdrive.fileId!);
-            preparedFiles.push({
-              useOldFile: false,
-              filename: finalName,
-              keterangan: file.keterangan,
-              lokasiFile: LokasiFile.GDRIVE,
-              fileId: gdrive.fileId,
-            });
-          } else {
-            const folder = "public/uploads/dokumen-borang";
-            if (!fs.existsSync(folder))
-              fs.mkdirSync(folder, { recursive: true });
+        if (file.lokasiFile === LokasiFile.GDRIVE) {
+          const gdrive = await DriveApiService.upload({
+            fileBuffer: multerFile.buffer,
+            filename: finalName,
+            mimeType: multerFile.mimetype,
+            allowMimeType: ["application/pdf"],
+          });
 
-            const filePath = path.join(folder, finalName);
-            fs.writeFileSync(filePath, multerFile.buffer);
+          uploadedGdriveIds.push(gdrive.fileId!);
+          preparedFiles.push({
+            useOldFile: false,
+            filename: finalName,
+            keterangan: file.keterangan,
+            lokasiFile: LokasiFile.GDRIVE,
+            fileId: gdrive.fileId,
+          });
+        } else {
+          const folder = "public/uploads/dokumen-borang";
+          if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
 
-            uploadedSistemPaths.push(filePath);
-            preparedFiles.push({
-              useOldFile: false,
-              filename: finalName,
-              keterangan: file.keterangan,
-              lokasiFile: LokasiFile.SISTEM,
-              filePath,
-            });
-          }
-        }),
-      );
+          const filePath = path.join(folder, finalName);
+          fs.writeFileSync(filePath, multerFile.buffer);
+
+          uploadedSistemPaths.push(filePath);
+          preparedFiles.push({
+            useOldFile: false,
+            filename: finalName,
+            keterangan: file.keterangan,
+            lokasiFile: LokasiFile.SISTEM,
+            filePath,
+          });
+        }
+      }
 
       // ✅ STEP 2: Semua operasi DB dalam transaction (cepat, tidak ada external call)
       const result = await prisma.$transaction(async (tx) => {

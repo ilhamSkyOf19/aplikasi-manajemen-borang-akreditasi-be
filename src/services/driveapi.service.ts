@@ -34,6 +34,7 @@ export class DriveApiService {
         mimeType,
         body: bufferStream,
       },
+      fields: "id",
     });
 
     return {
