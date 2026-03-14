@@ -59,6 +59,9 @@ export const toResponseDokumenBorangType = (
 
 // response dokumen borang by kebutuhan dokumen
 export interface ResponseDaftarDokumenBorangByKebutuhanDokumenType {
+  pic: {
+    id?: number | null;
+  };
   kebutuhanDokumen: {
     id: number;
     namaDokumen: string;

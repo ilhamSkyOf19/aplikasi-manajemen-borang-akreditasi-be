@@ -241,94 +241,113 @@ export class DokumenBorangService {
     req: Omit<CreateDokumenBorangType, "filename">,
     uploadedFiles: Express.Multer.File[],
   ): Promise<ResponseCreateDokumenBorangType | null> {
+    // destruct
     const { assignedBy, uploadedBy, picId, files } = req;
 
+    // Prepared data
     const uploadedGdriveIds: string[] = [];
     const uploadedSistemPaths: string[] = [];
 
     let uploadIndex = 0;
 
+    // Prepared file data setelah upload external
+    type PreparedFile = {
+      useOldFile: boolean;
+      oldDokumenBorangId?: number;
+      filename?: string;
+      keterangan?: string;
+      lokasiFile?: LokasiFile;
+      fileId?: string;
+      filePath?: string;
+    };
+
+    const preparedFiles: PreparedFile[] = [];
+
     try {
+      await Promise.all(
+        files.map(async (file, index) => {
+          if (file.useOldFile) {
+            preparedFiles.push({
+              useOldFile: true,
+              oldDokumenBorangId: file.oldDokumenBorangId,
+            });
+            return;
+          }
+
+          const multerFile = uploadedFiles[index];
+          const ext = path.extname(multerFile.originalname);
+          const finalName = `${file.filename}${ext}`;
+
+          if (file.lokasiFile === LokasiFile.GDRIVE) {
+            console.time("gdrive-upload");
+            const gdrive = await DriveApiService.upload({
+              fileBuffer: multerFile.buffer,
+              filename: finalName,
+              mimeType: multerFile.mimetype,
+              allowMimeType: ["application/pdf"],
+            });
+            console.timeEnd("gdrive-upload");
+
+            uploadedGdriveIds.push(gdrive.fileId!);
+            preparedFiles.push({
+              useOldFile: false,
+              filename: finalName,
+              keterangan: file.keterangan,
+              lokasiFile: LokasiFile.GDRIVE,
+              fileId: gdrive.fileId,
+            });
+          } else {
+            const folder = "public/uploads/dokumen-borang";
+            if (!fs.existsSync(folder))
+              fs.mkdirSync(folder, { recursive: true });
+
+            const filePath = path.join(folder, finalName);
+            fs.writeFileSync(filePath, multerFile.buffer);
+
+            uploadedSistemPaths.push(filePath);
+            preparedFiles.push({
+              useOldFile: false,
+              filename: finalName,
+              keterangan: file.keterangan,
+              lokasiFile: LokasiFile.SISTEM,
+              filePath,
+            });
+          }
+        }),
+      );
+
+      // ✅ STEP 2: Semua operasi DB dalam transaction (cepat, tidak ada external call)
       const result = await prisma.$transaction(async (tx) => {
         return Promise.all(
-          files.map(async (file) => {
-            // file lama - create pivot pic dokumen borang
+          preparedFiles.map(async (file) => {
             if (file.useOldFile) {
               return DokumenBorangService.createPicDokumen(tx, {
                 dokumenBorangId: file.oldDokumenBorangId!,
-                picId: picId,
-                assignedBy: assignedBy,
+                picId,
+                assignedBy,
               });
             }
 
-            // multer
-            const multerFile = uploadedFiles[uploadIndex++];
-
-            // generate filename
-            const ext = path.extname(multerFile.originalname);
-            const finalName = `${file.filename}${ext}`;
-
-            // check lokasi file
-            if (file.lokasiFile === LokasiFile.GDRIVE) {
-              const gdrive = await DriveApiService.upload({
-                fileBuffer: multerFile.buffer,
-                filename: finalName,
-                mimeType: multerFile.mimetype,
-                allowMimeType: ["application/pdf"],
-              });
-
-              // push gdrive id
-              uploadedGdriveIds.push(gdrive.fileId!);
-
-              // create data dokumen borang
-              return await this.createWithFile(tx, {
-                filename: finalName,
-                uploadedBy: uploadedBy,
-                keterangan: file.keterangan!,
-                lokasiFile: LokasiFile.GDRIVE,
-                picId: picId,
-                assignedBy: assignedBy,
-                fileId: gdrive.fileId,
-              });
-            } else {
-              const folder = "public/uploads/dokumen-borang";
-
-              // check existing folder
-              if (!fs.existsSync(folder))
-                fs.mkdirSync(folder, { recursive: true });
-
-              // file path
-              const filePath = path.join(folder, finalName);
-
-              // create file
-              fs.writeFileSync(filePath, multerFile.buffer);
-
-              // push to upload sistem paths
-              uploadedSistemPaths.push(filePath);
-
-              // create with file
-              return await this.createWithFile(tx, {
-                filename: finalName,
-                uploadedBy: uploadedBy,
-                keterangan: file.keterangan!,
-                lokasiFile: LokasiFile.SISTEM,
-                picId: picId,
-                assignedBy: assignedBy,
-              });
-            }
+            return this.createWithFile(tx, {
+              filename: file.filename!,
+              uploadedBy,
+              keterangan: file.keterangan!,
+              lokasiFile: file.lokasiFile!,
+              picId,
+              assignedBy,
+              fileId: file.fileId,
+            });
           }),
         );
       });
 
       return result[0];
     } catch (error) {
-      // delete file
       await Promise.all(
         uploadedGdriveIds.map((id) => DriveApiService.deleteFile(id)),
       );
 
-      // delete files
-      uploadedSistemPaths.forEach((path) => FileService.deleteFile(path));
+      uploadedSistemPaths.forEach((p) => FileService.deleteFile(p));
 
       throw error;
     }
@@ -690,6 +709,7 @@ export class DokumenBorangService {
             },
           },
           select: {
+            id: true,
             picDokumen: {
               select: {
                 assignedBy: {
@@ -729,36 +749,39 @@ export class DokumenBorangService {
     if (!result) return null;
 
     return toResponseDaftarDokumenBorangByKebutuhanDokumenType({
+      pic: {
+        id: result?.pic?.id,
+      },
       kebutuhanDokumen: {
         id: result?.id,
         namaDokumen: result?.namaDokumen,
       },
-      daftarDokumen: result?.pic.flatMap((pd) =>
-        pd.picDokumen.map((item) =>
-          toResponseDokumenBorangType({
-            dokumen: {
-              id: item.dokumenBorang.id,
-              filename: item.dokumenBorang.filename,
-              keterangan: item.dokumenBorang.keterangan,
-              status: item.dokumenBorang.status as Status,
-              lokasiFile: item.dokumenBorang.lokasi_file as LokasiFile,
-              fileId: item.dokumenBorang.file_id,
-              createdAt: item.dokumenBorang.createdAt,
-              updatedAt: item.dokumenBorang.updatedAt,
-            },
-            assignedBy: {
-              id: item.assignedBy.id,
-              nama: item.assignedBy.nama,
-              email: item.assignedBy.email,
-            },
-            uploadedBy: {
-              id: item.dokumenBorang.uploadedBy.id,
-              nama: item.dokumenBorang.uploadedBy.nama,
-              email: item.dokumenBorang.uploadedBy.email,
-            },
-          }),
-        ),
-      ),
+      daftarDokumen: result?.pic
+        ? result?.pic.picDokumen?.map((item) =>
+            toResponseDokumenBorangType({
+              dokumen: {
+                id: item.dokumenBorang.id,
+                filename: item.dokumenBorang.filename,
+                keterangan: item.dokumenBorang.keterangan,
+                status: item.dokumenBorang.status as Status,
+                lokasiFile: item.dokumenBorang.lokasi_file as LokasiFile,
+                fileId: item.dokumenBorang.file_id,
+                createdAt: item.dokumenBorang.createdAt,
+                updatedAt: item.dokumenBorang.updatedAt,
+              },
+              assignedBy: {
+                id: item.assignedBy.id,
+                nama: item.assignedBy.nama,
+                email: item.assignedBy.email,
+              },
+              uploadedBy: {
+                id: item.dokumenBorang.uploadedBy.id,
+                nama: item.dokumenBorang.uploadedBy.nama,
+                email: item.dokumenBorang.uploadedBy.email,
+              },
+            }),
+          )
+        : [],
     });
   }
 

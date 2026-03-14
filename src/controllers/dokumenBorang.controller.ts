@@ -78,7 +78,12 @@ export class DokumenBorangController {
 
         // check filename length
         if (filenamesCheck.length > 0) {
-          return ResponseResult.error(res, 400, "Filename sudah digunakan");
+          return ResponseResult.error(
+            res,
+            400,
+            "Filename sudah digunakan",
+            filenamesCheck,
+          );
         }
       }
 

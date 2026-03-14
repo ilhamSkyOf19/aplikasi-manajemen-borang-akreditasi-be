@@ -5,6 +5,7 @@ export interface ResponseStructure<T> {
   meta: {
     statusCode: number;
     message: string;
+    customField?: string[];
   };
   data: T;
 }
@@ -45,11 +46,13 @@ export class ResponseResult {
     res: Response<ResponseStructure<null>>,
     statusCode?: number,
     message?: string,
+    customField?: string[],
   ) {
     return res.status(statusCode || 500).json({
       meta: {
         statusCode: statusCode || 500,
         message: message || "error",
+        customField: customField,
       },
       data: null,
     });

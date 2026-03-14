@@ -74,7 +74,7 @@ model Kebutuhan_Dokumen {
 
   kriteria   Kriteria   @relation(fields: [kriteriaId], references: [id], onDelete: Cascade)
   pendekatan Pendekatan @relation(fields: [pendekatanId], references: [id], onDelete: Cascade)
-  pic        Pic[]
+  pic        Pic?
   riwayat    Riwayat[]  @relation("RiwayatKebutuhanDokumen")
 
   @@map("kebutuhan_dokumen")

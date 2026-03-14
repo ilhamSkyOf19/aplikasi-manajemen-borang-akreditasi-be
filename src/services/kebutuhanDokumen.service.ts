@@ -127,14 +127,12 @@ export class KebutuhanDokumenService {
     const result = await prisma.kebutuhan_Dokumen.count({
       where: {
         pic: {
-          some: {
-            picTimAkreditasi: {
-              some: {
-                timAkreditasi: {
-                  userTimAkreditasi: {
-                    some: {
-                      userId,
-                    },
+          picTimAkreditasi: {
+            some: {
+              timAkreditasi: {
+                userTimAkreditasi: {
+                  some: {
+                    userId,
                   },
                 },
               },
