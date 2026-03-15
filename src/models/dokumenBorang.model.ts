@@ -160,3 +160,14 @@ export interface DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta {
   data: DaftarKebutuhanDokumentasiItemType[];
   meta: MetaType;
 }
+
+// dokumen borang for choose response
+export interface ResponseDokumenBorangChooseWithMetaType {
+  data: { id: number; filename: string }[];
+  meta: MetaType;
+}
+
+// to response dokumen borang choose type
+export const toResponseDokumenBorangChooseWithMetaType = (
+  dokumenBorang: ResponseDokumenBorangChooseWithMetaType,
+): ResponseDokumenBorangChooseWithMetaType => dokumenBorang;

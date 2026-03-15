@@ -8,6 +8,7 @@ import {
   PicItem,
   ResponseCreateDokumenBorangType,
   ResponseDaftarDokumenBorangByKebutuhanDokumenType,
+  ResponseDokumenBorangChooseWithMetaType,
   ResponseDokumenBorangType,
   toResponseCreateDokumenBorangType,
   toResponseDaftarDokumenBorangByKebutuhanDokumenType,
@@ -919,6 +920,74 @@ export class DokumenBorangService {
     }
 
     await archive.finalize();
+  }
+
+  // read choose
+  static async getDokumenBorangForChoose(
+    pagination: PaginationType,
+  ): Promise<ResponseDokumenBorangChooseWithMetaType | null> {
+    // get pagination
+    const { limit = 5, page = 1, search } = pagination;
+
+    // get current page
+    const currentPage = page < 1 ? 1 : page;
+
+    // conditional
+    const conditional = {
+      where: {
+        AND: [
+          search
+            ? {
+                filename: {
+                  contains: search,
+                },
+              }
+            : {},
+          {
+            status: {
+              not: Status.revisi,
+            },
+          },
+        ],
+      },
+    };
+
+    // get count
+    const totalData = await prisma.dokumenBorang.count(conditional);
+
+    // skip
+    const skip = (currentPage - 1) * limit;
+
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
+
+    // call db
+    const result = await prisma.dokumenBorang.findMany({
+      ...conditional,
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        filename: true,
+      },
+    });
+
+    // return result
+    return {
+      data: result.map((item) => ({
+        id: item.id,
+        filename: item.filename,
+      })),
+      meta: {
+        totalData,
+        currentPage,
+        totalPage,
+        limit,
+      },
+    };
   }
 
   // delete dokumen borang by ids

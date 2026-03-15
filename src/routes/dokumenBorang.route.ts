@@ -27,6 +27,13 @@ dokumenBorangRoute.get(
   DokumenBorangController.readDaftarDokumen,
 );
 
+// read dokumen for choose
+dokumenBorangRoute.get(
+  "/get-daftar-dokumentasi-for-choose",
+  authMiddleware,
+  DokumenBorangController.getDokumenBorangForChoose,
+);
+
 // read daftar kebutuhan dokumentasi
 dokumenBorangRoute.get(
   "/read-daftar-kebutuhan-dokumentasi/:kriteria/:pendekatan",

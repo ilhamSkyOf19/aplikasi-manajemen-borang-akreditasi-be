@@ -9,6 +9,7 @@ import {
   FileItem,
   ResponseCreateDokumenBorangType,
   ResponseDaftarDokumenBorangByKebutuhanDokumenType,
+  ResponseDokumenBorangChooseWithMetaType,
   ResponseDokumenBorangType,
 } from "../models/dokumenBorang.model";
 import checkParamsId from "../utils/checkParamsId";
@@ -18,6 +19,7 @@ import { DokumenBorangValidation } from "../validations/dokumenBorang.validation
 import { FileService } from "../services/file.service";
 import { PicService } from "../services/pic.service";
 import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
+import { checkQueryPagination } from "../utils/checkQueryPagination";
 
 export class DokumenBorangController {
   // create
@@ -408,6 +410,42 @@ export class DokumenBorangController {
 
       // return success
       return ResponseResult.successNoContent(null, res, "success delete");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // get dokumen borang for choose
+  static async getDokumenBorangForChoose(
+    req: Request<{}, {}, {}, PaginationType>,
+    res: Response<
+      ResponseStructure<ResponseDokumenBorangChooseWithMetaType | null>
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get data from query
+      const { limit, page, search } = req.query;
+
+      // check query
+      const checkQuery = checkQueryPagination(page, limit);
+
+      // check query
+      if (!checkQuery?.status) {
+        return ResponseResult.error(res, 400, "page and limit must be numbers");
+      }
+
+      // call service
+      const service = await DokumenBorangService.getDokumenBorangForChoose({
+        limit: checkQuery.limit,
+        page: checkQuery.page,
+        search,
+      });
+
+      return ResponseResult.success<ResponseDokumenBorangChooseWithMetaType | null>(
+        service,
+        res,
+      );
     } catch (error) {
       next(error);
     }
