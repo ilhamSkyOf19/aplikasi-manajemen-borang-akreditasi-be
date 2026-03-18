@@ -446,19 +446,31 @@ export class DokumenBorangService {
       await KebutuhanDokumenService.getCountKebutuhanDokumenByUserId(userId);
 
     // get count dokumen borang by user id and status
-    const countDokumenBorangDiSetujui = await prisma.dokumenBorang.count({
+    const kebutuhanDokumenList = await prisma.kebutuhan_Dokumen.findMany({
       where: {
-        picDokumen: {
-          some: {
-            pic: {
-              picTimAkreditasi: {
-                some: {
-                  timAkreditasi: {
-                    userTimAkreditasi: {
-                      some: {
-                        userId,
-                      },
-                    },
+        pic: {
+          picTimAkreditasi: {
+            some: {
+              timAkreditasi: {
+                userTimAkreditasi: {
+                  some: {
+                    userId,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+        pic: {
+          select: {
+            picDokumen: {
+              select: {
+                dokumenBorang: {
+                  select: {
+                    status: true,
                   },
                 },
               },
@@ -468,14 +480,29 @@ export class DokumenBorangService {
       },
     });
 
-    // progress
+    // get total kebutuhan
+    const totalKebutuhan = kebutuhanDokumenList.length;
+
+    // calculation dokumen is complete
+    const kebutuhanTerpenuhi = kebutuhanDokumenList.filter((kebutuhan) => {
+      // get dokumen borang dalam kebutuhan
+      const semuaDokumen = kebutuhan.pic?.picDokumen.flatMap(
+        (dokumen) => dokumen.dokumenBorang,
+      );
+
+      // check
+      if (semuaDokumen?.length === 0) return false;
+
+      return semuaDokumen?.every((dok) => dok.status === Status.disetujui);
+    }).length;
+
+    // progres
     const progress =
-      countDokumenBorangDiSetujui === 0
+      totalKebutuhan === 0
         ? 0
-        : Math.floor(
-            (countDokumenBorangDiSetujui / countKebutuhanDokumen) * 100,
-          );
-    console.log(countKebutuhanDokumen);
+        : Math.floor((kebutuhanTerpenuhi / totalKebutuhan) * 100);
+
+    console.log("progress", progress);
 
     // faltten pic
     const allPics: PicItem[] = result.flatMap((uta) =>
@@ -500,11 +527,6 @@ export class DokumenBorangService {
 
         // pendekatan id
         const pendekatanKey = pendekatan.id;
-
-        console.log(
-          "status dokumen borang :",
-          pic.picDokumen.map((pd) => pd.dokumenBorang.status),
-        );
 
         // inisialisasi kriteria jika blm ada array nya
         if (!acc[kriteriaKey]) {
@@ -542,8 +564,8 @@ export class DokumenBorangService {
       }))
       .sort((a, b) =>
         sort === "asc"
-          ? a.kriteriaId + b.kriteriaId
-          : a.kriteriaId - b.kriteriaId,
+          ? a.kriteriaId - b.kriteriaId
+          : b.kriteriaId - a.kriteriaId,
       );
 
     return {

@@ -10,7 +10,7 @@ export class DokumenBorangValidation {
       .enum(["GDRIVE", "SISTEM"] as LokasiFile[], "lokasi file tidak falid")
       .optional(),
     filename: z.string().optional(),
-    keterangan: z.string().min(1).max(1000),
+    keterangan: z.string().min(1).max(1000).optional(),
   });
 
   static readonly CREATE = z
