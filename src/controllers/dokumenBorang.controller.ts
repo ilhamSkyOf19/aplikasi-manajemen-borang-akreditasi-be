@@ -8,7 +8,7 @@ import {
   DaftarKebutuhanDokumenetasiByKriteriaPendekatanWithMeta,
   FileItem,
   ResponseCreateDokumenBorangType,
-  ResponseDaftarDokumenBorangByKebutuhanDokumenType,
+  ResponseDaftarDokumenBorangByPicType,
   ResponseDokumenBorangChooseWithMetaType,
   ResponseDokumenBorangType,
 } from "../models/dokumenBorang.model";
@@ -18,7 +18,6 @@ import { validation } from "../validations/validation";
 import { DokumenBorangValidation } from "../validations/dokumenBorang.validation";
 import { FileService } from "../services/file.service";
 import { PicService } from "../services/pic.service";
-import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
 
 export class DokumenBorangController {
@@ -260,7 +259,7 @@ export class DokumenBorangController {
   static async findDokumenBorangByKebutuhanDokumenId(
     req: Request<{ kebutuhanDokumenId: string }>,
     res: Response<
-      ResponseStructure<ResponseDaftarDokumenBorangByKebutuhanDokumenType | null>
+      ResponseStructure<ResponseDaftarDokumenBorangByPicType | null>
     >,
     next: NextFunction,
   ) {
@@ -271,19 +270,6 @@ export class DokumenBorangController {
       // check id
       const checkId = checkParamsId(res, kebutuhanDokumenId);
 
-      // check kebutuhan dokumentasi
-      const checkKebutuhanDokumentasi = await KebutuhanDokumenService.findById(
-        checkId as number,
-      );
-
-      if (!checkKebutuhanDokumentasi) {
-        return ResponseResult.error(
-          res,
-          404,
-          "kebutuhan dokumentasi not found",
-        );
-      }
-
       // call service
       const service =
         await DokumenBorangService.findDokumenBorangByKebutuhanDokumentasiId(
@@ -291,7 +277,7 @@ export class DokumenBorangController {
         );
 
       // return success
-      return ResponseResult.success<ResponseDaftarDokumenBorangByKebutuhanDokumenType | null>(
+      return ResponseResult.success<ResponseDaftarDokumenBorangByPicType | null>(
         service,
         res,
         200,

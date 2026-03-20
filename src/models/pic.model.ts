@@ -1,5 +1,7 @@
 import { MetaType, Status } from "../utils/contstanst";
 import { IKebutuhanDokumen } from "./kebutuhanDokumen.model";
+import { ResponseKriteriaType } from "./kriteria.model";
+import { IPendekatan } from "./pendekatan.model";
 import { ITimAkreditasi } from "./timAkreditasi.model";
 import { PayloadUserType } from "./user.model";
 
@@ -9,23 +11,26 @@ export interface IPic {
   timAkreditasi: (Omit<ITimAkreditasi, "user"> & {
     anggota: PayloadUserType[];
   })[];
-  kebutuhanDokumen: Omit<IKebutuhanDokumen, "createdAt" | "updatedAt">;
-  statusRiwayat: Status | null;
-  status: Status;
+  namaDokumen: string;
   keterangan: string;
+  kriteria: Omit<ResponseKriteriaType, "revisi" | "createdAt" | "updatedAt">;
+  pendekatan: IPendekatan;
   createdAt: Date;
   updatedAt: Date;
+  status: Status;
 }
 
 // create
 export interface CreatePicType {
+  namaDokumen: string;
+  kriteriaId: number;
+  pendekatanId: number;
   timAkreditasiId: number[];
-  kebutuhanDokumenId: number;
   keterangan: string;
 }
 
 // update
-export interface UpdatePicType extends Partial<Omit<CreatePicType, "status">> {
+export interface UpdatePicType extends Partial<CreatePicType> {
   keteranganUpdate: string;
 }
 
@@ -49,6 +54,7 @@ export const toResponsePicWithMetaType = (
 // response update status
 export interface ResponsePicUpdateStatusType {
   id: number;
+  namaDokumen: string;
   timAkreditasi: {
     id: number;
     namaTimAkreditasi: string;
@@ -57,11 +63,16 @@ export interface ResponsePicUpdateStatusType {
       nama: string;
     }[];
   }[];
-  kebutuhanDokumen: {
+  kriteria: {
     id: number;
-    namaDokumen: string;
+    kriteria: number;
+    namaKriteria: string;
   };
-
+  pendekatan: {
+    id: number;
+    tahap: string;
+    keterangan: string;
+  };
   status: string;
   keterangan: string;
   createdAt: Date;
@@ -79,19 +90,16 @@ export interface PicItem {
   id: number;
   status: Status;
   keterangan: string;
-  kebutuhanDokumen: {
+  namaDokumen: string;
+  kriteria: {
     id: number;
-    namaDokumen: string;
-    kriteria: {
-      id: number;
-      kriteria: number;
-      namaKriteria: string;
-    };
-    pendekatan: {
-      id: number;
-      tahap: string;
-      keterangan: string;
-    };
+    kriteria: number;
+    namaKriteria: string;
+  };
+  pendekatan: {
+    id: number;
+    tahap: string;
+    keterangan: string;
   };
 }
 

@@ -7,15 +7,14 @@ import {
   KriteriaGrouped,
   PicItem,
   ResponseCreateDokumenBorangType,
-  ResponseDaftarDokumenBorangByKebutuhanDokumenType,
+  ResponseDaftarDokumenBorangByPicType,
   ResponseDokumenBorangChooseWithMetaType,
   ResponseDokumenBorangType,
   toResponseCreateDokumenBorangType,
-  toResponseDaftarDokumenBorangByKebutuhanDokumenType,
+  toResponseDaftarDokumenBorangByPicType,
   toResponseDokumenBorangType,
 } from "../models/dokumenBorang.model";
 import { LokasiFile, Status } from "../utils/contstanst";
-import { KebutuhanDokumenService } from "./kebutuhanDokumen.service";
 import { PaginationType } from "../types/pagination";
 import { Prisma } from "../../generated/prisma/browser";
 import path from "path";
@@ -154,24 +153,19 @@ export class DokumenBorangService {
         pic: {
           select: {
             id: true,
-            kebutuhanDokumen: {
+            namaDokumen: true,
+            kriteria: {
               select: {
                 id: true,
-                namaDokumen: true,
-                kriteria: {
-                  select: {
-                    id: true,
-                    kriteria: true,
-                    namaKriteria: true,
-                  },
-                },
-                pendekatan: {
-                  select: {
-                    id: true,
-                    tahap: true,
-                    keterangan: true,
-                  },
-                },
+                kriteria: true,
+                namaKriteria: true,
+              },
+            },
+            pendekatan: {
+              select: {
+                id: true,
+                tahap: true,
+                keterangan: true,
               },
             },
             picDokumen: {
@@ -212,12 +206,9 @@ export class DokumenBorangService {
     return toResponseCreateDokumenBorangType({
       pic: {
         id: result.pic.id,
-      },
-      kebutuhanDokumen: {
-        id: result.pic.kebutuhanDokumen.id,
-        namaDokumen: result.pic.kebutuhanDokumen.namaDokumen,
-        kriteria: result.pic.kebutuhanDokumen.kriteria,
-        pendekatan: result.pic.kebutuhanDokumen.pendekatan,
+        namaDokumen: result.pic.namaDokumen,
+        kriteria: result.pic.kriteria,
+        pendekatan: result.pic.pendekatan,
         dokumenBorang: result.pic.picDokumen.map((item) => ({
           id: item.dokumenBorang.id,
           uploadedBy: item.dokumenBorang.uploadedBy,
@@ -370,13 +361,11 @@ export class DokumenBorangService {
           picTimAkreditasi: {
             some: {
               pic: {
-                kebutuhanDokumen: {
-                  namaDokumen: search
-                    ? {
-                        contains: search,
-                      }
-                    : {},
-                },
+                namaDokumen: search
+                  ? {
+                      contains: search,
+                    }
+                  : {},
               },
             },
           },
@@ -404,23 +393,18 @@ export class DokumenBorangService {
                   select: {
                     id: true,
                     keterangan: true,
-                    kebutuhanDokumen: {
+                    kriteria: {
                       select: {
                         id: true,
-                        kriteria: {
-                          select: {
-                            id: true,
-                            kriteria: true,
-                            namaKriteria: true,
-                          },
-                        },
-                        pendekatan: {
-                          select: {
-                            id: true,
-                            tahap: true,
-                            keterangan: true,
-                          },
-                        },
+                        kriteria: true,
+                        namaKriteria: true,
+                      },
+                    },
+                    pendekatan: {
+                      select: {
+                        id: true,
+                        tahap: true,
+                        keterangan: true,
                       },
                     },
                     picDokumen: {
@@ -441,21 +425,15 @@ export class DokumenBorangService {
       },
     });
 
-    // get count kebutuhan dokumen
-    const countKebutuhanDokumen =
-      await KebutuhanDokumenService.getCountKebutuhanDokumenByUserId(userId);
-
     // get count dokumen borang by user id and status
-    const kebutuhanDokumenList = await prisma.kebutuhan_Dokumen.findMany({
+    const picList = await prisma.pic.findMany({
       where: {
-        pic: {
-          picTimAkreditasi: {
-            some: {
-              timAkreditasi: {
-                userTimAkreditasi: {
-                  some: {
-                    userId,
-                  },
+        picTimAkreditasi: {
+          some: {
+            timAkreditasi: {
+              userTimAkreditasi: {
+                some: {
+                  userId,
                 },
               },
             },
@@ -464,15 +442,11 @@ export class DokumenBorangService {
       },
       select: {
         id: true,
-        pic: {
+        picDokumen: {
           select: {
-            picDokumen: {
+            dokumenBorang: {
               select: {
-                dokumenBorang: {
-                  select: {
-                    status: true,
-                  },
-                },
+                status: true,
               },
             },
           },
@@ -481,13 +455,13 @@ export class DokumenBorangService {
     });
 
     // get total kebutuhan
-    const totalKebutuhan = kebutuhanDokumenList.length;
+    const totalKebutuhan = picList.length;
 
     // calculation dokumen is complete
-    const kebutuhanTerpenuhi = kebutuhanDokumenList.filter((kebutuhan) => {
+    const kebutuhanTerpenuhi = picList.filter((dokumen) => {
       // get dokumen borang dalam kebutuhan
-      const semuaDokumen = kebutuhan.pic?.picDokumen.flatMap(
-        (dokumen) => dokumen.dokumenBorang,
+      const semuaDokumen = dokumen?.picDokumen.flatMap(
+        (dok) => dok.dokumenBorang,
       );
 
       // check
@@ -520,7 +494,7 @@ export class DokumenBorangService {
     const grouped = allPics.reduce<Record<number, KriteriaGrouped>>(
       (acc, pic) => {
         // destruct
-        const { kriteria, pendekatan } = pic.kebutuhanDokumen;
+        const { kriteria, pendekatan } = pic;
 
         // kriteria id
         const kriteriaKey = kriteria.id;
@@ -605,14 +579,12 @@ export class DokumenBorangService {
             },
           },
         },
-        kebutuhanDokumen: {
-          namaDokumen: search ? { contains: search } : {},
-          kriteria: {
-            kriteria,
-          },
-          pendekatan: {
-            keterangan: pendekatan.toLowerCase(),
-          },
+        namaDokumen: search ? { contains: search } : {},
+        kriteria: {
+          kriteria,
+        },
+        pendekatan: {
+          keterangan: pendekatan.toLowerCase(),
         },
       },
     });
@@ -633,14 +605,12 @@ export class DokumenBorangService {
             picTimAkreditasi: {
               where: {
                 pic: {
-                  kebutuhanDokumen: {
-                    namaDokumen: search ? { contains: search } : {},
-                    kriteria: {
-                      kriteria,
-                    },
-                    pendekatan: {
-                      keterangan: pendekatan,
-                    },
+                  namaDokumen: search ? { contains: search } : {},
+                  kriteria: {
+                    kriteria,
+                  },
+                  pendekatan: {
+                    keterangan: pendekatan,
                   },
                 },
               },
@@ -649,12 +619,7 @@ export class DokumenBorangService {
                   select: {
                     id: true,
                     keterangan: true,
-                    kebutuhanDokumen: {
-                      select: {
-                        id: true,
-                        namaDokumen: true,
-                      },
-                    },
+                    namaDokumen: true,
                     picDokumen: {
                       select: {
                         dokumenBorang: {
@@ -677,30 +642,16 @@ export class DokumenBorangService {
     const allKebutuhanDokumenAndStatus: DaftarKebutuhanDokumentasiItemType[] =
       result.flatMap((uta) =>
         uta.timAkreditasi.picTimAkreditasi.map((pta) => ({
-          kebutuhanDokumen: {
-            id: pta.pic.kebutuhanDokumen.id,
-            namaDokumen: pta.pic.kebutuhanDokumen.namaDokumen,
-          },
+          id: pta.pic.id,
+          namaDokumen: pta.pic.namaDokumen,
           dokumenBorangStatus: pta.pic.picDokumen.map(
             (pd) => pd.dokumenBorang.status as Status,
           ),
         })),
       );
 
-    // final data
-    const finalData = Array.from(
-      allKebutuhanDokumenAndStatus
-        .reduce((map, item) => {
-          if (!map.has(item.kebutuhanDokumen.id)) {
-            map.set(item.kebutuhanDokumen.id, item);
-          }
-          return map;
-        }, new Map<number, DaftarKebutuhanDokumentasiItemType>())
-        .values(),
-    );
-
     return {
-      data: finalData,
+      data: allKebutuhanDokumenAndStatus,
       meta: {
         currentPage,
         limit,
@@ -710,52 +661,42 @@ export class DokumenBorangService {
     };
   }
 
-  // get dokumen borang by kebutuhan dokumentasi id
+  // get dokumen borang by pic id
   static async findDokumenBorangByKebutuhanDokumentasiId(
-    kebutuhanDokumentasiId: number,
-  ): Promise<ResponseDaftarDokumenBorangByKebutuhanDokumenType | null> {
+    picId: number,
+  ): Promise<ResponseDaftarDokumenBorangByPicType | null> {
     // call db
-    const result = await prisma.kebutuhan_Dokumen.findFirst({
+    const result = await prisma.pic.findFirst({
       where: {
-        id: kebutuhanDokumentasiId,
+        id: picId,
       },
       select: {
         id: true,
         namaDokumen: true,
-        pic: {
-          where: {
-            kebutuhanDokumen: {
-              id: kebutuhanDokumentasiId,
-            },
-          },
+        picDokumen: {
           select: {
-            id: true,
-            picDokumen: {
+            assignedBy: {
               select: {
-                assignedBy: {
+                id: true,
+                nama: true,
+                email: true,
+              },
+            },
+            dokumenBorang: {
+              select: {
+                id: true,
+                filename: true,
+                keterangan: true,
+                file_id: true,
+                status: true,
+                lokasi_file: true,
+                createdAt: true,
+                updatedAt: true,
+                uploadedBy: {
                   select: {
                     id: true,
                     nama: true,
                     email: true,
-                  },
-                },
-                dokumenBorang: {
-                  select: {
-                    id: true,
-                    filename: true,
-                    keterangan: true,
-                    file_id: true,
-                    status: true,
-                    lokasi_file: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    uploadedBy: {
-                      select: {
-                        id: true,
-                        nama: true,
-                        email: true,
-                      },
-                    },
                   },
                 },
               },
@@ -768,16 +709,13 @@ export class DokumenBorangService {
     // if not found
     if (!result) return null;
 
-    return toResponseDaftarDokumenBorangByKebutuhanDokumenType({
+    return toResponseDaftarDokumenBorangByPicType({
       pic: {
-        id: result?.pic?.id,
-      },
-      kebutuhanDokumen: {
         id: result?.id,
         namaDokumen: result?.namaDokumen,
       },
-      daftarDokumen: result?.pic
-        ? result?.pic.picDokumen?.map((item) =>
+      daftarDokumen: result
+        ? result?.picDokumen?.map((item) =>
             toResponseDokumenBorangType({
               dokumen: {
                 id: item.dokumenBorang.id,

@@ -6,8 +6,10 @@ export class PicValidation {
   static readonly CREATE = z
     .object({
       timAkreditasiId: z.array(z.number().int().positive()).nonempty(),
-      kebutuhanDokumenId: z.number().min(1).max(99999),
       keterangan: z.string().trim().min(1).max(1000),
+      namaDokumen: z.string().trim().min(1).max(100),
+      kriteriaId: z.number().min(1).max(99999),
+      pendekatanId: z.number().min(1).max(99999),
     })
     .strict() satisfies z.ZodType<CreatePicType>;
 
@@ -15,9 +17,11 @@ export class PicValidation {
   static readonly UPDATE = z
     .object({
       timAkreditasiId: z.array(z.number().int().positive()).optional(),
-      kebutuhanDokumenId: z.number().min(1).max(99999).optional(),
       keterangan: z.string().trim().min(1).max(1000).optional(),
       keteranganUpdate: z.string().trim().min(1).max(1000),
+      namaDokumen: z.string().trim().min(1).max(100).optional(),
+      kriteriaId: z.number().min(1).max(99999).optional(),
+      pendekatanId: z.number().min(1).max(99999).optional(),
     })
     .strict() satisfies z.ZodType<UpdatePicType>;
 }

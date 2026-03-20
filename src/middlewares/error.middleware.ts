@@ -18,7 +18,9 @@ export const errorMiddleware = (
     // switch case
     switch (err.code) {
       case "P2002":
-        return ResponseResult.error(res, 409, "Duplicate field value entered");
+        return ResponseResult.error(res, 409, `unique constraint failed `, [
+          err.meta?.modelName as unknown as string,
+        ]);
 
       case "P2025":
         return ResponseResult.error(res, 404, "Resource not found");

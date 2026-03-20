@@ -1,9 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import {
-  ResponseRiwayatType,
-  UpdateRiwayatType,
-} from "../models/riwayat.model";
+import { ResponseRiwayatType } from "../models/riwayat.model";
 import checkParamsId from "../utils/checkParamsId";
 import { PicService } from "../services/pic.service";
 import { RiwayatService } from "../services/riwayat.service";
@@ -87,27 +84,6 @@ export class RiwayatController {
           return ResponseResult.error(res, 404, "pic not found");
         }
 
-        // update status kebutuhan dokumen if flag kebutuhan dokumen
-        if (
-          (flagRevisi && flagRevisi.includes(FlagRevisi.kebutuhan_dokumen)) ||
-          status === Status.disetujui
-        ) {
-          const updateStatusKebutuhanDokumen =
-            await KebutuhanDokumenService.updateStatusKebutuhanDokumentasi(
-              servicePic.kebutuhanDokumen.id,
-              status,
-            );
-
-          // check update status kebutuhan dokumen
-          if (!updateStatusKebutuhanDokumen) {
-            return ResponseResult.error(
-              res,
-              500,
-              "gagal update status kebutuhan dokumen",
-            );
-          }
-        }
-
         // check status success or status revisi
         if (status === "disetujui" || status === "revisi") {
           // check find pic by id and status menunggu
@@ -182,14 +158,14 @@ export class RiwayatController {
         if (servicePic.status === Status.disetujui) {
           await NotifikasiService.notifyPicDisetujuiWD1(
             servicePic.id,
-            servicePic.kebutuhanDokumen.namaDokumen,
+            servicePic.namaDokumen,
           );
         }
 
         if (servicePic.status === Status.revisi) {
           await NotifikasiService.notifyPicDirevisiWD1(
             servicePic.id,
-            servicePic.kebutuhanDokumen.namaDokumen,
+            servicePic.namaDokumen,
             keterangan,
           );
         }
@@ -243,7 +219,7 @@ export class RiwayatController {
               keterangan: "",
               status: Status.menunggu,
               createdData: findPic.createdAt,
-              highlightDataEmpy: findPic.kebutuhanDokumen.namaDokumen,
+              highlightDataEmpy: findPic.namaDokumen,
             },
           ],
           res,

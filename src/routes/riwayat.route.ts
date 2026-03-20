@@ -3,7 +3,6 @@ import { RiwayatController } from "../controllers/riwayat.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import { zodValidation } from "../middlewares/validation.middleware";
-import { UpdateRiwayatType } from "../models/riwayat.model";
 // import { RiwayatValidation } from "../validations/riwayat.validation";
 import { UpdateStatusType } from "../models/status.model";
 import { StatusValidation } from "../validations/status.validation";

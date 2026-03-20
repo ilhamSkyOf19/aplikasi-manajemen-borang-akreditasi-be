@@ -28,9 +28,15 @@ export class PicService {
             },
           })),
         },
-        kebutuhanDokumen: {
+        namaDokumen: req.namaDokumen,
+        kriteria: {
           connect: {
-            id: req.kebutuhanDokumenId,
+            id: req.kriteriaId,
+          },
+        },
+        pendekatan: {
+          connect: {
+            id: req.pendekatanId,
           },
         },
         keterangan: req.keterangan,
@@ -41,6 +47,21 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        namaDokumen: true,
+        kriteria: {
+          select: {
+            id: true,
+            kriteria: true,
+            namaKriteria: true,
+          },
+        },
+        pendekatan: {
+          select: {
+            id: true,
+            tahap: true,
+            keterangan: true,
+          },
+        },
         riwayat: {
           select: {
             status: true,
@@ -50,7 +71,7 @@ export class PicService {
           },
         },
         picTimAkreditasi: {
-          include: {
+          select: {
             timAkreditasi: {
               select: {
                 id: true,
@@ -73,28 +94,6 @@ export class PicService {
             },
           },
         },
-        kebutuhanDokumen: {
-          select: {
-            id: true,
-            namaDokumen: true,
-            keterangan: true,
-            status: true,
-            kriteria: {
-              select: {
-                id: true,
-                kriteria: true,
-                namaKriteria: true,
-              },
-            },
-            pendekatan: {
-              select: {
-                id: true,
-                tahap: true,
-                keterangan: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -103,13 +102,12 @@ export class PicService {
 
     // return
     return toResponsePicType({
-      ...result,
+      keterangan: result.keterangan,
+      id: result.id,
       status: result.status as Status,
-      statusRiwayat: (result.riwayat[0]?.status ?? null) as Status | null,
-      kebutuhanDokumen: {
-        ...result.kebutuhanDokumen,
-        status: result.kebutuhanDokumen.status as Status,
-      },
+      namaDokumen: result.namaDokumen,
+      kriteria: result.kriteria,
+      pendekatan: result.pendekatan,
       timAkreditasi: result.picTimAkreditasi.map((item) => ({
         id: item.timAkreditasi.id,
         namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
@@ -122,6 +120,8 @@ export class PicService {
           role: user.user.role as UserRole,
         })),
       })),
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
     });
   }
 
@@ -138,6 +138,21 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        namaDokumen: true,
+        kriteria: {
+          select: {
+            id: true,
+            kriteria: true,
+            namaKriteria: true,
+          },
+        },
+        pendekatan: {
+          select: {
+            id: true,
+            tahap: true,
+            keterangan: true,
+          },
+        },
         riwayat: {
           select: {
             status: true,
@@ -147,7 +162,7 @@ export class PicService {
           },
         },
         picTimAkreditasi: {
-          include: {
+          select: {
             timAkreditasi: {
               select: {
                 id: true,
@@ -170,28 +185,6 @@ export class PicService {
             },
           },
         },
-        kebutuhanDokumen: {
-          select: {
-            id: true,
-            namaDokumen: true,
-            keterangan: true,
-            status: true,
-            kriteria: {
-              select: {
-                id: true,
-                kriteria: true,
-                namaKriteria: true,
-              },
-            },
-            pendekatan: {
-              select: {
-                id: true,
-                tahap: true,
-                keterangan: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -202,11 +195,6 @@ export class PicService {
     return toResponsePicType({
       ...result,
       status: result.status as Status,
-      statusRiwayat: (result.riwayat[0]?.status ?? null) as Status | null,
-      kebutuhanDokumen: {
-        ...result.kebutuhanDokumen,
-        status: result.kebutuhanDokumen.status as Status,
-      },
       timAkreditasi: result.picTimAkreditasi.map((item) => ({
         id: item.timAkreditasi.id,
         namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
@@ -289,19 +277,15 @@ export class PicService {
           status ? { status: status } : {},
           kriteria
             ? {
-                kebutuhanDokumen: {
-                  kriteria: {
-                    namaKriteria: kriteria,
-                  },
+                kriteria: {
+                  namaKriteria: kriteria,
                 },
               }
             : {},
           pendekatan
             ? {
-                kebutuhanDokumen: {
-                  pendekatan: {
-                    keterangan: pendekatan,
-                  },
+                pendekatan: {
+                  keterangan: pendekatan,
                 },
               }
             : {},
@@ -329,6 +313,21 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        namaDokumen: true,
+        kriteria: {
+          select: {
+            id: true,
+            kriteria: true,
+            namaKriteria: true,
+          },
+        },
+        pendekatan: {
+          select: {
+            id: true,
+            tahap: true,
+            keterangan: true,
+          },
+        },
         riwayat: {
           select: {
             status: true,
@@ -361,28 +360,6 @@ export class PicService {
             },
           },
         },
-        kebutuhanDokumen: {
-          select: {
-            id: true,
-            namaDokumen: true,
-            keterangan: true,
-            status: true,
-            kriteria: {
-              select: {
-                id: true,
-                kriteria: true,
-                namaKriteria: true,
-              },
-            },
-            pendekatan: {
-              select: {
-                id: true,
-                tahap: true,
-                keterangan: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -396,13 +373,14 @@ export class PicService {
       },
       data: result.map((item) =>
         toResponsePicType({
-          ...item,
+          id: item.id,
+          namaDokumen: item.namaDokumen,
+          kriteria: item.kriteria,
+          pendekatan: item.pendekatan,
+          keterangan: item.keterangan,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
           status: item.status as Status,
-          statusRiwayat: (item.riwayat[0]?.status ?? null) as Status | null,
-          kebutuhanDokumen: {
-            ...item.kebutuhanDokumen,
-            status: item.kebutuhanDokumen.status as Status,
-          },
           timAkreditasi: item.picTimAkreditasi.map((tim) => ({
             id: tim.timAkreditasi.id,
             namaTimAkreditasi: tim.timAkreditasi.namaTimAkreditasi,
@@ -437,26 +415,19 @@ export class PicService {
                     id: true,
                     status: true,
                     keterangan: true,
-                    kebutuhanDokumen: {
+                    namaDokumen: true,
+                    kriteria: {
                       select: {
                         id: true,
-                        namaDokumen: true,
+                        kriteria: true,
+                        namaKriteria: true,
+                      },
+                    },
+                    pendekatan: {
+                      select: {
+                        id: true,
+                        tahap: true,
                         keterangan: true,
-                        status: true,
-                        kriteria: {
-                          select: {
-                            id: true,
-                            kriteria: true,
-                            namaKriteria: true,
-                          },
-                        },
-                        pendekatan: {
-                          select: {
-                            id: true,
-                            tahap: true,
-                            keterangan: true,
-                          },
-                        },
                       },
                     },
                   },
@@ -467,6 +438,8 @@ export class PicService {
         },
       },
     });
+
+    console.log(result);
 
     // flatten pic
     const allPics: PicItem[] = result.flatMap((uta) =>
@@ -480,12 +453,7 @@ export class PicService {
     const grouped = allPics.reduce<Record<number, KriteriaGrouped>>(
       (acc, pic) => {
         // destruct
-        const {
-          kriteria,
-          pendekatan,
-          namaDokumen,
-          id: dokumenId,
-        } = pic.kebutuhanDokumen;
+        const { kriteria, pendekatan, namaDokumen, id: dokumenId } = pic;
 
         // kriteria id
         const kriteriaKey = kriteria.id;
@@ -559,6 +527,21 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        namaDokumen: true,
+        kriteria: {
+          select: {
+            id: true,
+            kriteria: true,
+            namaKriteria: true,
+          },
+        },
+        pendekatan: {
+          select: {
+            id: true,
+            tahap: true,
+            keterangan: true,
+          },
+        },
         riwayat: {
           select: {
             status: true,
@@ -568,7 +551,7 @@ export class PicService {
           },
         },
         picTimAkreditasi: {
-          include: {
+          select: {
             timAkreditasi: {
               select: {
                 id: true,
@@ -576,7 +559,7 @@ export class PicService {
                 createdAt: true,
                 updatedAt: true,
                 userTimAkreditasi: {
-                  include: {
+                  select: {
                     user: {
                       select: {
                         id: true,
@@ -591,28 +574,6 @@ export class PicService {
             },
           },
         },
-        kebutuhanDokumen: {
-          select: {
-            id: true,
-            namaDokumen: true,
-            keterangan: true,
-            status: true,
-            kriteria: {
-              select: {
-                id: true,
-                kriteria: true,
-                namaKriteria: true,
-              },
-            },
-            pendekatan: {
-              select: {
-                id: true,
-                tahap: true,
-                keterangan: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -621,13 +582,14 @@ export class PicService {
 
     // return
     return toResponsePicType({
-      ...result,
+      id: result.id,
+      namaDokumen: result.namaDokumen,
+      keterangan: result.keterangan,
+      kriteria: result.kriteria,
+      pendekatan: result.pendekatan,
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
       status: result.status as Status,
-      statusRiwayat: (result.riwayat[0]?.status ?? null) as Status | null,
-      kebutuhanDokumen: {
-        ...result.kebutuhanDokumen,
-        status: result.kebutuhanDokumen.status as Status,
-      },
       timAkreditasi: result.picTimAkreditasi.map((item) => ({
         id: item.timAkreditasi.id,
         namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
@@ -649,7 +611,7 @@ export class PicService {
     req: Omit<UpdatePicType, "keteranganUpdate">,
   ): Promise<ResponsePicType | null> {
     // destroy
-    const { kebutuhanDokumenId, timAkreditasiId, ...rest } = req;
+    const { timAkreditasiId, kriteriaId, pendekatanId, ...rest } = req;
     // call db
     const result = await prisma.pic.update({
       where: {
@@ -657,21 +619,32 @@ export class PicService {
       },
       data: {
         ...rest,
-        kebutuhanDokumen: {
-          connect: {
-            id: req.kebutuhanDokumenId,
-          },
-        },
-        picTimAkreditasi: {
-          deleteMany: {},
-          create: req.timAkreditasiId?.map((idTim) => ({
-            timAkreditasi: {
-              connect: {
-                id: idTim,
-              },
+        ...(kriteriaId && {
+          kriteria: {
+            connect: {
+              id: kriteriaId,
             },
-          })),
-        },
+          },
+        }),
+        ...(pendekatanId && {
+          pendekatan: {
+            connect: {
+              id: pendekatanId,
+            },
+          },
+        }),
+        ...(timAkreditasiId && {
+          picTimAkreditasi: {
+            deleteMany: {},
+            create: req.timAkreditasiId?.map((idTim) => ({
+              timAkreditasi: {
+                connect: {
+                  id: idTim,
+                },
+              },
+            })),
+          },
+        }),
         status: "menunggu",
       },
       select: {
@@ -680,6 +653,21 @@ export class PicService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
+        namaDokumen: true,
+        kriteria: {
+          select: {
+            id: true,
+            kriteria: true,
+            namaKriteria: true,
+          },
+        },
+        pendekatan: {
+          select: {
+            id: true,
+            tahap: true,
+            keterangan: true,
+          },
+        },
         riwayat: {
           select: {
             status: true,
@@ -689,7 +677,7 @@ export class PicService {
           },
         },
         picTimAkreditasi: {
-          include: {
+          select: {
             timAkreditasi: {
               select: {
                 id: true,
@@ -697,7 +685,7 @@ export class PicService {
                 createdAt: true,
                 updatedAt: true,
                 userTimAkreditasi: {
-                  include: {
+                  select: {
                     user: {
                       select: {
                         id: true,
@@ -712,28 +700,6 @@ export class PicService {
             },
           },
         },
-        kebutuhanDokumen: {
-          select: {
-            id: true,
-            namaDokumen: true,
-            keterangan: true,
-            status: true,
-            kriteria: {
-              select: {
-                id: true,
-                kriteria: true,
-                namaKriteria: true,
-              },
-            },
-            pendekatan: {
-              select: {
-                id: true,
-                tahap: true,
-                keterangan: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -742,13 +708,14 @@ export class PicService {
 
     // return
     return toResponsePicType({
-      ...result,
+      id: result.id,
+      namaDokumen: result.namaDokumen,
+      keterangan: result.keterangan,
+      kriteria: result.kriteria,
+      pendekatan: result.pendekatan,
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
       status: result.status as Status,
-      statusRiwayat: (result.riwayat[0]?.status ?? null) as Status | null,
-      kebutuhanDokumen: {
-        ...result.kebutuhanDokumen,
-        status: result.kebutuhanDokumen.status as Status,
-      },
       timAkreditasi: result.picTimAkreditasi.map((item) => ({
         id: item.timAkreditasi.id,
         namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
@@ -781,10 +748,25 @@ export class PicService {
         id: true,
         status: true,
         keterangan: true,
+        namaDokumen: true,
+        kriteria: {
+          select: {
+            id: true,
+            kriteria: true,
+            namaKriteria: true,
+          },
+        },
+        pendekatan: {
+          select: {
+            id: true,
+            tahap: true,
+            keterangan: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
         picTimAkreditasi: {
-          include: {
+          select: {
             timAkreditasi: {
               select: {
                 id: true,
@@ -792,7 +774,7 @@ export class PicService {
                 createdAt: true,
                 updatedAt: true,
                 userTimAkreditasi: {
-                  include: {
+                  select: {
                     user: {
                       select: {
                         id: true,
@@ -807,12 +789,6 @@ export class PicService {
             },
           },
         },
-        kebutuhanDokumen: {
-          select: {
-            id: true,
-            namaDokumen: true,
-          },
-        },
       },
     });
 
@@ -821,11 +797,14 @@ export class PicService {
 
     // return
     return toResponsePicUpdateStatusType({
-      ...result,
+      id: result.id,
+      keterangan: result.keterangan,
+      namaDokumen: result.namaDokumen,
+      kriteria: result.kriteria,
+      pendekatan: result.pendekatan,
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
       status: result.status as Status,
-      kebutuhanDokumen: {
-        ...result.kebutuhanDokumen,
-      },
       timAkreditasi: result.picTimAkreditasi.map((item) => ({
         id: item.timAkreditasi.id,
         namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,

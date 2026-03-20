@@ -7,7 +7,6 @@ import {
   UpdatePicType,
 } from "../models/pic.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
 import { TimAkreditasiService } from "../services/timAkreditasi.service";
 import { PicService } from "../services/pic.service";
 import { PaginationType } from "../types/pagination";
@@ -17,6 +16,8 @@ import checkParamsId from "../utils/checkParamsId";
 import { RiwayatService } from "../services/riwayat.service";
 import { NotifikasiService } from "../services/notifikasi.service";
 import { AuthRequest } from "../types/authRequest";
+import { KriteriaService } from "../services/kriteria.service";
+import { PendekatanService } from "../services/pendekatan.service";
 
 export class PicController {
   // create
@@ -27,15 +28,13 @@ export class PicController {
   ) {
     try {
       // get body from params
-      const { kebutuhanDokumenId, keterangan, timAkreditasiId } = req.body;
-
-      // find kebutuhan dokumen id
-      const findKebutuhanDokumen =
-        await KebutuhanDokumenService.readById(kebutuhanDokumenId);
-
-      // check
-      if (!findKebutuhanDokumen)
-        return ResponseResult.error(res, 404, "kebutuhan dokumen not found");
+      const {
+        keterangan,
+        timAkreditasiId,
+        kriteriaId,
+        namaDokumen,
+        pendekatanId,
+      } = req.body;
 
       // find tim akreditasi id
       const findTimAkreditasi =
@@ -45,9 +44,23 @@ export class PicController {
       if (!findTimAkreditasi)
         return ResponseResult.error(res, 404, "tim akreditasi not found");
 
+      // check kriteria
+      const checkKriteria = await KriteriaService.readById(kriteriaId);
+
+      if (!checkKriteria)
+        return ResponseResult.error(res, 404, "kriteria not found");
+
+      // check pendekatan id
+      const checkPendekatan = await PendekatanService.readById(pendekatanId);
+
+      if (!checkPendekatan)
+        return ResponseResult.error(res, 404, "pendekatan not found");
+
       // call service
       const service = await PicService.create({
-        kebutuhanDokumenId,
+        kriteriaId,
+        namaDokumen,
+        pendekatanId,
         keterangan,
         timAkreditasiId,
       });
@@ -59,7 +72,7 @@ export class PicController {
       // push notifikasi
       await NotifikasiService.notifyPicBaruKeWD1(
         service.id,
-        findKebutuhanDokumen.namaDokumen,
+        service.namaDokumen,
       );
 
       return ResponseResult.success<ResponsePicType | null>(
@@ -224,23 +237,13 @@ export class PicController {
 
       // get body
       const {
-        kebutuhanDokumenId,
         keterangan,
         timAkreditasiId,
         keteranganUpdate,
+        kriteriaId,
+        namaDokumen,
+        pendekatanId,
       } = req.body;
-
-      // check if kebutuhan dokumen exist in request
-      if (kebutuhanDokumenId) {
-        // find kebutuhan dokumen
-        const findKebutuhanDokumen =
-          await KebutuhanDokumenService.readById(kebutuhanDokumenId);
-
-        // check kebutuhan dokumen
-        if (!findKebutuhanDokumen) {
-          return ResponseResult.error(res, 404, "kebutuhan dokumen not found");
-        }
-      }
 
       // jika timAkreditasiId dikirim
       if (timAkreditasiId && timAkreditasiId?.length > 0) {
@@ -255,7 +258,9 @@ export class PicController {
 
       // call service
       const service = await PicService.update(checkId as number, {
-        kebutuhanDokumenId,
+        kriteriaId,
+        namaDokumen,
+        pendekatanId,
         keterangan,
         timAkreditasiId,
       });
@@ -300,7 +305,7 @@ export class PicController {
       // push notifikasi
       await NotifikasiService.notifyPicRevisiKaprodiKeWD1(
         service.id,
-        service.kebutuhanDokumen.namaDokumen,
+        service.namaDokumen,
       );
 
       // return success

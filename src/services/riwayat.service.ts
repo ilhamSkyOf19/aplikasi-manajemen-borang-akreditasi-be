@@ -3,7 +3,6 @@ import {
   CreateRiwayatType,
   ResponseRiwayatType,
   toResponseRiwayatType,
-  UpdateRiwayatType,
 } from "../models/riwayat.model";
 import {
   FlagRevisi,
@@ -56,12 +55,7 @@ export class RiwayatService {
             id: true,
             status: true,
             createdAt: true,
-            kebutuhanDokumen: {
-              select: {
-                id: true,
-                namaDokumen: true,
-              },
-            },
+            namaDokumen: true,
             picTimAkreditasi: {
               include: {
                 timAkreditasi: {
@@ -101,10 +95,7 @@ export class RiwayatService {
         ? {
             id: result.pic.id,
             status: result.pic.status as Status,
-            kebutuhanDokumen: {
-              id: result.pic.kebutuhanDokumen.id,
-              namaDokumen: result.pic.kebutuhanDokumen.namaDokumen,
-            },
+            namaDokumen: result.pic.namaDokumen,
             timAkreditasi: result.pic.picTimAkreditasi.map((item) => ({
               id: item.timAkreditasi.id,
               namaTimAkreditasi: item.timAkreditasi.namaTimAkreditasi,
@@ -166,22 +157,17 @@ export class RiwayatService {
         pic: {
           select: {
             id: true,
+            namaDokumen: true,
             status: true,
             createdAt: true,
-            kebutuhanDokumen: {
-              select: {
-                id: true,
-                namaDokumen: true,
-              },
-            },
             picTimAkreditasi: {
-              include: {
+              select: {
                 timAkreditasi: {
                   select: {
                     id: true,
                     namaTimAkreditasi: true,
                     userTimAkreditasi: {
-                      include: {
+                      select: {
                         user: {
                           select: {
                             id: true,
@@ -217,17 +203,12 @@ export class RiwayatService {
         ) as FlagRevisi[] | null,
         status: item.status as Status,
         createdData: item.pic ? item.pic.createdAt : null,
-        highlightDataEmpy: item.pic?.kebutuhanDokumen?.namaDokumen
-          ? item.pic?.kebutuhanDokumen?.namaDokumen
-          : "",
+        highlightDataEmpy: item.pic?.namaDokumen ?? "",
         pic: item.pic
           ? {
               id: item.pic.id,
               status: item.pic.status as Status,
-              kebutuhanDokumen: {
-                id: item.pic.kebutuhanDokumen.id,
-                namaDokumen: item.pic.kebutuhanDokumen.namaDokumen,
-              },
+              namaDokumen: item.pic.namaDokumen,
               timAkreditasi: item.pic.picTimAkreditasi.map((tim) => ({
                 id: tim.timAkreditasi.id,
                 namaTimAkreditasi: tim.timAkreditasi.namaTimAkreditasi,
@@ -272,20 +253,15 @@ export class RiwayatService {
             id: true,
             status: true,
             createdAt: true,
-            kebutuhanDokumen: {
-              select: {
-                id: true,
-                namaDokumen: true,
-              },
-            },
+            namaDokumen: true,
             picTimAkreditasi: {
-              include: {
+              select: {
                 timAkreditasi: {
                   select: {
                     id: true,
                     namaTimAkreditasi: true,
                     userTimAkreditasi: {
-                      include: {
+                      select: {
                         user: {
                           select: {
                             id: true,
@@ -318,17 +294,12 @@ export class RiwayatService {
         ) as FlagRevisi[] | null,
         status: item.status as Status,
         createdData: item.pic ? item.pic.createdAt : null,
-        highlightDataEmpy: item.pic?.kebutuhanDokumen?.namaDokumen
-          ? item.pic?.kebutuhanDokumen?.namaDokumen
-          : "",
+        highlightDataEmpy: item.pic?.namaDokumen ?? "",
         pic: item.pic
           ? {
               id: item.pic.id,
               status: item.pic.status as Status,
-              kebutuhanDokumen: {
-                id: item.pic.kebutuhanDokumen.id,
-                namaDokumen: item.pic.kebutuhanDokumen.namaDokumen,
-              },
+              namaDokumen: item.pic.namaDokumen,
               timAkreditasi: item.pic.picTimAkreditasi.map((tim) => ({
                 id: tim.timAkreditasi.id,
                 namaTimAkreditasi: tim.timAkreditasi.namaTimAkreditasi,
@@ -345,15 +316,15 @@ export class RiwayatService {
     );
   }
 
-  // read by kebutuhan dokumen id
-  static async findAllRiwayatByKebutuhanDokumenId(
-    kebutuhanDokumenId: number,
+  // read by pic id
+  static async findAllRiwayatByPicId(
+    picId: number,
   ): Promise<ResponseRiwayatType[] | null> {
     // call db
     const result = await prisma.riwayat.findMany({
       where: {
         pic: {
-          kebutuhanDokumenId: kebutuhanDokumenId,
+          id: picId,
         },
       },
       select: {
@@ -373,12 +344,7 @@ export class RiwayatService {
             id: true,
             status: true,
             createdAt: true,
-            kebutuhanDokumen: {
-              select: {
-                id: true,
-                namaDokumen: true,
-              },
-            },
+            namaDokumen: true,
             picTimAkreditasi: {
               include: {
                 timAkreditasi: {
@@ -415,17 +381,12 @@ export class RiwayatService {
         ) as FlagRevisi[] | null,
         status: item.status as Status,
         createdData: item.pic ? item.pic.createdAt : null,
-        highlightDataEmpy: item.pic?.kebutuhanDokumen?.namaDokumen
-          ? item.pic?.kebutuhanDokumen?.namaDokumen
-          : "",
+        highlightDataEmpy: item.pic?.namaDokumen ?? "",
         pic: item.pic
           ? {
               id: item.pic.id,
               status: item.pic.status as Status,
-              kebutuhanDokumen: {
-                id: item.pic.kebutuhanDokumen.id,
-                namaDokumen: item.pic.kebutuhanDokumen.namaDokumen,
-              },
+              namaDokumen: item.pic.namaDokumen,
               timAkreditasi: item.pic.picTimAkreditasi.map((tim) => ({
                 id: tim.timAkreditasi.id,
                 namaTimAkreditasi: tim.timAkreditasi.namaTimAkreditasi,

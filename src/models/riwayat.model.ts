@@ -13,8 +13,7 @@ export interface IRiwayat {
   createdData?: Date | null;
   highlightDataEmpy?: string;
   pic?:
-    | (Pick<IPic, "id" | "status"> & {
-        kebutuhanDokumen: Pick<IKebutuhanDokumen, "id" | "namaDokumen">;
+    | (Pick<IPic, "id" | "status" | "namaDokumen"> & {
         timAkreditasi: (Pick<ITimAkreditasi, "id" | "namaTimAkreditasi"> & {
           anggota: PayloadUserType[];
         })[];
@@ -30,7 +29,6 @@ export interface CreateRiwayatType extends Omit<
   | "id"
   | "createdAt"
   | "updatedAt"
-  | "kebutuhanDokumen"
   | "pic"
   | "highlightDataEmpy"
   | "createdData"

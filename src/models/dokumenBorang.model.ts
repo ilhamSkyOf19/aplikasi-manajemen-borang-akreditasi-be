@@ -58,11 +58,8 @@ export const toResponseDokumenBorangType = (
 ): ResponseDokumenBorangType => dokumenBorang;
 
 // response dokumen borang by kebutuhan dokumen
-export interface ResponseDaftarDokumenBorangByKebutuhanDokumenType {
+export interface ResponseDaftarDokumenBorangByPicType {
   pic: {
-    id?: number | null;
-  };
-  kebutuhanDokumen: {
     id: number;
     namaDokumen: string;
   };
@@ -70,16 +67,13 @@ export interface ResponseDaftarDokumenBorangByKebutuhanDokumenType {
 }
 
 // to response dokumen borang by kebutuhan dokumen
-export const toResponseDaftarDokumenBorangByKebutuhanDokumenType = (
-  daftarDokumen: ResponseDaftarDokumenBorangByKebutuhanDokumenType,
+export const toResponseDaftarDokumenBorangByPicType = (
+  daftarDokumen: ResponseDaftarDokumenBorangByPicType,
 ) => daftarDokumen;
 
 // response create dokumen borang
 export interface ResponseCreateDokumenBorangType {
   pic: {
-    id: number;
-  };
-  kebutuhanDokumen: {
     id: number;
     namaDokumen: string;
     kriteria: Pick<IKriteria, "id" | "kriteria" | "namaKriteria">;
@@ -96,17 +90,15 @@ export const toResponseCreateDokumenBorangType = (
 // pic item
 export interface PicItem {
   id: number;
-  kebutuhanDokumen: {
-    kriteria: {
-      id: number;
-      kriteria: number;
-      namaKriteria: string;
-    };
-    pendekatan: {
-      id: number;
-      tahap: string;
-      keterangan: string;
-    };
+  kriteria: {
+    id: number;
+    kriteria: number;
+    namaKriteria: string;
+  };
+  pendekatan: {
+    id: number;
+    tahap: string;
+    keterangan: string;
   };
   picDokumen: {
     dokumenBorang: {
@@ -148,10 +140,8 @@ export interface DaftarDokumenBorangByKriteriaWithMeta {
 
 // type daftar kebutuhan dokumentasi
 export interface DaftarKebutuhanDokumentasiItemType {
-  kebutuhanDokumen: {
-    id: number;
-    namaDokumen: string;
-  };
+  id: number;
+  namaDokumen: string;
   dokumenBorangStatus: Status[];
 }
 

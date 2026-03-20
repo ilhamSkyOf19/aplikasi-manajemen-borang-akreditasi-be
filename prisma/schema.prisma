@@ -42,42 +42,24 @@ enum Role {
 }
 
 model Kriteria {
-  id               Int                 @id @default(autoincrement())
-  kriteria         Int                 @unique
-  namaKriteria     String
-  revisi           Int                 @default(0)
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-  kebutuhanDokumen Kebutuhan_Dokumen[]
+  id           Int      @id @default(autoincrement())
+  kriteria     Int      @unique
+  namaKriteria String
+  revisi       Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  pics         Pic[]
 
   @@map("kriteria")
 }
 
 model Pendekatan {
-  id               Int                 @id @default(autoincrement())
-  tahap            String
-  keterangan       String              @unique
-  kebutuhanDokumen Kebutuhan_Dokumen[]
+  id         Int    @id @default(autoincrement())
+  tahap      String
+  keterangan String @unique
+  pics       Pic[]
 
   @@map("pendekatan")
-}
-
-model Kebutuhan_Dokumen {
-  id           Int      @id @default(autoincrement())
-  namaDokumen  String   @unique
-  keterangan   String   @db.VarChar(1000)
-  kriteriaId   Int
-  pendekatanId Int
-  status       Status   @default(menunggu)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  kriteria   Kriteria   @relation(fields: [kriteriaId], references: [id], onDelete: Cascade)
-  pendekatan Pendekatan @relation(fields: [pendekatanId], references: [id], onDelete: Cascade)
-  pic        Pic?
-  riwayat    Riwayat[]  @relation("RiwayatKebutuhanDokumen")
-
-  @@map("kebutuhan_dokumen")
 }
 
 model TimAkreditasi {
@@ -94,15 +76,18 @@ model TimAkreditasi {
 }
 
 model Pic {
-  id                 Int      @id @default(autoincrement())
-  kebutuhanDokumenId Int      @unique
-  status             Status   @default(menunggu)
-  keterangan         String   @db.VarChar(1000)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  status       Status   @default(menunggu)
+  keterangan   String   @db.VarChar(1000)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  namaDokumen  String   @unique
+  kriteriaId   Int
+  pendekatanId Int
 
-  // Hapus timAkreditasiId dari sini
-  kebutuhanDokumen Kebutuhan_Dokumen  @relation(fields: [kebutuhanDokumenId], references: [id], onDelete: Cascade)
+  kriteria   Kriteria   @relation(fields: [kriteriaId], references: [id], onDelete: Cascade)
+  pendekatan Pendekatan @relation(fields: [pendekatanId], references: [id], onDelete: Cascade)
+
   picTimAkreditasi PicTimAkreditasi[]
   riwayat          Riwayat[]
   picDokumen       PicDokumenBorang[]
@@ -165,9 +150,8 @@ model Riwayat {
   picId               Int?
   kebutuhan_DokumenId Int?
 
-  pic              Pic?                @relation(fields: [picId], references: [id], onDelete: Cascade)
-  kebutuhanDokumen Kebutuhan_Dokumen?  @relation("RiwayatKebutuhanDokumen", fields: [kebutuhan_DokumenId], references: [id], onDelete: SetNull)
-  flagRevisi       RiwayatFlagRevisi[]
+  pic        Pic?                @relation(fields: [picId], references: [id], onDelete: Cascade)
+  flagRevisi RiwayatFlagRevisi[]
 
   @@map("riwayat")
 }
