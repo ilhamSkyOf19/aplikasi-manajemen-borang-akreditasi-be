@@ -1,4 +1,3 @@
-import { connect } from "node:http2";
 import prisma from "../libs/prisma";
 import {
   CreatePicType,

@@ -1,5 +1,4 @@
-import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
-import { IKebutuhanDokumen } from "./kebutuhanDokumen.model";
+import { JenisRiwayat, Status } from "../utils/contstanst";
 import { IPic } from "./pic.model";
 import { ITimAkreditasi } from "./timAkreditasi.model";
 import { PayloadUserType } from "./user.model";
@@ -7,7 +6,6 @@ import { PayloadUserType } from "./user.model";
 export interface IRiwayat {
   id: number;
   jenis: JenisRiwayat;
-  flagRevisi?: FlagRevisi[] | null;
   status: Status;
   keterangan: string;
   createdData?: Date | null;
@@ -26,16 +24,9 @@ export interface IRiwayat {
 // create
 export interface CreateRiwayatType extends Omit<
   IRiwayat,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "pic"
-  | "highlightDataEmpy"
-  | "createdData"
-  | "flagRevisi"
+  "id" | "createdAt" | "updatedAt" | "pic" | "highlightDataEmpy" | "createdData"
 > {
   picId?: number;
-  flagRevisi?: FlagRevisi[];
 }
 
 // update

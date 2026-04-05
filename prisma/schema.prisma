@@ -150,20 +150,9 @@ model Riwayat {
   picId               Int?
   kebutuhan_DokumenId Int?
 
-  pic        Pic?                @relation(fields: [picId], references: [id], onDelete: Cascade)
-  flagRevisi RiwayatFlagRevisi[]
+  pic Pic? @relation(fields: [picId], references: [id], onDelete: Cascade)
 
   @@map("riwayat")
-}
-
-model RiwayatFlagRevisi {
-  id         Int        @id @default(autoincrement())
-  riwayatId  Int
-  flagRevisi FlagRevisi
-
-  riwayat Riwayat @relation(fields: [riwayatId], references: [id], onDelete: Cascade)
-
-  @@map("riwayat_flag_revisi")
 }
 
 model UserTimAkreditasi {
@@ -191,12 +180,6 @@ enum Status {
 
 enum JenisRiwayat {
   dokumen_borang
-  pic
-}
-
-enum FlagRevisi {
-  dokumen_borang
-  kebutuhan_dokumen
   pic
 }
 

@@ -4,12 +4,7 @@ import {
   ResponseRiwayatType,
   toResponseRiwayatType,
 } from "../models/riwayat.model";
-import {
-  FlagRevisi,
-  JenisRiwayat,
-  Status,
-  UserRole,
-} from "../utils/contstanst";
+import { JenisRiwayat, Status, UserRole } from "../utils/contstanst";
 
 export class RiwayatService {
   // create
@@ -30,13 +25,6 @@ export class RiwayatService {
               },
             }
           : undefined,
-        flagRevisi: data.flagRevisi
-          ? {
-              create: data.flagRevisi.map((item) => ({
-                flagRevisi: item,
-              })),
-            }
-          : undefined,
       },
       select: {
         id: true,
@@ -45,11 +33,6 @@ export class RiwayatService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
-        flagRevisi: {
-          select: {
-            flagRevisi: true,
-          },
-        },
         pic: {
           select: {
             id: true,
@@ -86,9 +69,6 @@ export class RiwayatService {
     return toResponseRiwayatType({
       ...result,
       jenis: result.jenis as JenisRiwayat,
-      flagRevisi: result.flagRevisi?.map(
-        (item) => item.flagRevisi as FlagRevisi,
-      ) as FlagRevisi[] | null,
       status: result.status as Status,
       createdData: result.pic ? result.pic.createdAt : null,
       pic: result.pic
@@ -121,12 +101,6 @@ export class RiwayatService {
             keterangan: item.keterangan,
             status: item.status,
             picId: item.picId ?? null,
-            flagRevisi: {
-              create:
-                item.flagRevisi?.map((flag) => ({
-                  flagRevisi: flag,
-                })) ?? [],
-            },
           },
         }),
       ),
@@ -149,11 +123,6 @@ export class RiwayatService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
-        flagRevisi: {
-          select: {
-            flagRevisi: true,
-          },
-        },
         pic: {
           select: {
             id: true,
@@ -198,9 +167,6 @@ export class RiwayatService {
       toResponseRiwayatType({
         ...item,
         jenis: item.jenis as JenisRiwayat,
-        flagRevisi: item.flagRevisi?.map(
-          (item) => item.flagRevisi as FlagRevisi,
-        ) as FlagRevisi[] | null,
         status: item.status as Status,
         createdData: item.pic ? item.pic.createdAt : null,
         highlightDataEmpy: item.pic?.namaDokumen ?? "",
@@ -243,11 +209,6 @@ export class RiwayatService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
-        flagRevisi: {
-          select: {
-            flagRevisi: true,
-          },
-        },
         pic: {
           select: {
             id: true,
@@ -289,9 +250,6 @@ export class RiwayatService {
       toResponseRiwayatType({
         ...item,
         jenis: item.jenis as JenisRiwayat,
-        flagRevisi: item.flagRevisi?.map(
-          (item) => item.flagRevisi as FlagRevisi,
-        ) as FlagRevisi[] | null,
         status: item.status as Status,
         createdData: item.pic ? item.pic.createdAt : null,
         highlightDataEmpy: item.pic?.namaDokumen ?? "",
@@ -334,11 +292,6 @@ export class RiwayatService {
         keterangan: true,
         createdAt: true,
         updatedAt: true,
-        flagRevisi: {
-          select: {
-            flagRevisi: true,
-          },
-        },
         pic: {
           select: {
             id: true,
@@ -376,9 +329,6 @@ export class RiwayatService {
       toResponseRiwayatType({
         ...item,
         jenis: item.jenis as JenisRiwayat,
-        flagRevisi: item.flagRevisi?.map(
-          (item) => item.flagRevisi as FlagRevisi,
-        ) as FlagRevisi[] | null,
         status: item.status as Status,
         createdData: item.pic ? item.pic.createdAt : null,
         highlightDataEmpy: item.pic?.namaDokumen ?? "",

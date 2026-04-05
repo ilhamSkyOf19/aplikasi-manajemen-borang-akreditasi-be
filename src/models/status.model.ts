@@ -5,5 +5,4 @@ export interface UpdateStatusType {
   status: Status;
   keterangan: string;
   jenisRiwayat: JenisRiwayat;
-  flagRevisi?: FlagRevisi[];
 }

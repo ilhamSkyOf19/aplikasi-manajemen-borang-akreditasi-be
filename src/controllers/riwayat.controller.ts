@@ -4,10 +4,9 @@ import { ResponseRiwayatType } from "../models/riwayat.model";
 import checkParamsId from "../utils/checkParamsId";
 import { PicService } from "../services/pic.service";
 import { RiwayatService } from "../services/riwayat.service";
-import { FlagRevisi, JenisRiwayat, Status } from "../utils/contstanst";
+import { JenisRiwayat, Status } from "../utils/contstanst";
 import { UpdateStatusType } from "../models/status.model";
 import { ResponsePicUpdateStatusType } from "../models/pic.model";
-import { KebutuhanDokumenService } from "../services/kebutuhanDokumen.service";
 import { NotifikasiService } from "../services/notifikasi.service";
 
 export class RiwayatController {
@@ -19,7 +18,7 @@ export class RiwayatController {
   ) {
     try {
       // get body
-      const { status, keterangan, jenisRiwayat, flagRevisi } = req.body;
+      const { status, keterangan, jenisRiwayat } = req.body;
 
       // get id from params
       const { id } = req.params;
@@ -27,16 +26,10 @@ export class RiwayatController {
       // check id
       const checkId = checkParamsId(res, id);
 
-      // check status
-      if (status === Status.menunggu || status === Status.revisi) {
-        if (!flagRevisi) {
-          return ResponseResult.error(res, 400, "flag revisi harus diisi");
-        }
-      }
-
       // service pic
       let servicePic: ResponsePicUpdateStatusType | null = null;
 
+      // check status success
       let checkStatusSuccess: ResponseRiwayatType[] | null = null;
 
       // check status revisi
@@ -143,8 +136,6 @@ export class RiwayatController {
         keterangan,
         status,
         picId: servicePic ? servicePic.id : 0,
-        // tambahkan dokumen borang
-        flagRevisi,
       });
 
       // check riwayat

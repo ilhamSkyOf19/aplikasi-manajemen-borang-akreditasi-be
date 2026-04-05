@@ -293,7 +293,6 @@ export class PicController {
           keterangan: keteranganUpdate,
           status: Status.menunggu,
           picId: service ? service.id : 0,
-          flagRevisi: [FlagRevisi.pic],
         });
 
         // check riwayat

@@ -1,5 +1,4 @@
 import { MetaType, Status } from "../utils/contstanst";
-import { IKebutuhanDokumen } from "./kebutuhanDokumen.model";
 import { ResponseKriteriaType } from "./kriteria.model";
 import { IPendekatan } from "./pendekatan.model";
 import { ITimAkreditasi } from "./timAkreditasi.model";
