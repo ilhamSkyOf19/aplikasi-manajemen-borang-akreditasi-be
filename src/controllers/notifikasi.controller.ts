@@ -85,4 +85,35 @@ export class NotifikasiController {
       next(error);
     }
   }
+
+  // delete
+  static async delete(
+    req: Request<{ id: string }>,
+    res: Response<ResponseStructure<null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get id from params
+      const id = req.params.id;
+
+      // check params
+      const checkId = checkParamsId(res, id);
+
+      // check
+      if (!checkId) {
+        return ResponseResult.error(res, 400, "id must be number");
+      }
+
+      // call service
+      const service = await NotifikasiService.delete(checkId as number);
+      // return success
+      return ResponseResult.successNoContent(
+        null,
+        res,
+        "success delete notifikasi",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }

@@ -268,4 +268,13 @@ export class NotifikasiService {
       kriteria: result.kriteria ?? undefined,
     });
   }
+
+  // delete
+  static async delete(id: number): Promise<void> {
+    await prisma.notification.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }

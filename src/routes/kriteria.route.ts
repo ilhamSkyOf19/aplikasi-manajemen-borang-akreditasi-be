@@ -13,7 +13,7 @@ const kriteriaRouter: Router = Router();
 
 // read all
 kriteriaRouter.get(
-  "/read-all",
+  "/",
   [
     authMiddleware,
     aclMiddleware(["wakil_dekan_1", "kaprodi", "tim_akreditasi"]),
@@ -23,7 +23,7 @@ kriteriaRouter.get(
 
 // read by id
 kriteriaRouter.get(
-  "/read-by-id/:id",
+  "/:id",
   [
     authMiddleware,
     aclMiddleware(["wakil_dekan_1", "kaprodi", "tim_akreditasi"]),
@@ -33,7 +33,7 @@ kriteriaRouter.get(
 
 // create
 kriteriaRouter.post(
-  "/create",
+  "/",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   zodValidation<CreateKriteriaType>(KriteriaValidation.CREATE),
   KriteriaController.create,
@@ -41,7 +41,7 @@ kriteriaRouter.post(
 
 // update
 kriteriaRouter.patch(
-  "/update/:id",
+  "/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   zodValidation<UpdateKriteriaType>(KriteriaValidation.UPDATE),
   KriteriaController.update,
@@ -49,7 +49,7 @@ kriteriaRouter.patch(
 
 // delete
 kriteriaRouter.delete(
-  "/delete/:id",
+  "/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   KriteriaController.delete,
 );

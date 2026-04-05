@@ -10,7 +10,7 @@ const picRouter: Router = Router();
 
 // read all
 picRouter.get(
-  "/read-all",
+  "/",
   [
     authMiddleware,
     aclMiddleware(["kaprodi", "wakil_dekan_1", "tim_akreditasi"]),
@@ -20,7 +20,7 @@ picRouter.get(
 
 // read detail
 picRouter.get(
-  "/read-by-id/:id",
+  "/:id",
   [
     authMiddleware,
     aclMiddleware(["kaprodi", "wakil_dekan_1", "tim_akreditasi"]),
@@ -31,19 +31,9 @@ picRouter.get(
 // read pic by id user
 picRouter.get("/read-my-pic", [authMiddleware], PicController.readByUserId);
 
-// read detail
-picRouter.get(
-  "/read-by-id/:id",
-  [
-    authMiddleware,
-    aclMiddleware(["kaprodi", "wakil_dekan_1", "tim_akreditasi"]),
-  ],
-  PicController.readById,
-);
-
 // create
 picRouter.post(
-  "/create",
+  "/",
   [authMiddleware, aclMiddleware(["kaprodi"])],
   zodValidation<CreatePicType>(PicValidation.CREATE),
   PicController.create,
@@ -51,7 +41,7 @@ picRouter.post(
 
 // update
 picRouter.patch(
-  "/update/:id",
+  "/:id",
   [authMiddleware, aclMiddleware(["kaprodi"])],
   zodValidation<UpdatePicType>(PicValidation.UPDATE),
   PicController.update,
@@ -59,7 +49,7 @@ picRouter.patch(
 
 // delete
 picRouter.delete(
-  "/delete/:id",
+  "/:id",
   [authMiddleware, aclMiddleware(["kaprodi"])],
   PicController.delete,
 );

@@ -10,21 +10,21 @@ const userRoute: Router = Router();
 
 // find all
 userRoute.get(
-  "/read-all",
+  "/",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   UserController.readAll,
 );
 
 // read by id
 userRoute.get(
-  "/read-by-id/:id",
+  "/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   UserController.readById,
 );
 
 // update user
 userRoute.patch(
-  "/update/:id",
+  "/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   zodValidation<UpdateUserType>(UserValidation.UPDATE),
   UserController.update,
@@ -32,7 +32,7 @@ userRoute.patch(
 
 // delete
 userRoute.delete(
-  "/delete/:id",
+  "/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   UserController.delete,
 );

@@ -6,15 +6,12 @@ import { NotifikasiController } from "../controllers/notifikasi.controller";
 const notifikasiRoute: Router = Router();
 
 // get notifikasi
-notifikasiRoute.get(
-  "/read-all",
-
-  authMiddleware,
-
-  NotifikasiController.getNotifikasi,
-);
+notifikasiRoute.get("/", authMiddleware, NotifikasiController.getNotifikasi);
 
 // is read
 notifikasiRoute.put("/isRead/:id", authMiddleware, NotifikasiController.isRead);
+
+// delete notifikasi
+notifikasiRoute.delete("/:id", authMiddleware, NotifikasiController.delete);
 
 export default notifikasiRoute;

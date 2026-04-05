@@ -11,7 +11,7 @@ const riwayatRouter: Router = Router();
 
 // read all by pic id
 riwayatRouter.get(
-  "/read-all-by-pic-id/:picId",
+  "/:picId",
   [
     authMiddleware,
     aclMiddleware(["kaprodi", "wakil_dekan_1", "tim_akreditasi"]),
@@ -21,7 +21,7 @@ riwayatRouter.get(
 
 // update status
 riwayatRouter.patch(
-  "/update-status/:id",
+  "/status/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   zodValidation<UpdateStatusType>(StatusValidation.UPDATE_STATUS),
   RiwayatController.updateStatus,

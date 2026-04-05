@@ -13,7 +13,7 @@ const timAkreditasiRoute: Router = Router();
 
 // create
 timAkreditasiRoute.post(
-  "/create",
+  "/",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   zodValidation<CreateTimAkreditasiType>(TimAkreditasiValidation.CREATE),
   TimAkreditasiController.create,
@@ -21,7 +21,7 @@ timAkreditasiRoute.post(
 
 // read by id
 timAkreditasiRoute.get(
-  "/read-by-id/:id",
+  "/:id",
   [
     authMiddleware,
     aclMiddleware(["wakil_dekan_1", "kaprodi", "tim_akreditasi"]),
@@ -31,7 +31,7 @@ timAkreditasiRoute.get(
 
 // read all
 timAkreditasiRoute.get(
-  "/read-all",
+  "/",
   [
     authMiddleware,
     aclMiddleware(["wakil_dekan_1", "kaprodi", "tim_akreditasi"]),
@@ -41,14 +41,14 @@ timAkreditasiRoute.get(
 
 // read choose
 timAkreditasiRoute.get(
-  "/read-choose",
+  "/choose",
   [authMiddleware, aclMiddleware(["wakil_dekan_1", "kaprodi"])],
   TimAkreditasiController.readChoose,
 );
 
 // update
 timAkreditasiRoute.patch(
-  "/update/:id",
+  "/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   zodValidation<UpdateTimAkreditasiType>(TimAkreditasiValidation.UPDATE),
   TimAkreditasiController.update,
@@ -56,7 +56,7 @@ timAkreditasiRoute.patch(
 
 // delete by id
 timAkreditasiRoute.delete(
-  "/delete/:id",
+  "/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
   TimAkreditasiController.delete,
 );

@@ -334,12 +334,7 @@ export class DokumenBorangController {
       const findDokumenBorang = await DokumenBorangService.findByIds(ids);
 
       // check
-      if (!findDokumenBorang) {
-        return ResponseResult.error(res, 404, "dokumen borang not found");
-      }
-
-      // check
-      if (findDokumenBorang.length === 0) {
+      if (!findDokumenBorang || findDokumenBorang.length === 0) {
         return ResponseResult.error(res, 404, "dokumen borang not found");
       }
 

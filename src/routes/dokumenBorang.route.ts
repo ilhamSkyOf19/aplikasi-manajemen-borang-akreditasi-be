@@ -22,28 +22,28 @@ dokumenBorangRoute.post(
 
 // read all
 dokumenBorangRoute.get(
-  "/read-daftar",
+  "/",
   authMiddleware,
   DokumenBorangController.readDaftarDokumen,
 );
 
 // read dokumen for choose
 dokumenBorangRoute.get(
-  "/get-daftar-dokumentasi-for-choose",
+  "/for-choose",
   authMiddleware,
   DokumenBorangController.getDokumenBorangForChoose,
 );
 
-// read daftar kebutuhan dokumentasi
+// read daftar kebutuhan dokumentasi by kriteria by pendekatan
 dokumenBorangRoute.get(
-  "/read-daftar-kebutuhan-dokumentasi/:kriteria/:pendekatan",
+  "/:kriteria/:pendekatan",
   authMiddleware,
   DokumenBorangController.readDaftarKebutuhanDokumentasiByKriteriaAndPendekatan,
 );
 
 // read dokumentasi borang by kebutuhan dokumen id
 dokumenBorangRoute.get(
-  "/read-daftar-dokumentasi-borang/:kebutuhanDokumenId",
+  "/:kebutuhanDokumenId",
   authMiddleware,
   DokumenBorangController.findDokumenBorangByKebutuhanDokumenId,
 );
@@ -63,7 +63,7 @@ dokumenBorangRoute.post(
 
 // delete
 dokumenBorangRoute.delete(
-  "/delete",
+  "/:id",
   authMiddleware,
   zodValidation<{ ids: number[] }>(DokumenBorangValidation.DELETE),
   DokumenBorangController.deleteDokumenBorang,

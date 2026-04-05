@@ -388,7 +388,7 @@ export class TimAkreditasiService {
   }
 
   // delete by id
-  static async delete(id: number): Promise<ResponseTimAkreditasiType | null> {
+  static async delete(id: number): Promise<boolean> {
     // call db
     const result = await prisma.timAkreditasi.delete({
       where: {
@@ -412,19 +412,6 @@ export class TimAkreditasiService {
       },
     });
 
-    // check
-    if (!result) return null;
-
-    // return
-
-    return toResponseTimAkreditasiType({
-      ...result,
-      user: result.userTimAkreditasi.map((user) => {
-        return {
-          ...user.user,
-          role: user.user.role as UserRole,
-        };
-      }),
-    });
+    return !!result;
   }
 }
