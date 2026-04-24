@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
 import { AuthRequest } from "../types/authRequest";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { PayloadUserType } from "../models/dosen.model";
+import { PayloadDosenType } from "../models/dosen.model";
 import { ENV } from "../utils/env";
 export const authMiddleware = (
   req: AuthRequest,
@@ -17,7 +17,7 @@ export const authMiddleware = (
     if (!token) return ResponseResult.unauthorized(res, "Token not found");
 
     // get payload
-    const payload = jwt.verify(token, ENV.SECRET_KEY) as PayloadUserType;
+    const payload = jwt.verify(token, ENV.SECRET_KEY) as PayloadDosenType;
 
     // set request user
     req.data = {

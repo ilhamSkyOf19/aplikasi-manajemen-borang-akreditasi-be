@@ -3,6 +3,7 @@ import { DosenRole } from "../utils/contstanst";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
 import {
   PayloadDosenType,
+  ResponseDosenType,
   ResponseDosenWithMetaType,
   UpdateDosenType,
 } from "../models/dosen.model";
@@ -93,7 +94,7 @@ export class DosenController {
   // // update
   static async update(
     req: Request<{ id: string }, {}, UpdateDosenType>,
-    res: Response<ResponseStructure<PayloadDosenType | null>>,
+    res: Response<ResponseStructure<ResponseDosenType | null>>,
     next: NextFunction,
   ) {
     try {
@@ -104,6 +105,19 @@ export class DosenController {
       // check params
       const cleanId = checkParamsId(res, id);
 
+      // check body role
+      if (body.roles?.includes(DosenRole.wakil_dekan_1)) {
+        // check count wd 1
+        const countWd1 = await DosenServices.findCountRole(
+          DosenRole.wakil_dekan_1,
+        );
+
+        // check count === 2
+        if (countWd1 === 2) {
+          return ResponseResult.error(res, 400, "max record wd 1 is 2");
+        }
+      }
+
       // update user
       const service = await DosenServices.update(cleanId as number, body);
 
@@ -112,7 +126,7 @@ export class DosenController {
         return ResponseResult.error(res, 404, "dosen not found");
       }
       // return success
-      return ResponseResult.success<PayloadDosenType | null>(
+      return ResponseResult.success<ResponseDosenType | null>(
         service,
         res,
         200,
@@ -122,7 +136,8 @@ export class DosenController {
       next(error);
     }
   }
-  // // delete
+
+  // delete
   static async delete(
     req: Request<{ id: string }>,
     res: Response<ResponseStructure<null>>,
@@ -133,20 +148,26 @@ export class DosenController {
       const id = req.params.id;
       // check params
       const checkId = checkParamsId(res, id);
-      // check
-      if (!checkId) {
-        return ResponseResult.error(res, 400, "id must be number");
+
+      // find user by id
+      const dosen = await DosenServices.findById(checkId as number);
+      // check user
+      if (!dosen) {
+        return ResponseResult.error(res, 404, "dosen not found");
       }
-      // find user
-      const findUser = await DosenServices.findById(checkId as number);
-      // check count wakil dekan
-      if (findUser?.role === DosenRole.wakil_dekan_1) {
-        return ResponseResult.error(
-          res,
-          400,
-          "Wakil Dekan 1 tidak boleh dihapus",
+
+      // check role dosen
+      if (dosen.roles.includes(DosenRole.wakil_dekan_1)) {
+        // check count role wd 1
+        const countWd1 = await DosenServices.findCountRole(
+          DosenRole.wakil_dekan_1,
         );
+
+        if (countWd1 === 1) {
+          return ResponseResult.error(res, 400, "cannot delete wd 1");
+        }
       }
+
       // call service
       await DosenServices.delete(checkId as number);
       // return success

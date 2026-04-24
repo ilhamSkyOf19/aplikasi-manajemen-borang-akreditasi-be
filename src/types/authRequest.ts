@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { DosenRole } from "../utils/contstanst";
 
 export interface AuthRequest<
   params = {},
@@ -10,6 +11,6 @@ export interface AuthRequest<
     id: number;
     name: string;
     email: string;
-    role: string;
+    role: DosenRole;
   };
 }

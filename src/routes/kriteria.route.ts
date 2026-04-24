@@ -8,6 +8,7 @@ import {
   UpdateKriteriaType,
 } from "../models/kriteria.model";
 import { aclMiddleware } from "../middlewares/acl.middleware";
+import { DosenRole } from "../utils/contstanst";
 
 const kriteriaRouter: Router = Router();
 
@@ -16,7 +17,11 @@ kriteriaRouter.get(
   "/",
   [
     authMiddleware,
-    aclMiddleware(["wakil_dekan_1", "kaprodi", "tim_akreditasi"]),
+    aclMiddleware([
+      DosenRole.kaprodi,
+      DosenRole.tim_akreditasi,
+      DosenRole.wakil_dekan_1,
+    ]),
   ],
   KriteriaController.findAll,
 );
@@ -26,7 +31,11 @@ kriteriaRouter.get(
   "/:id",
   [
     authMiddleware,
-    aclMiddleware(["wakil_dekan_1", "kaprodi", "tim_akreditasi"]),
+    aclMiddleware([
+      DosenRole.kaprodi,
+      DosenRole.tim_akreditasi,
+      DosenRole.wakil_dekan_1,
+    ]),
   ],
   KriteriaController.findById,
 );
@@ -34,7 +43,7 @@ kriteriaRouter.get(
 // create
 kriteriaRouter.post(
   "/",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
   zodValidation<CreateKriteriaType>(KriteriaValidation.CREATE),
   KriteriaController.create,
 );
@@ -42,7 +51,7 @@ kriteriaRouter.post(
 // // update
 kriteriaRouter.patch(
   "/:id",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
   zodValidation<UpdateKriteriaType>(KriteriaValidation.UPDATE),
   KriteriaController.update,
 );
@@ -50,7 +59,7 @@ kriteriaRouter.patch(
 // // delete
 kriteriaRouter.delete(
   "/:id",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
   KriteriaController.delete,
 );
 

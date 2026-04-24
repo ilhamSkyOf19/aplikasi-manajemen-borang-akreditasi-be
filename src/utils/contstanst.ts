@@ -49,3 +49,10 @@ export enum LokasiFile {
   GDRIVE = "GDRIVE",
   SISTEM = "SISTEM",
 }
+
+// role priority
+export const rolePriority = [
+  DosenRole.wakil_dekan_1,
+  DosenRole.kaprodi,
+  DosenRole.tim_akreditasi,
+];

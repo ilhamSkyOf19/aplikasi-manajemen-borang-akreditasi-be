@@ -10,7 +10,7 @@ import { DosenServices } from "../services/dosen.service";
 import argon2 from "argon2";
 import { generateAccessToken } from "../utils/jwt";
 import { AuthRequest } from "../types/authRequest";
-import { DosenRole } from "../utils/contstanst";
+import { DosenRole, rolePriority } from "../utils/contstanst";
 
 export class AuthController {
   // register
@@ -23,16 +23,17 @@ export class AuthController {
       // get body
       const body = req.body;
 
-      // check role
-      if (
-        body.role === DosenRole.wakil_dekan_1 ||
-        body.role === DosenRole.kaprodi
-      ) {
-        return ResponseResult.error(
-          res,
-          400,
-          "Role yang dikirim tidak boleh didaftarkan lebih dari satu kali",
+      // check body role
+      if (body.roles?.includes(DosenRole.wakil_dekan_1)) {
+        // check count wd 1
+        const countWd1 = await DosenServices.findCountRole(
+          DosenRole.wakil_dekan_1,
         );
+
+        // check count === 2
+        if (countWd1 === 2) {
+          return ResponseResult.error(res, 400, "max record wd 1 is 2");
+        }
       }
 
       // check password & confirm password
@@ -52,7 +53,7 @@ export class AuthController {
         email: body.email.trim(),
         nidn: body.nidn.trim(),
         password: hashedPassword,
-        role: body.role,
+        roles: body.roles,
       });
 
       // response success
@@ -67,7 +68,7 @@ export class AuthController {
     }
   }
 
-  // // login
+  //  login
   static async login(
     req: Request<{}, {}, LoginDosenType>,
     res: Response<ResponseStructure<PayloadDosenType | null>>,
@@ -82,33 +83,29 @@ export class AuthController {
         identifier: body.identifier.trim(),
       });
 
-      // cek user
-      if (!service)
-        return ResponseResult.error(
-          res,
-          400,
-          "Email or NIDN  password is wrong",
-        );
+      // cek dosen
+      if (!service) return ResponseResult.error(res, 400, "Data tidak valid");
 
-      // compare
+      // compare password
       const isMatch = await argon2.verify(
         service.password,
         body.password.trim(),
       );
 
       // cek
-      if (!isMatch)
-        return ResponseResult.error(
-          res,
-          400,
-          "Email or NIDN or password is wrong",
-        );
+      if (!isMatch) return ResponseResult.error(res, 400, "Data tidak valid");
 
       // get payload
-      const { password, ...payloadDosen } = service;
+      const { password, roles, ...payloadDosen } = service;
+
+      // default role
+      const defaultRole = rolePriority.find((role) => roles.includes(role))!;
 
       // generate token
-      const token = generateAccessToken(payloadDosen);
+      const token = generateAccessToken({
+        ...payloadDosen,
+        role: defaultRole,
+      });
 
       const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
 
@@ -123,7 +120,10 @@ export class AuthController {
 
       // return success
       return ResponseResult.success<PayloadDosenType | null>(
-        payloadDosen,
+        {
+          ...payloadDosen,
+          role: defaultRole,
+        },
         res,
         200,
         "success login user",
@@ -133,53 +133,53 @@ export class AuthController {
     }
   }
 
-  // // auth me
-  // static async me(
-  //   req: AuthRequest,
-  //   res: Response<ResponseStructure<PayloadUserType | null>>,
-  //   next: NextFunction,
-  // ) {
-  //   try {
-  //     // get res data
-  //     const data = req.data;
+  // // // auth me
+  // // static async me(
+  // //   req: AuthRequest,
+  // //   res: Response<ResponseStructure<PayloadUserType | null>>,
+  // //   next: NextFunction,
+  // // ) {
+  // //   try {
+  // //     // get res data
+  // //     const data = req.data;
 
-  //     // cek data
-  //     if (!data) return ResponseResult.unauthorized(res, "Token not found");
+  // //     // cek data
+  // //     if (!data) return ResponseResult.unauthorized(res, "Token not found");
 
-  //     // call service
-  //     const service = await UserService.findUserById(data.id);
+  // //     // call service
+  // //     const service = await UserService.findUserById(data.id);
 
-  //     // return success
-  //     return ResponseResult.success<PayloadUserType | null>(
-  //       service,
-  //       res,
-  //       200,
-  //       "success login user",
-  //     );
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
+  // //     // return success
+  // //     return ResponseResult.success<PayloadUserType | null>(
+  // //       service,
+  // //       res,
+  // //       200,
+  // //       "success login user",
+  // //     );
+  // //   } catch (error) {
+  // //     next(error);
+  // //   }
+  // // }
 
-  // // logout
-  // static async logout(
-  //   _req: Request,
-  //   res: Response<ResponseStructure<null>>,
-  //   next: NextFunction,
-  // ) {
-  //   try {
-  //     const isProduction = process.env.NODE_ENV === "production";
+  // // // logout
+  // // static async logout(
+  // //   _req: Request,
+  // //   res: Response<ResponseStructure<null>>,
+  // //   next: NextFunction,
+  // // ) {
+  // //   try {
+  // //     const isProduction = process.env.NODE_ENV === "production";
 
-  //     // Clear cookie
-  //     res.clearCookie("token", {
-  //       httpOnly: true,
-  //       secure: isProduction,
-  //       sameSite: isProduction ? "none" : "lax",
-  //     });
+  // //     // Clear cookie
+  // //     res.clearCookie("token", {
+  // //       httpOnly: true,
+  // //       secure: isProduction,
+  // //       sameSite: isProduction ? "none" : "lax",
+  // //     });
 
-  //     return ResponseResult.success<null>(null, res, 200, "success logout");
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
+  // //     return ResponseResult.success<null>(null, res, 200, "success logout");
+  // //   } catch (error) {
+  // //     next(error);
+  // //   }
+  // // }
 }

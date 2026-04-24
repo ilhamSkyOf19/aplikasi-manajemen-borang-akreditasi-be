@@ -19,12 +19,14 @@ model Dosen {
   email      String   @unique
   nidn       String   @unique
   password   String
-  role       Role     @default(tim_akreditasi)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   // relasi ke kriteria_pic
   kriteriaPic KriteriaPic[]
+
+  // dosen role 
+  dosenRole DosenRole[]
 
   // dokumen borang
   // dokumentasi_borang DokumentasiBorang[]
@@ -35,6 +37,20 @@ model Dosen {
   // kebutuhan_dokumentasi_dokumentasi_borang KebutuhanDokumentasiDokumentasiBorang[] @relation("PicDokumenAssignedBy")
 
   @@map("dosen")
+}
+
+// dosen role 
+model DosenRole {
+  id         Int      @id @default(autoincrement())
+  dosen_id   Int
+  role       Role
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  dosen Dosen @relation(fields: [dosen_id], references: [id], onDelete: Cascade)
+
+  @@unique([dosen_id, role]) // Mencegah duplikasi
+  @@map("dosen_role")
 }
 
 // kriteria 
@@ -54,16 +70,16 @@ model Kriteria {
 
 // kriteria pic 
 model KriteriaPic {
-  id         Int      @id @default(autoincrement())
-  kriteri_id Int
-  dosen_id   Int
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  kriteria_id Int
+  dosen_id    Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
-  kriteria Kriteria @relation(fields: [kriteri_id], references: [id], onDelete: Cascade)
+  kriteria Kriteria @relation(fields: [kriteria_id], references: [id], onDelete: Cascade)
   dosen    Dosen    @relation(fields: [dosen_id], references: [id], onDelete: Cascade)
 
-  @@unique([kriteri_id, dosen_id]) // Mencegah duplikasi
+  @@unique([kriteria_id, dosen_id]) // Mencegah duplikasi
   @@map("kriteria_pic")
 }
 

@@ -6,7 +6,7 @@ export interface IDosen {
   email: string;
   nidn: string;
   password: string;
-  role: DosenRole;
+  roles: DosenRole[];
   created_at: Date;
   updated_at: Date;
 }
@@ -14,17 +14,16 @@ export interface IDosen {
 // create user model
 export interface CreateDosenType extends Omit<
   IDosen,
-  "id" | "created_at" | "updated_at"
+  "id" | "created_at" | "updated_at" | "roles"
 > {
   confirmPassword: string;
+  roles: DosenRole[];
 }
 
 // update user model
 export interface UpdateDosenType extends Partial<
-  Omit<CreateDosenType, "role" | "confirmPassword">
-> {
-  role?: Exclude<DosenRole, DosenRole.wakil_dekan_1>;
-}
+  Omit<CreateDosenType, "confirmPassword">
+> {}
 
 // login type
 export interface LoginDosenType extends Pick<IDosen, "password"> {
@@ -34,8 +33,10 @@ export interface LoginDosenType extends Pick<IDosen, "password"> {
 // payload
 export interface PayloadDosenType extends Omit<
   IDosen,
-  "password" | "created_at" | "updated_at"
-> {}
+  "password" | "created_at" | "updated_at" | "roles"
+> {
+  role: DosenRole;
+}
 
 // response user model
 export interface ResponseDosenType extends Omit<IDosen, "password"> {}

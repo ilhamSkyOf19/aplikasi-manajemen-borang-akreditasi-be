@@ -6,7 +6,7 @@ import {
   UpdateKriteriaType,
 } from "../models/kriteria.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { KriteriaService } from "../services/kriteria.service";
+import { KriteriaServices } from "../services/kriteria.service";
 import { PaginationType } from "../types/pagination";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
 import checkParamsId from "../utils/checkParamsId";
@@ -26,7 +26,7 @@ export class KriteriaController {
       const { kode_kriteria, nama_kriteria } = req.body;
 
       // call service
-      const service = await KriteriaService.create({
+      const service = await KriteriaServices.create({
         kode_kriteria,
         nama_kriteria,
       });
@@ -57,7 +57,7 @@ export class KriteriaController {
       const cleanId = checkParamsId(res, id);
 
       // call service
-      const service = await KriteriaService.findById(cleanId as number);
+      const service = await KriteriaServices.findById(cleanId as number);
 
       //   check
       if (!service) {
@@ -104,7 +104,7 @@ export class KriteriaController {
       }
 
       // call service
-      const service = await KriteriaService.findAll({
+      const service = await KriteriaServices.findAll({
         limit: checkQuery.limit,
         page: checkQuery.page,
         search,
@@ -137,7 +137,10 @@ export class KriteriaController {
       const cleanId = checkParamsId(res, id);
 
       // call service
-      const service = await KriteriaService.update(cleanId as number, req.body);
+      const service = await KriteriaServices.update(
+        cleanId as number,
+        req.body,
+      );
 
       // return
       return ResponseResult.success<ResponseKriteriaType | null>(
@@ -162,7 +165,7 @@ export class KriteriaController {
       const cleanId = checkParamsId(res, req.params.id);
 
       // call service
-      await KriteriaService.delete(cleanId as number);
+      await KriteriaServices.delete(cleanId as number);
 
       // return
       return ResponseResult.successNoContent(res, "success delete");

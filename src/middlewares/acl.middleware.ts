@@ -2,9 +2,10 @@ import { NextFunction, Response } from "express";
 import { AuthRequest } from "../types/authRequest";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { DosenServices } from "../services/dosen.service";
+import { DosenRole } from "../utils/contstanst";
 
 export const aclMiddleware =
-  (roles: string[]) =>
+  (allowRoles: DosenRole[]) =>
   async (
     req: AuthRequest,
     res: Response<ResponseStructure<null>>,
@@ -12,13 +13,19 @@ export const aclMiddleware =
   ) => {
     try {
       // get user id
-      const userId = req.data?.id;
+      const dosenId = req.data?.id;
+
+      // role dosen
+      const roleDosen = req.data?.role;
 
       // check db
-      const user = await DosenServices.findById(userId!);
-
+      const dosen = await DosenServices.findById(dosenId!);
       // check roles
-      if (!user || !roles.includes(user.role)) {
+      if (
+        !dosen ||
+        !dosen.roles.includes(roleDosen!) ||
+        !allowRoles.includes(roleDosen!)
+      ) {
         return ResponseResult.error(res, 403, "Forbidden");
       }
 

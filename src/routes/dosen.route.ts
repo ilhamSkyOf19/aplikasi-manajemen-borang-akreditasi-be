@@ -5,13 +5,14 @@ import { aclMiddleware } from "../middlewares/acl.middleware";
 import { zodValidation } from "../middlewares/validation.middleware";
 import { UpdateDosenType } from "../models/dosen.model";
 import { DosenValidation } from "../validations/dosen.validation";
+import { DosenRole } from "../utils/contstanst";
 
 const dosenRoute: Router = Router();
 
 // find all
 dosenRoute.get(
   "/",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
   DosenController.findAll,
 );
 
@@ -25,7 +26,7 @@ dosenRoute.get(
 // // update dosen
 dosenRoute.patch(
   "/:id",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
   zodValidation<UpdateDosenType>(DosenValidation.UPDATE),
   DosenController.update,
 );
@@ -33,7 +34,7 @@ dosenRoute.patch(
 // // delete
 dosenRoute.delete(
   "/:id",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
   DosenController.delete,
 );
 

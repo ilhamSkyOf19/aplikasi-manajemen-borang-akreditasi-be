@@ -31,7 +31,7 @@ export class DosenValidation {
 
   // email schema
   private static emailSchema() {
-    return z.string().email();
+    return z.email();
   }
 
   // password schema
@@ -47,11 +47,9 @@ export class DosenValidation {
       nidn: this.nidnSchema(),
       password: this.passwordSchema(),
       confirmPassword: this.passwordSchema(),
-      role: z.enum([
-        "wakil_dekan_1",
-        "kaprodi",
-        "tim_akreditasi",
-      ] as DosenRole[]),
+      roles: z.array(
+        z.enum(["wakil_dekan_1", "kaprodi", "tim_akreditasi"] as DosenRole[]),
+      ),
     })
     .superRefine((data, ctx) => {
       if (data.password !== data.confirmPassword) {
@@ -79,11 +77,10 @@ export class DosenValidation {
       email: this.emailSchema().optional(),
       nidn: this.nidnSchema().optional(),
       password: this.passwordSchema().optional(),
-      role: z
-        .enum(["kaprodi", "tim_akreditasi"] as Exclude<
-          DosenRole,
-          "wakil_dekan_1"
-        >[])
+      roles: z
+        .array(
+          z.enum(["wakil_dekan_1", "kaprodi", "tim_akreditasi"] as DosenRole[]),
+        )
         .optional(),
     })
     .strict() satisfies z.ZodType<UpdateDosenType>;

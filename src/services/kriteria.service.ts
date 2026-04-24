@@ -10,7 +10,7 @@ import {
 } from "../models/kriteria.model";
 import { PaginationType } from "../types/pagination";
 
-export class KriteriaService {
+export class KriteriaServices {
   // create kriteria
   static async create(
     req: CreateKriteriaType,
@@ -84,6 +84,17 @@ export class KriteriaService {
       },
       data: result,
     };
+  }
+
+  // find uniqe by id
+  static async findUniqeById(id: number): Promise<number> {
+    const result = await prisma.kriteria.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return result?.id ?? 0;
   }
 
   // //   update kriteria

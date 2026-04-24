@@ -19,33 +19,59 @@ export class DosenServices {
   static async create(
     req: Omit<CreateDosenType, "confirmPassword">,
   ): Promise<ResponseDosenType | null> {
-    const result = await prisma.dosen.create({
-      data: {
-        ...req,
-        role: req.role,
-      },
-      select: {
-        id: true,
-        nama: true,
-        email: true,
-        nidn: true,
-        role: true,
-        created_at: true,
-        updated_at: true,
-      },
+    const result = await prisma.$transaction(async (tx) => {
+      const dosen = await tx.dosen.create({
+        data: {
+          nama: req.nama,
+          nidn: req.nidn,
+          email: req.email,
+          password: req.password,
+        },
+      });
+
+      await tx.dosenRole.createMany({
+        data: req.roles.map((role) => ({
+          dosen_id: dosen.id,
+          role,
+        })),
+        skipDuplicates: true,
+      });
+
+      return tx.dosen.findUnique({
+        where: {
+          id: dosen.id,
+        },
+        select: {
+          id: true,
+          nama: true,
+          nidn: true,
+          email: true,
+          created_at: true,
+          updated_at: true,
+          dosenRole: {
+            select: {
+              role: true,
+            },
+          },
+        },
+      });
     });
 
+    // check result
+    if (!result) return null;
+    const { dosenRole, ...dataDosen } = result;
+
     return toDosenResponse({
-      ...result,
-      role: result.role as DosenRole,
+      ...dataDosen,
+      roles: result?.dosenRole.map((dr) => dr.role) as DosenRole[],
     });
   }
 
-  //   // find user by email or name & password
+  // //   // find user by email or name & password
   static async findDosenByIdentifier({
     identifier,
-  }: Omit<LoginDosenType, "password">): Promise<
-    (PayloadDosenType & { password: string }) | null
+  }: Omit<LoginDosenType, "password" | "role">): Promise<
+    (ResponseDosenType & { password: string }) | null
   > {
     // find user by email or name
     const dosen = await prisma.dosen.findFirst({
@@ -65,7 +91,11 @@ export class DosenServices {
         nama: true,
         email: true,
         nidn: true,
-        role: true,
+        dosenRole: {
+          select: {
+            role: true,
+          },
+        },
         password: true,
         created_at: true,
         updated_at: true,
@@ -80,13 +110,15 @@ export class DosenServices {
       nama: dosen.nama,
       email: dosen.email,
       nidn: dosen.nidn,
-      role: dosen.role as DosenRole,
+      roles: dosen.dosenRole.map((dr) => dr.role) as DosenRole[],
       password: dosen.password,
+      created_at: dosen.created_at,
+      updated_at: dosen.updated_at,
     };
   }
 
-  //   // find user by id
-  static async findById(id: number): Promise<PayloadDosenType | null> {
+  // //   // find user by id
+  static async findById(id: number): Promise<ResponseDosenType | null> {
     const dosen = await prisma.dosen.findUnique({
       where: {
         id,
@@ -96,7 +128,13 @@ export class DosenServices {
         nama: true,
         email: true,
         nidn: true,
-        role: true,
+        dosenRole: {
+          select: {
+            role: true,
+          },
+        },
+        created_at: true,
+        updated_at: true,
       },
     });
 
@@ -108,35 +146,47 @@ export class DosenServices {
       nama: dosen.nama,
       email: dosen.email,
       nidn: dosen.nidn,
-      role: dosen.role as DosenRole,
+      created_at: dosen.created_at,
+      updated_at: dosen.updated_at,
+      roles: dosen.dosenRole.map((dr) => dr.role) as DosenRole[],
     };
   }
 
-  //   // read users id
-  //   static async findUserManyById(ids: number[]): Promise<PayloadUserType[]> {
-  //     const users = await prisma.user.findMany({
-  //       where: {
-  //         id: {
-  //           in: ids,
-  //         },
-  //       },
-  //       select: {
-  //         id: true,
-  //         nama: true,
-  //         email: true,
-  //         role: true,
-  //       },
-  //     });
+  // read users id
+  static async findDosenManyById(ids: number[]): Promise<ResponseDosenType[]> {
+    const dosens = await prisma.dosen.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        nidn: true,
+        dosenRole: {
+          select: {
+            role: true,
+          },
+        },
+        created_at: true,
+        updated_at: true,
+      },
+    });
 
-  //     return users.map((user) => ({
-  //       id: user.id,
-  //       nama: user.nama,
-  //       email: user.email,
-  //       role: user.role as UserRole,
-  //     }));
-  //   }
+    return dosens.map((dosen) => ({
+      id: dosen.id,
+      nama: dosen.nama,
+      email: dosen.email,
+      nidn: dosen.nidn,
+      roles: dosen.dosenRole.map((item) => item.role) as DosenRole[],
+      created_at: dosen.created_at,
+      updated_at: dosen.updated_at,
+    }));
+  }
 
-  //   // read all user
+  // //   // read all user
   static async findAll(
     query: PaginationType & {
       role?: DosenRole;
@@ -160,7 +210,7 @@ export class DosenServices {
           { nidn: { contains: cleanSearch } },
         ],
       }),
-      ...(role && { role }),
+      ...(role && { dosenRole: { some: { role } } }),
     };
 
     // get count data
@@ -177,7 +227,11 @@ export class DosenServices {
         nama: true,
         email: true,
         nidn: true,
-        role: true,
+        dosenRole: {
+          select: {
+            role: true,
+          },
+        },
         created_at: true,
         updated_at: true,
       },
@@ -191,8 +245,13 @@ export class DosenServices {
     return {
       data: result.map((user) =>
         toDosenResponse({
-          ...user,
-          role: user.role as DosenRole,
+          id: user.id,
+          nama: user.nama,
+          email: user.email,
+          nidn: user.nidn,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          roles: user.dosenRole.map((role) => role.role) as DosenRole[],
         }),
       ),
       meta: {
@@ -204,74 +263,108 @@ export class DosenServices {
     };
   }
 
-  //   // update by id
+  // //   // update by id
   static async update(
     id: number,
-    req: UpdateDosenType,
-  ): Promise<PayloadDosenType | null> {
-    // call db
-    const result = await prisma.dosen.update({
-      where: {
-        id,
-      },
-      data: {
-        ...req,
-        role: req.role,
-      },
-      select: {
-        id: true,
-        nama: true,
-        email: true,
-        nidn: true,
-        role: true,
-        created_at: true,
-        updated_at: true,
-      },
+    req: Omit<UpdateDosenType, "confirmPassword">,
+  ): Promise<ResponseDosenType | null> {
+    const { roles, ...data } = req;
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.dosen.update({
+        where: {
+          id,
+        },
+        data: {
+          ...data,
+        },
+      });
+
+      // roles hanya di-update jika dikirim dari request
+      if (roles !== undefined) {
+        await tx.dosenRole.deleteMany({
+          where: {
+            dosen_id: id,
+          },
+        });
+
+        if (roles.length > 0) {
+          await tx.dosenRole.createMany({
+            data: roles.map((role) => ({
+              dosen_id: id,
+              role,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+
+      return tx.dosen.findUnique({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          nama: true,
+          nidn: true,
+          email: true,
+          created_at: true,
+          updated_at: true,
+          dosenRole: {
+            select: {
+              role: true,
+            },
+          },
+        },
+      });
     });
 
-    return {
-      id: result.id,
-      nama: result.nama,
-      email: result.email,
-      nidn: result.nidn,
-      role: result.role as DosenRole,
-    };
+    if (!result) return null;
+
+    const { dosenRole, ...dataDosen } = result;
+
+    return toDosenResponse({
+      ...dataDosen,
+      roles: dosenRole.map((dr) => dr.role) as DosenRole[],
+    });
   }
 
-  //   // find all user for get ids
-  //   static async findAllUserIds(filter?: UserRole[]): Promise<number[]> {
-  //     const users = await prisma.user.findMany({
-  //       where: {
-  //         role: {
-  //           notIn: filter,
-  //         },
-  //       },
-  //       select: {
-  //         id: true,
-  //       },
-  //     });
+  // //   // find all user for get ids
+  // //   static async findAllUserIds(filter?: UserRole[]): Promise<number[]> {
+  // //     const users = await prisma.user.findMany({
+  // //       where: {
+  // //         role: {
+  // //           notIn: filter,
+  // //         },
+  // //       },
+  // //       select: {
+  // //         id: true,
+  // //       },
+  // //     });
 
-  //     return users.map((user) => user.id);
-  //   }
+  // //     return users.map((user) => user.id);
+  // //   }
 
-  //   // get wd1 id
-  //   static async getWD1Id(): Promise<number> {
-  //     const wd1 = await prisma.user.findFirstOrThrow({
-  //       where: { role: "wakil_dekan_1" },
-  //       select: { id: true },
-  //     });
-  //     return wd1.id;
-  //   }
+  // //   // get wd1 id
+  // static async getCountDosenWd1(): Promise<number> {
+  //   const result = await prisma.dosen.findMany({
+  //     where: { dosenRole: {
+  //       some: { role: "wakil_dekan_1" }
+  //     } },
+  //     select: { id: true },
+  //   });
 
-  //   static async getKaprodiId(): Promise<number> {
-  //     const kaprodi = await prisma.user.findFirstOrThrow({
-  //       where: { role: "kaprodi" },
-  //       select: { id: true },
-  //     });
-  //     return kaprodi.id;
-  //   }
+  //   return result.length;
+  // }
 
-  //   // delete by id
+  // //   static async getKaprodiId(): Promise<number> {
+  // //     const kaprodi = await prisma.user.findFirstOrThrow({
+  // //       where: { role: "kaprodi" },
+  // //       select: { id: true },
+  // //     });
+  // //     return kaprodi.id;
+  // //   }
+
+  // //   // delete by id
   static async delete(id: number): Promise<boolean> {
     // call db
     const result = await prisma.dosen.delete({
@@ -287,11 +380,11 @@ export class DosenServices {
   }
 
   //   // find count role
-  //   static async findCountRole(role: UserRole): Promise<number> {
-  //     return await prisma.user.count({
-  //       where: {
-  //         role: role,
-  //       },
-  //     });
-  //   }
+  static async findCountRole(role: DosenRole): Promise<number> {
+    return await prisma.dosenRole.count({
+      where: {
+        role: role,
+      },
+    });
+  }
 }
