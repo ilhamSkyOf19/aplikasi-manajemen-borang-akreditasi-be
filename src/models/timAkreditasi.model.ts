@@ -1,5 +1,5 @@
 import { MetaType } from "../utils/contstanst";
-import { PayloadUserType, ResponseUserType } from "./user.model";
+import { PayloadUserType, ResponseUserType } from "./dosen.model";
 
 export interface ITimAkreditasi {
   id: number;

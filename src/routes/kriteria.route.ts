@@ -11,14 +11,14 @@ import { aclMiddleware } from "../middlewares/acl.middleware";
 
 const kriteriaRouter: Router = Router();
 
-// read all
+// find all
 kriteriaRouter.get(
   "/",
   [
     authMiddleware,
     aclMiddleware(["wakil_dekan_1", "kaprodi", "tim_akreditasi"]),
   ],
-  KriteriaController.readAll,
+  KriteriaController.findAll,
 );
 
 // read by id
@@ -28,7 +28,7 @@ kriteriaRouter.get(
     authMiddleware,
     aclMiddleware(["wakil_dekan_1", "kaprodi", "tim_akreditasi"]),
   ],
-  KriteriaController.readById,
+  KriteriaController.findById,
 );
 
 // create
@@ -39,7 +39,7 @@ kriteriaRouter.post(
   KriteriaController.create,
 );
 
-// update
+// // update
 kriteriaRouter.patch(
   "/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
@@ -47,7 +47,7 @@ kriteriaRouter.patch(
   KriteriaController.update,
 );
 
-// delete
+// // delete
 kriteriaRouter.delete(
   "/:id",
   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],

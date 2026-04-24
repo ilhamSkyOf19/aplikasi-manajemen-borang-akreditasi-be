@@ -3,7 +3,7 @@ import { ResponseResult, ResponseStructure } from "../types/response";
 
 const checkParamsId = (
   res: Response,
-  value: any,
+  value: string,
 ): number | Response<ResponseStructure<null>> => {
   const id = Number(value);
 

@@ -11,6 +11,8 @@ import { PaginationType } from "../types/pagination";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
 import checkParamsId from "../utils/checkParamsId";
 import { NotifikasiService } from "../services/notifikasi.service";
+import { checkSort } from "../utils/utils";
+import { SortOrder } from "../../generated/prisma/internal/prismaNamespace";
 
 export class KriteriaController {
   // create
@@ -21,15 +23,13 @@ export class KriteriaController {
   ) {
     try {
       // get body
-      const { kriteria, namaKriteria } = req.body;
+      const { kode_kriteria, nama_kriteria } = req.body;
 
       // call service
-      const service = await KriteriaService.create({ kriteria, namaKriteria });
-
-      // push notifikasi
-      await NotifikasiService.notifyKriteriaDitambah(
-        service?.namaKriteria ?? "",
-      );
+      const service = await KriteriaService.create({
+        kode_kriteria,
+        nama_kriteria,
+      });
 
       //   return
       return ResponseResult.success<ResponseKriteriaType | null>(
@@ -43,8 +43,8 @@ export class KriteriaController {
     }
   }
 
-  //   read detail by id
-  static async readById(
+  // //   read detail by id
+  static async findById(
     req: Request<{ id: string }>,
     res: Response<ResponseStructure<ResponseKriteriaType | null>>,
     next: NextFunction,
@@ -54,14 +54,14 @@ export class KriteriaController {
       const id = req.params.id;
 
       //check id
-      const checkId = checkParamsId(res, id);
+      const cleanId = checkParamsId(res, id);
 
       // call service
-      const service = await KriteriaService.readById(checkId as number);
+      const service = await KriteriaService.findById(cleanId as number);
 
       //   check
       if (!service) {
-        return ResponseResult.error(res, 404, "kriteria not found");
+        return ResponseResult.error(res, 404, "Record not found", ["kriteria"]);
       }
 
       //   return
@@ -69,15 +69,15 @@ export class KriteriaController {
         service,
         res,
         200,
-        "success read kriteria by id",
+        "success find kriteria by id",
       );
     } catch (error) {
       next(error);
     }
   }
 
-  //   read all
-  static async readAll(
+  // //   read all
+  static async findAll(
     req: Request<{}, {}, {}, PaginationType & { status?: "baru" | "revisi" }>,
     res: Response<ResponseStructure<ResponseKriteriaWithMetaType | null>>,
     next: NextFunction,
@@ -87,19 +87,10 @@ export class KriteriaController {
       const { limit, page, search, status, sort } = req.query;
 
       // check sort
-      if (sort) {
-        if (sort !== "asc" && sort !== "desc") {
-          return ResponseResult.error(res, 400, "sort must be asc or desc");
-        }
-      }
+      const cleanSort = checkSort(sort);
 
       // check query
       const checkQuery = checkQueryPagination(page, limit);
-
-      // check query
-      if (!checkQuery?.status) {
-        return ResponseResult.error(res, 400, "page and limit must be numbers");
-      }
 
       // check query status
       if (status) {
@@ -113,12 +104,11 @@ export class KriteriaController {
       }
 
       // call service
-      const service = await KriteriaService.readAll({
+      const service = await KriteriaService.findAll({
         limit: checkQuery.limit,
         page: checkQuery.page,
         search,
-        status,
-        sort,
+        sort: cleanSort,
       });
 
       // return
@@ -133,7 +123,7 @@ export class KriteriaController {
     }
   }
 
-  //   update
+  // //   update
   static async update(
     req: Request<{ id: string }, {}, UpdateKriteriaType>,
     res: Response<ResponseStructure<ResponseKriteriaType | null>>,
@@ -144,24 +134,10 @@ export class KriteriaController {
       const id = req.params.id;
 
       //check id
-      const checkId = checkParamsId(res, id);
-
-      // find kriteria by id
-      const kriteria = await KriteriaService.readById(checkId as number);
-
-      // check kriteria
-      if (!kriteria)
-        return ResponseResult.error(res, 404, "kriteria not found");
+      const cleanId = checkParamsId(res, id);
 
       // call service
-      const service = await KriteriaService.update(
-        Number(id),
-        kriteria.revisi,
-        req.body,
-      );
-
-      // push notifikasi
-      await NotifikasiService.notifyKriteriaDiedit(service?.namaKriteria ?? "");
+      const service = await KriteriaService.update(cleanId as number, req.body);
 
       // return
       return ResponseResult.success<ResponseKriteriaType | null>(
@@ -175,31 +151,21 @@ export class KriteriaController {
     }
   }
 
-  //   delete
+  // //   delete
   static async delete(
     req: Request<{ id: string }>,
     res: Response<ResponseStructure<null>>,
     next: NextFunction,
   ) {
     try {
-      // parse id
-      const id = Number(req.params.id);
-
-      if (isNaN(id)) {
-        return ResponseResult.error(res, 400, "Bad request");
-      }
+      // check id
+      const cleanId = checkParamsId(res, req.params.id);
 
       // call service
-      const service = await KriteriaService.delete(Number(id));
-
-      //   check
-      if (!service) return ResponseResult.error(res, 404, "kriteria not found");
-
-      // push notifikasi
-      await NotifikasiService.notifyKriteriaDihapus(service.namaKriteria);
+      await KriteriaService.delete(cleanId as number);
 
       // return
-      return ResponseResult.successNoContent(null, res, "success delete");
+      return ResponseResult.successNoContent(res, "success delete");
     } catch (error) {
       next(error);
     }

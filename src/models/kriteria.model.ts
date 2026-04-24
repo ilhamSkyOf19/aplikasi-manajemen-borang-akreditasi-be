@@ -1,54 +1,40 @@
+import { MetaType } from "../utils/contstanst";
+
 // kriteria model
 export interface IKriteria {
   id: number;
-  kriteria: number;
-  namaKriteria: string;
-  revisi: number;
-  createdAt: Date;
-  updatedAt: Date;
+  kode_kriteria: number;
+  nama_kriteria: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 // create kriteria model
 export interface CreateKriteriaType extends Omit<
   IKriteria,
-  "id" | "createdAt" | "updatedAt" | "revisi"
+  "id" | "created_at" | "updated_at"
 > {}
 
-// updatfe kriteria model
+// update kriteria model
 export interface UpdateKriteriaType extends Partial<
-  Omit<IKriteria, "id" | "createdAt" | "updatedAt" | "revisi">
+  Omit<IKriteria, "id" | "created_at" | "updated_at">
 > {}
 
 // response kriteria model
 export interface ResponseKriteriaType extends IKriteria {}
 
-// ro response
+// to response
 export const toKriteriaResponse = (
   kriteria: ResponseKriteriaType,
 ): ResponseKriteriaType => kriteria;
 
 // response kriteria model with meta
 export interface ResponseKriteriaWithMetaType {
-  meta: {
-    totalData: number;
-    currentPage: number;
-    totalPage: number;
-    limit: number;
-  };
+  meta: MetaType;
   data: IKriteria[];
 }
 
-// toresponse user model
+// toresponse kriteria model
 export const toKriteriaWithMetaResponse = (
   kriteria: ResponseKriteriaWithMetaType,
-): ResponseKriteriaWithMetaType => {
-  return {
-    meta: {
-      totalData: kriteria.meta.totalData,
-      currentPage: kriteria.meta.currentPage,
-      totalPage: kriteria.meta.totalPage,
-      limit: kriteria.meta.limit,
-    },
-    data: kriteria.data.map((item) => item),
-  };
-};
+): ResponseKriteriaWithMetaType => kriteria;

@@ -1,7 +1,7 @@
 import { JenisRiwayat, Status } from "../utils/contstanst";
 import { IPic } from "./pic.model";
 import { ITimAkreditasi } from "./timAkreditasi.model";
-import { PayloadUserType } from "./user.model";
+import { PayloadUserType } from "./dosen.model";
 
 export interface IRiwayat {
   id: number;

@@ -2,7 +2,7 @@ import { MetaType, Status } from "../utils/contstanst";
 import { ResponseKriteriaType } from "./kriteria.model";
 import { IPendekatan } from "./pendekatan.model";
 import { ITimAkreditasi } from "./timAkreditasi.model";
-import { PayloadUserType } from "./user.model";
+import { PayloadUserType } from "./dosen.model";
 
 // type
 export interface IPic {

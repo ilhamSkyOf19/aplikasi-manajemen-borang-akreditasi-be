@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { PayloadUserType } from "../models/user.model";
+import { PayloadUserType } from "../models/dosen.model";
 import { ENV } from "./env";
 
 // access token

@@ -29,7 +29,8 @@ export const zodValidation = <T>(schema: ZodType<T>) => {
         console.log(error);
 
         const message = error.issues.map((error) => error.message)[0];
-        return ResponseResult.error(res, 400, message);
+        const path = error.issues.map((error) => error.path.join("."))[0];
+        return ResponseResult.error(res, 400, message, [path]);
       }
 
       return ResponseResult.error(res, 500, "Internal server error");

@@ -1,12 +1,12 @@
 import z from "zod";
 import {
-  CreateUserType,
-  LoginUserType,
-  UpdateUserType,
-} from "../models/user.model";
-import { UserRole } from "../utils/contstanst";
+  CreateDosenType,
+  LoginDosenType,
+  UpdateDosenType,
+} from "../models/dosen.model";
+import { DosenRole } from "../utils/contstanst";
 
-export class UserValidation {
+export class DosenValidation {
   // only char schema
   private static onlyCharSchema(min: number = 1, max: number = 100) {
     return z
@@ -15,6 +15,13 @@ export class UserValidation {
       .min(min)
       .max(max)
       .regex(/^[A-Za-z\s.,]+$/);
+  }
+
+  // nidn schema
+  private static nidnSchema() {
+    return z
+      .string()
+      .regex(/^\d{10}$/, "NIDN harus terdiri dari 10 digit angka");
   }
 
   // string schema
@@ -37,13 +44,14 @@ export class UserValidation {
     .object({
       nama: this.onlyCharSchema(),
       email: this.emailSchema(),
+      nidn: this.nidnSchema(),
       password: this.passwordSchema(),
       confirmPassword: this.passwordSchema(),
       role: z.enum([
         "wakil_dekan_1",
         "kaprodi",
         "tim_akreditasi",
-      ] as UserRole[]),
+      ] as DosenRole[]),
     })
     .superRefine((data, ctx) => {
       if (data.password !== data.confirmPassword) {
@@ -54,7 +62,7 @@ export class UserValidation {
         });
       }
     })
-    .strict() satisfies z.ZodType<CreateUserType>;
+    .strict() satisfies z.ZodType<CreateDosenType>;
 
   // login
   static readonly LOGIN = z
@@ -62,20 +70,21 @@ export class UserValidation {
       identifier: this.stringSchema(),
       password: this.passwordSchema(),
     })
-    .strict() satisfies z.ZodType<LoginUserType>;
+    .strict() satisfies z.ZodType<LoginDosenType>;
 
   // update
   static readonly UPDATE = z
     .object({
       nama: this.onlyCharSchema().optional(),
       email: this.emailSchema().optional(),
+      nidn: this.nidnSchema().optional(),
       password: this.passwordSchema().optional(),
       role: z
         .enum(["kaprodi", "tim_akreditasi"] as Exclude<
-          UserRole,
+          DosenRole,
           "wakil_dekan_1"
         >[])
         .optional(),
     })
-    .strict() satisfies z.ZodType<UpdateUserType>;
+    .strict() satisfies z.ZodType<UpdateDosenType>;
 }

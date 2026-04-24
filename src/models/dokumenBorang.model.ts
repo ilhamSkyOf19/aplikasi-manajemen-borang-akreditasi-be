@@ -2,7 +2,7 @@ import { LokasiFile, MetaType, Status } from "../utils/contstanst";
 import { IKriteria } from "./kriteria.model";
 import { IPendekatan } from "./pendekatan.model";
 import { IPic } from "./pic.model";
-import { PayloadUserType } from "./user.model";
+import { PayloadUserType } from "./dosen.model";
 
 export interface IDokumenBorang {
   id: number;

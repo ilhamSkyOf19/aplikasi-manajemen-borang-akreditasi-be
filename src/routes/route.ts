@@ -4,11 +4,12 @@ import authRoute from "./auth.route";
 import kriteriaRouter from "./kriteria.route";
 import timAkreditasiRoute from "./timAkreditasi.route";
 import LimiterMiddleware from "../middlewares/limiter.middleware";
-import userRoute from "./user.route";
+import userRoute from "./dosen.route";
 import picRouter from "./pic.route";
 import riwayatRouter from "./riwayat.route";
 import notifikasiRoute from "./notifikasi.route";
 import dokumenBorangRoute from "./dokumenBorang.route";
+import dosenRoute from "./dosen.route";
 
 const appRoute: Router = Router();
 
@@ -21,25 +22,25 @@ appRoute.use(LimiterMiddleware.apiRegular());
 // auth router
 appRoute.use("/api/auth", authRoute);
 
-// user route
-appRoute.use("/api/user", userRoute);
+// // user route
+appRoute.use("/api/dosen", dosenRoute);
 
-// kriteria router
+// // kriteria router
 appRoute.use("/api/kriteria", kriteriaRouter);
 
-// tim akreditasi router
-appRoute.use("/api/tim-akreditasi", timAkreditasiRoute);
+// // tim akreditasi router
+// appRoute.use("/api/tim-akreditasi", timAkreditasiRoute);
 
-// pic router
-appRoute.use("/api/pic", picRouter);
+// // pic router
+// appRoute.use("/api/pic", picRouter);
 
-// riwayat router
-appRoute.use("/api/riwayat", riwayatRouter);
+// // riwayat router
+// appRoute.use("/api/riwayat", riwayatRouter);
 
-// notifikasi router
-appRoute.use("/api/notifikasi", notifikasiRoute);
+// // notifikasi router
+// appRoute.use("/api/notifikasi", notifikasiRoute);
 
-// dokumen borang router
-appRoute.use("/api/dokumen-borang", dokumenBorangRoute);
+// // dokumen borang router
+// appRoute.use("/api/dokumen-borang", dokumenBorangRoute);
 
 export default appRoute;

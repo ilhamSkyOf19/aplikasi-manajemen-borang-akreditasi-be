@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import { AuthRequest } from "../types/authRequest";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { UserService } from "../services/user.service";
+import { DosenServices } from "../services/dosen.service";
 
 export const aclMiddleware =
   (roles: string[]) =>
@@ -15,7 +15,7 @@ export const aclMiddleware =
       const userId = req.data?.id;
 
       // check db
-      const user = await UserService.findUserById(userId!);
+      const user = await DosenServices.findById(userId!);
 
       // check roles
       if (!user || !roles.includes(user.role)) {
@@ -25,6 +25,8 @@ export const aclMiddleware =
       return next();
     } catch (error) {
       // return internal server error
-      return ResponseResult.error(res, 500, "Internal server error");
+      return ResponseResult.error(res, 500, "Internal server error", [
+        "aclMiddleware",
+      ]);
     }
   };

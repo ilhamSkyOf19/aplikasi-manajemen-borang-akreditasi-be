@@ -16,17 +16,22 @@ export const errorMiddleware = (
   // prisma error catch
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     // switch case
+
+    const modelName = err.meta?.modelName as unknown as string;
+
     switch (err.code) {
       case "P2002":
         return ResponseResult.error(res, 409, `unique constraint failed `, [
-          err.meta?.modelName as unknown as string,
+          modelName,
         ]);
 
       case "P2025":
-        return ResponseResult.error(res, 404, "Resource not found");
+        return ResponseResult.error(res, 404, `Record not found`, [modelName]);
 
       default:
-        return ResponseResult.error(res, 500, "Internal server error");
+        return ResponseResult.error(res, 500, "Internal server error", [
+          "prisma",
+        ]);
     }
   }
 
@@ -58,7 +63,9 @@ export const errorMiddleware = (
         return ResponseResult.error(res, 400, "file tidak sesuai");
 
       default:
-        return ResponseResult.error(res, 500, "Internal server error");
+        return ResponseResult.error(res, 500, "Internal server error", [
+          "multer",
+        ]);
     }
   }
 

@@ -10,7 +10,7 @@ import {
 } from "../models/notifikasi.model";
 import { PaginationType } from "../types/pagination";
 import { TypeNotifikasi, UserRole } from "../utils/contstanst";
-import { UserService } from "./user.service";
+import { UserService } from "./dosen.service";
 
 export class NotifikasiService {
   // =============================================

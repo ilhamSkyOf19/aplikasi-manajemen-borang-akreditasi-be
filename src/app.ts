@@ -27,7 +27,7 @@ app.use(cookieParser());
 // routes
 app.use("/", appRoute);
 
-// erro handle
+// error handle
 app.use(errorMiddleware);
 
 // export app

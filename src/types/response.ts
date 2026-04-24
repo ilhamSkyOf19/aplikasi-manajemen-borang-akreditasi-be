@@ -29,7 +29,6 @@ export class ResponseResult {
   }
 
   static successNoContent(
-    data: null,
     res: Response<ResponseStructure<null>>,
     message?: string,
   ) {
@@ -38,7 +37,7 @@ export class ResponseResult {
         statusCode: 204,
         message: message || "success",
       },
-      data: data,
+      data: null,
     });
   }
   // error

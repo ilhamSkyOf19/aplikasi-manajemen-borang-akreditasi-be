@@ -7,7 +7,7 @@ import {
   UpdateTimAkreditasiType,
 } from "../models/timAkreditasi.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { UserService } from "../services/user.service";
+import { UserService } from "../services/dosen.service";
 import { TimAkreditasiService } from "../services/timAkreditasi.service";
 import checkParamsId from "../utils/checkParamsId";
 import { PaginationType } from "../types/pagination";
