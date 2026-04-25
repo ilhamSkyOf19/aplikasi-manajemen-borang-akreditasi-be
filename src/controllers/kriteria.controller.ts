@@ -78,30 +78,19 @@ export class KriteriaController {
 
   // //   read all
   static async findAll(
-    req: Request<{}, {}, {}, PaginationType & { status?: "baru" | "revisi" }>,
+    req: Request<{}, {}, {}, PaginationType>,
     res: Response<ResponseStructure<ResponseKriteriaWithMetaType | null>>,
     next: NextFunction,
   ) {
     try {
       // get params
-      const { limit, page, search, status, sort } = req.query;
+      const { limit, page, search, sort } = req.query;
 
       // check sort
       const cleanSort = checkSort(sort);
 
       // check query
       const checkQuery = checkQueryPagination(page, limit);
-
-      // check query status
-      if (status) {
-        if (status !== "baru" && status !== "revisi") {
-          return ResponseResult.error(
-            res,
-            400,
-            "status must be baru or revisi",
-          );
-        }
-      }
 
       // call service
       const service = await KriteriaServices.findAll({

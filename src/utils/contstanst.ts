@@ -56,3 +56,6 @@ export const rolePriority = [
   DosenRole.kaprodi,
   DosenRole.tim_akreditasi,
 ];
+
+// sort type asc or desc
+export type SortOrder = "asc" | "desc";

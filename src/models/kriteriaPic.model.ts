@@ -18,23 +18,25 @@ export interface CreateKriteriaPicType {
 }
 
 // update kriteria pic model
-export interface UpdateKriteriaPicType extends Partial<CreateKriteriaPicType> {}
+export interface UpdateKriteriaPicType {
+  dosen_id: number[];
+}
 
 // response kriteria model
 export interface ResponseKriteriaPicType extends Omit<IKriteriaPic, "id"> {}
 
 // to response
 export const toKriteriaPicResponse = (
-  kriteria: ResponseKriteriaPicType,
-): ResponseKriteriaPicType => kriteria;
+  data: ResponseKriteriaPicType,
+): ResponseKriteriaPicType => data;
 
 // response kriteria model with meta
 export interface ResponseKriteriaPicWithMetaType {
   meta: MetaType;
-  data: IKriteriaPic[];
+  data: Omit<IKriteriaPic, "id">[];
 }
 
 // toresponse kriteria model
 export const toKriteriaPicWithMetaResponse = (
-  kriteria: ResponseKriteriaPicWithMetaType,
-): ResponseKriteriaPicWithMetaType => kriteria;
+  data: ResponseKriteriaPicWithMetaType,
+): ResponseKriteriaPicWithMetaType => data;

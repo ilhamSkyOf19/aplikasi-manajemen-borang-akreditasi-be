@@ -1,5 +1,4 @@
 import { Prisma } from "../../generated/prisma/client";
-import { SortOrder } from "../../generated/prisma/internal/prismaNamespaceBrowser";
 import prisma from "../libs/prisma";
 import {
   CreateKriteriaType,
@@ -9,6 +8,7 @@ import {
   UpdateKriteriaType,
 } from "../models/kriteria.model";
 import { PaginationType } from "../types/pagination";
+import { SortOrder } from "../utils/contstanst";
 
 export class KriteriaServices {
   // create kriteria
@@ -41,9 +41,7 @@ export class KriteriaServices {
 
   // //   read all
   static async findAll(
-    query: PaginationType & {
-      sort: SortOrder;
-    },
+    query: PaginationType,
   ): Promise<ResponseKriteriaWithMetaType | null> {
     const { page = 1, limit = 8, search, sort } = query;
 
