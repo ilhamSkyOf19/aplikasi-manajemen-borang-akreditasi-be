@@ -60,7 +60,8 @@ model Kriteria {
   nama_kriteria String
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
-  // kebutuhan_dokumentasi KebutuhanDokumentasi[]
+
+  kebutuhan_dokumentasi KebutuhanDokumentasi[]
 
   // relasi ke kriteria_pic
   kriteriaPic KriteriaPic[]
@@ -84,10 +85,10 @@ model KriteriaPic {
 }
 
 model Pendekatan {
-  id         Int    @id @default(autoincrement())
-  tahap      String
-  keterangan String @unique
-  // kebutuhan_dokumentasi KebutuhanDokumentasi[]
+  id                    Int                    @id @default(autoincrement())
+  tahap                 String
+  keterangan            String                 @unique
+  kebutuhan_dokumentasi KebutuhanDokumentasi[]
 
   @@map("pendekatan")
 }
@@ -98,46 +99,78 @@ enum Role {
   tim_akreditasi
 }
 
-// model KebutuhanDokumentasi {
-//   id              Int      @id @default(autoincrement())
-//   status          Status   @default(menunggu)
-//   keterangan      String   @db.VarChar(1000)
-//   createdAt       DateTime @default(now())
-//   updatedAt       DateTime @updatedAt
-//   namaDokumentasi String   @unique
-//   kriteriaId      Int
-//   pendekatanId    Int
+model KebutuhanDokumentasi {
+  id                            Int             @id @default(autoincrement())
+  kriteria_id                   Int
+  pendekatan_id                 Int
+  pic_id                        Int
+  nama_kebutuhan_dokumentasi_id Int
+  tipe_dokumentasi              TipeDokumentasi @default(DEFAULT)
+  status                        Status          @default(PENDING)
+  keterangan                    String          @db.VarChar(1000)
+  created_at                    DateTime        @default(now())
+  updated_at                    DateTime        @updatedAt
 
-//   kriteria   Kriteria   @relation(fields: [kriteriaId], references: [id], onDelete: Cascade)
-//   pendekatan Pendekatan @relation(fields: [pendekatanId], references: [id], onDelete: Cascade)
+  kriteria   Kriteria   @relation(fields: [kriteria_id], references: [id], onDelete: Cascade)
+  pendekatan Pendekatan @relation(fields: [pendekatan_id], references: [id], onDelete: Cascade)
 
-//   kebutuhanDokumentasiPic               KebutuhanDokumentasiPic[]
-//   riwayat                               Riwayat[]
-//   kebutuhanDokumentasiDokumentasiBorang KebutuhanDokumentasiDokumentasiBorang[]
+  // relasi ke kebutuhan_dokumentasi_nama_kebutuhan_dokumentasi
+  kebutuhan_dokumentasi_nama_kebutuhan_dokumentasi KebutuhanDokumentasiNamaKebutuhanDokumentasi[]
 
-//   @@map("kebutuhan_dokumentasi")
-// }
+  // relasi ke kebutuhan dokumentasi pic 
+  kebutuhan_dokumentasi_pic KebutuhanDokumentasiPic[]
 
-// model Pic {
-//   id      Int    @id @default(autoincrement())
-//   namaPic String
+  riwayat Riwayat[]
 
-//   kebutuhanDokumentasiPic KebutuhanDokumentasiPic[]
+  // kebutuhanDokumentasiDokumentasiBorang KebutuhanDokumentasiDokumentasiBorang[]
 
-//   @@map("pic")
-// }
+  @@map("kebutuhan_dokumentasi")
+}
 
-// model KebutuhanDokumentasiPic {
-//   id                     Int @id @default(autoincrement())
-//   kebutuhanDokumentasiId Int
-//   picId                  Int
+// model nama kebutuhan dokumentasi 
+model NamaKebutuhanDokumentasi {
+  id                         Int    @id @default(autoincrement())
+  nama_kebutuhan_dokumentasi String @unique
 
-//   kebutuhanDokumentasi KebutuhanDokumentasi @relation(fields: [kebutuhanDokumentasiId], references: [id], onDelete: Cascade)
-//   pic                  Pic                  @relation(fields: [picId], references: [id], onDelete: Cascade)
+  // relasi
+  kebutuhan_dokumentasi_nama_kebutuhan_dokumentasi KebutuhanDokumentasiNamaKebutuhanDokumentasi[]
 
-//   @@unique([kebutuhanDokumentasiId, picId]) // Mencegah duplikasi
-//   @@map("kebutuhan_dokumentasi_pic")
-// }
+  @@map("nama_kebutuhan_dokumentasi")
+}
+
+model Pic {
+  id   Int    @id @default(autoincrement())
+  nama String @unique
+
+  kebutuhanDokumentasiPic KebutuhanDokumentasiPic[]
+
+  @@map("pic")
+}
+
+// tabel pivot kebutuhan dokumentasi nama kebutuhan dokumentasi 
+model KebutuhanDokumentasiNamaKebutuhanDokumentasi {
+  id                            Int @id @default(autoincrement())
+  kebutuhan_dokumentasi_id      Int
+  nama_kebutuhan_dokumentasi_id Int
+
+  kebutuhan_dokumentasi      KebutuhanDokumentasi     @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
+  nama_kebutuhan_dokumentasi NamaKebutuhanDokumentasi @relation(fields: [nama_kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
+
+  @@unique([kebutuhan_dokumentasi_id, nama_kebutuhan_dokumentasi_id]) // Mencegah duplikasi
+  @@map("kebutuhan_dokumentasi_nama_kebutuhan_dokumentasi")
+}
+
+model KebutuhanDokumentasiPic {
+  id                       Int @id @default(autoincrement())
+  kebutuhan_dokumentasi_id Int
+  pic_id                   Int
+
+  kebutuhanDokumentasi KebutuhanDokumentasi @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
+  pic                  Pic                  @relation(fields: [pic_id], references: [id], onDelete: Cascade)
+
+  @@unique([kebutuhan_dokumentasi_id, pic_id]) // Mencegah duplikasi
+  @@map("kebutuhan_dokumentasi_pic")
+}
 
 // model DokumentasiBorang {
 //   id           Int       @id @default(autoincrement())
@@ -171,36 +204,24 @@ enum Role {
 //   @@map("kebutuhan_dokumentasi_dokumentasi_borang")
 // }
 
-// model Riwayat {
-//   id                  Int          @id @default(autoincrement())
-//   jenis               JenisRiwayat
-//   keterangan          String       @db.VarChar(1000)
-//   status              Status       @default(menunggu)
-//   createdAt           DateTime     @default(now())
-//   updatedAt           DateTime     @updatedAt
-//   picId               Int?
-//   kebutuhan_DokumenId Int?
+model Riwayat {
+  id                       Int         @id @default(autoincrement())
+  tipe_riwayat             TipeRiwayat
+  keterangan               String      @db.VarChar(1000)
+  created_at               DateTime    @default(now())
+  updated_at               DateTime    @updatedAt
+  kebutuhan_dokumentasi_id Int?
+  // dokumentasi_borang Int?
 
-//   kebutuhanDokumentasi KebutuhanDokumentasi? @relation(fields: [kebutuhan_DokumenId], references: [id], onDelete: Cascade)
+  kebutuhanDokumentasi KebutuhanDokumentasi? @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
 
-//   @@map("riwayat")
-// }
+  @@map("riwayat")
+}
 
 // // enum lokasi
 // enum LokasFile {
 //   GDRIVE
 //   SISTEM
-// }
-
-// enum Status {
-//   menunggu
-//   revisi
-//   setuju
-// }
-
-// enum JenisRiwayat {
-//   dokumen_borang
-//   pic
 // }
 
 // // =============================================
@@ -250,3 +271,21 @@ enum Role {
 //   PIC_DISETUJUI_WD1
 //   PIC_DIREVISI_WD1 // WD1 meminta revisi ke Kaprodi
 // }
+
+// enum tipe kebutuhan 
+enum TipeDokumentasi {
+  DEFAULT
+  PENELITIAN
+}
+
+enum TipeRiwayat {
+  DOKUMENTASI_BORANG
+  KEBUTUHAN_DOKUMENTASI
+}
+
+// enum status
+enum Status {
+  PENDING
+  REVISION
+  APPROVED
+}

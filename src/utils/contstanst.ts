@@ -13,23 +13,29 @@ export interface MetaType {
 
 // enum status
 export enum Status {
-  menunggu = "menunggu",
-  revisi = "revisi",
-  disetujui = "disetujui",
+  PENDING = "PENDING",
+  REVISION = "REVISION",
+  APPROVED = "APPROVED",
+}
+
+// tipe dokumentasi
+export enum TipeDokumentasi {
+  DEFAULT = "DEFAULT",
+  PENELITIAN = "PENELITIAN",
 }
 
 // jenis riwayat
-export enum JenisRiwayat {
-  dokumen_borang = "dokumen_borang",
-  pic = "pic",
-}
+// export enum JenisRiwayat {
+//   dokumen_borang = "dokumen_borang",
+//   pic = "pic",
+// }
 
 // flag revisi
-export enum FlagRevisi {
-  dokumen_borang = "dokumen_borang",
-  kebutuhan_dokumen = "kebutuhan_dokumen",
-  pic = "pic",
-}
+// export enum FlagRevisi {
+//   dokumen_borang = "dokumen_borang",
+//   kebutuhan_dokumen = "kebutuhan_dokumen",
+//   pic = "pic",
+// }
 
 // type notifikasi
 export enum TypeNotifikasi {
