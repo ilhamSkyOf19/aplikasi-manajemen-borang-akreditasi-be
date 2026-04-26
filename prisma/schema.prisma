@@ -103,8 +103,8 @@ model KebutuhanDokumentasi {
   id                            Int             @id @default(autoincrement())
   kriteria_id                   Int
   pendekatan_id                 Int
-  pic_id                        Int
   nama_kebutuhan_dokumentasi_id Int
+  pic_id                        Int
   tipe_dokumentasi              TipeDokumentasi @default(DEFAULT)
   status                        Status          @default(PENDING)
   keterangan                    String          @db.VarChar(1000)
@@ -114,26 +114,21 @@ model KebutuhanDokumentasi {
   kriteria   Kriteria   @relation(fields: [kriteria_id], references: [id], onDelete: Cascade)
   pendekatan Pendekatan @relation(fields: [pendekatan_id], references: [id], onDelete: Cascade)
 
-  // relasi ke kebutuhan_dokumentasi_nama_kebutuhan_dokumentasi
-  kebutuhan_dokumentasi_nama_kebutuhan_dokumentasi KebutuhanDokumentasiNamaKebutuhanDokumentasi[]
+  nama_kebutuhan_dokumentasi NamaKebutuhanDokumentasi @relation(fields: [nama_kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
 
-  // relasi ke kebutuhan dokumentasi pic 
-  kebutuhan_dokumentasi_pic KebutuhanDokumentasiPic[]
+  pic Pic @relation(fields: [pic_id], references: [id], onDelete: Cascade)
 
   riwayat Riwayat[]
 
-  // kebutuhanDokumentasiDokumentasiBorang KebutuhanDokumentasiDokumentasiBorang[]
-
+  @@unique([kriteria_id, pendekatan_id, nama_kebutuhan_dokumentasi_id])
   @@map("kebutuhan_dokumentasi")
 }
 
-// model nama kebutuhan dokumentasi 
 model NamaKebutuhanDokumentasi {
   id                         Int    @id @default(autoincrement())
   nama_kebutuhan_dokumentasi String @unique
 
-  // relasi
-  kebutuhan_dokumentasi_nama_kebutuhan_dokumentasi KebutuhanDokumentasiNamaKebutuhanDokumentasi[]
+  kebutuhan_dokumentasi KebutuhanDokumentasi[]
 
   @@map("nama_kebutuhan_dokumentasi")
 }
@@ -142,35 +137,22 @@ model Pic {
   id   Int    @id @default(autoincrement())
   nama String @unique
 
-  kebutuhanDokumentasiPic KebutuhanDokumentasiPic[]
+  kebutuhan_dokumentasi KebutuhanDokumentasi[]
 
   @@map("pic")
 }
 
-// tabel pivot kebutuhan dokumentasi nama kebutuhan dokumentasi 
-model KebutuhanDokumentasiNamaKebutuhanDokumentasi {
-  id                            Int @id @default(autoincrement())
-  kebutuhan_dokumentasi_id      Int
-  nama_kebutuhan_dokumentasi_id Int
+// model KebutuhanDokumentasiPic {
+//   id                       Int @id @default(autoincrement())
+//   kebutuhan_dokumentasi_id Int
+//   pic_id                   Int
 
-  kebutuhan_dokumentasi      KebutuhanDokumentasi     @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
-  nama_kebutuhan_dokumentasi NamaKebutuhanDokumentasi @relation(fields: [nama_kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
+//   kebutuhanDokumentasi KebutuhanDokumentasi @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
+//   pic                  Pic                  @relation(fields: [pic_id], references: [id], onDelete: Cascade)
 
-  @@unique([kebutuhan_dokumentasi_id, nama_kebutuhan_dokumentasi_id]) // Mencegah duplikasi
-  @@map("kebutuhan_dokumentasi_nama_kebutuhan_dokumentasi")
-}
-
-model KebutuhanDokumentasiPic {
-  id                       Int @id @default(autoincrement())
-  kebutuhan_dokumentasi_id Int
-  pic_id                   Int
-
-  kebutuhanDokumentasi KebutuhanDokumentasi @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
-  pic                  Pic                  @relation(fields: [pic_id], references: [id], onDelete: Cascade)
-
-  @@unique([kebutuhan_dokumentasi_id, pic_id]) // Mencegah duplikasi
-  @@map("kebutuhan_dokumentasi_pic")
-}
+//   @@unique([kebutuhan_dokumentasi_id, pic_id]) // Mencegah duplikasi
+//   @@map("kebutuhan_dokumentasi_pic")
+// }
 
 // model DokumentasiBorang {
 //   id           Int       @id @default(autoincrement())

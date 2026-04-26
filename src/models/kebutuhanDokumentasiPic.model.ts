@@ -2,13 +2,13 @@ import { MetaType, Status, TipeDokumentasi } from "../utils/contstanst";
 import { IKriteria, ResponseKriteriaType } from "./kriteria.model";
 import { IPendekatan } from "./pendekatan.model";
 import { ITimAkreditasi } from "./timAkreditasi.model";
-import { IKriteriaPic } from "./kriteriaPic.model";
+import { IKriteriaPic, ResponseKriteriaPicType } from "./kriteriaPic.model";
 
 // type
 export interface IKebutuhanDokumentsiPic {
   id: number;
-  kriteria_pic: Omit<IKriteriaPic, "created_at" | "updated_at">;
-  pendekatan_id: IPendekatan;
+  kriteria_pic: Omit<ResponseKriteriaPicType, "created_at" | "updated_at">;
+  pendekatan: IPendekatan;
   nama_kebutuhan_dokumentasi: string;
   tipe_dokumentasi: TipeDokumentasi;
   pic: string;

@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { CreateKebutuhanDokumentasiPicRequestType } from "../models/kebutuhanDokumentasi.model";
+import {
+  CreateKebutuhanDokumentasiPicRequestType,
+  ResponseKebutuhanDokumentasiPicType,
+} from "../models/kebutuhanDokumentasiPic.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { checkBothFilled } from "../utils/utils";
 import { NamaDokumentasiServices } from "../services/namaDokumentasi.service";
@@ -10,7 +13,9 @@ export class KebutuhanDokumentasiPicController {
   // create
   static async create(
     req: Request<{}, {}, CreateKebutuhanDokumentasiPicRequestType>,
-    res: Response<ResponseStructure<any | null>>,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumentasiPicType | null>
+    >,
     next: NextFunction,
   ) {
     try {
@@ -32,13 +37,6 @@ export class KebutuhanDokumentasiPicController {
         nama_dokumentasi_id,
         res,
       );
-
-      if (checkRequestNamaDokumentasi) return checkRequestNamaDokumentasi;
-
-      //   check request pic
-      const checkRequestPic = checkBothFilled(pic_new, pic_id, res);
-
-      if (checkRequestPic) return checkRequestPic;
 
       //   nama dokumentasi new
       let namaKebutuhanDokumentasiNew: number | null = null;
@@ -126,7 +124,7 @@ export class KebutuhanDokumentasiPicController {
       }
 
       //   service succes
-      return ResponseResult.success<any | null>(
+      return ResponseResult.success<ResponseKebutuhanDokumentasiPicType | null>(
         service,
         res,
         201,
