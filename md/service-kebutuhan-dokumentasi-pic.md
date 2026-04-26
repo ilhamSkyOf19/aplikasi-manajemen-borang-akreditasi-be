@@ -267,7 +267,7 @@ Urutan pengerjaan yang disarankan:
 
 ## Checklist
 
-- [ ] Service create selesai.
+- [✅] Service create selesai.
 - [ ] Helper validasi data lama/baru selesai.
 - [ ] Validation create selesai.
 - [ ] Route create selesai.
