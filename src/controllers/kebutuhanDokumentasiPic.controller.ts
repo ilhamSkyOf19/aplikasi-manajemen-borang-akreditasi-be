@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import {
   CreateKebutuhanDokumentasiPicRequestType,
+  ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType,
+  ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
   ResponseKebutuhanDokumentasiPicType,
 } from "../models/kebutuhanDokumentasiPic.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
@@ -8,6 +10,8 @@ import { checkBothFilled } from "../utils/utils";
 import { NamaDokumentasiServices } from "../services/namaDokumentasi.service";
 import { PicServices } from "../services/pic.service";
 import { KebutuhanDokumentasiPicServices } from "../services/kebutuhanDokumentasiPic.service";
+import { PaginationType } from "../types/pagination";
+import { Status } from "../utils/contstanst";
 
 export class KebutuhanDokumentasiPicController {
   // create
@@ -129,6 +133,104 @@ export class KebutuhanDokumentasiPicController {
         res,
         201,
         "success create kebutuhan dokumentasi pic",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find all by kriteria pic
+  static async findAllByKriteriaPic(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
+      { validatedQuery: PaginationType & { status?: Status } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get query
+      const { limit, page, search, sort, status } = res.locals.validatedQuery;
+
+      // call service
+      const service =
+        await KebutuhanDokumentasiPicServices.findAllByKriteriaPic({
+          limit,
+          page,
+          search,
+          sort,
+          status: status as Status,
+        });
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(
+          res,
+          400,
+          "kebutuhan dokumentasi pic not found",
+        );
+      }
+
+      // return success
+      return ResponseResult.success<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>(
+        service,
+        res,
+        200,
+        "success read all kebutuhan dokumentasi pic",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find all by kriteria pic
+  static async findAllByKriteriaPendekatan(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
+      {
+        validatedQuery: PaginationType & { status?: Status };
+        validatedParams: { kriteria_id: number; pendekatan_id: number };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get query
+      const { limit, page, search, sort, status } = res.locals.validatedQuery;
+
+      // get params
+      const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
+
+      // call service
+      const service =
+        await KebutuhanDokumentasiPicServices.findAllByKriteriaAndPendekatan({
+          kriteria_id,
+          pendekatan_id,
+          query: {
+            limit,
+            page,
+            search,
+            sort,
+            status: status as Status,
+          },
+        });
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(
+          res,
+          400,
+          "kebutuhan dokumentasi pic not found",
+        );
+      }
+
+      // return success
+      return ResponseResult.success<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>(
+        service,
+        res,
+        200,
+        "success read all kebutuhan dokumentasi pic",
       );
     } catch (error) {
       next(error);

@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { SortOrder } from "../../generated/prisma/internal/prismaNamespace";
+import { Status } from "./contstanst";
 
 export const checkSort = (sort: string | undefined): SortOrder => {
   if (!sort) {
@@ -41,4 +42,19 @@ export const checkBothFilled = (
   }
 
   return null;
+};
+
+export const getPriorityStatus = (
+  oldStatus: Status,
+  newStatus: Status,
+): Status => {
+  if (oldStatus === Status.REVISION || newStatus === Status.REVISION) {
+    return Status.REVISION;
+  }
+
+  if (oldStatus === Status.PENDING || newStatus === Status.PENDING) {
+    return Status.PENDING;
+  }
+
+  return Status.APPROVED;
 };

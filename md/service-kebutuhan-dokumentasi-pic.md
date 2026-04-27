@@ -268,13 +268,12 @@ Urutan pengerjaan yang disarankan:
 ## Checklist
 
 - [✅] Service create selesai.
-- [ ] Helper validasi data lama/baru selesai.
-- [ ] Validation create selesai.
-- [ ] Route create selesai.
-- [ ] Endpoint create berhasil dites.
-- [ ] Service get all selesai.
-- [ ] Pagination selesai.
-- [ ] Search dan filter selesai.
+- [✅] Validation create selesai.
+- [✅] Route create selesai.
+- [✅] Endpoint create berhasil dites.
+- [✅] Service get all selesai.
+- [✅] Pagination selesai.
+- [✅] Search dan filter selesai.
 - [ ] Detail by ID selesai.
 - [ ] Update selesai.
 - [ ] Delete selesai.

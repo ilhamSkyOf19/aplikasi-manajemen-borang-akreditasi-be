@@ -5,7 +5,7 @@ import {
   ResponseKriteriaPicType,
   ResponseKriteriaPicWithMetaType,
   toKriteriaPicResponse,
-  toKriteriaPicWithMetaResponse,
+  toResponseKriteriaPicWithMeta,
   UpdateKriteriaPicType,
 } from "../models/kriteriaPic.model";
 import { PaginationType } from "../types/pagination";
@@ -208,15 +208,15 @@ export class KriteriaPicServices {
     const finalGrouped = Array.from(groupedMap.values());
 
     // return
-    return {
+    return toResponseKriteriaPicWithMeta({
+      data: finalGrouped,
       meta: {
         totalData,
         totalPage,
         currentPage,
         limit,
       },
-      data: finalGrouped,
-    };
+    });
   }
 
   // get count by kriteria id

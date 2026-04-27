@@ -48,6 +48,19 @@ export interface UpdateKebutuhanDokumentasiPicType extends Partial<CreateKebutuh
 }
 
 // response
+export interface ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType {
+  data: Omit<IKebutuhanDokumentsiPic, "kriteria_pic" | "pendekatan">[];
+  meta: MetaType;
+}
+
+// to response
+export const toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType =
+  (
+    data: ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType,
+  ): ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType =>
+    data;
+
+// response
 export interface ResponseKebutuhanDokumentasiPicType extends IKebutuhanDokumentsiPic {}
 
 // to response
@@ -65,6 +78,20 @@ export interface ResponseKebutuhanDokumentasiPicWithMetaType {
 export const toResponseKebutuhanDokumentasiPicWithMetaType = (
   data: ResponseKebutuhanDokumentasiPicWithMetaType,
 ): ResponseKebutuhanDokumentasiPicWithMetaType => data;
+
+// response with pagination
+export interface ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType {
+  meta: MetaType;
+  data: {
+    kriteria_pic: Omit<ResponseKriteriaPicType, "created_at" | "updated_at">;
+    status: Status;
+  }[];
+}
+
+// to response with pagination
+export const toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType = (
+  data: ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
+): ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType => data;
 
 // // response update status
 // export interface ResponsePicUpdateStatusType {

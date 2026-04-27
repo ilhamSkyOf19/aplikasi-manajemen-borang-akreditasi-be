@@ -1,17 +1,31 @@
+import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
 import {
   CreateKebutuhanDokumentasiPic,
+  ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType,
+  ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
   ResponseKebutuhanDokumentasiPicType,
+  ResponseKebutuhanDokumentasiPicWithMetaType,
+  toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType,
+  toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
   toResponseKebutuhanDokumentasiPicType,
+  toResponseKebutuhanDokumentasiPicWithMetaType,
 } from "../models/kebutuhanDokumentasiPic.model";
 import { ResponseKriteriaPicType } from "../models/kriteriaPic.model";
-import { DosenRole, Status, TipeDokumentasi } from "../utils/contstanst";
+import { PaginationType } from "../types/pagination";
+import {
+  DosenRole,
+  SortOrder,
+  Status,
+  TipeDokumentasi,
+} from "../utils/contstanst";
+import { getPriorityStatus } from "../utils/utils";
 
 export class KebutuhanDokumentasiPicServices {
   // create
   static async create(
     data: CreateKebutuhanDokumentasiPic,
-  ): Promise<any | null> {
+  ): Promise<ResponseKebutuhanDokumentasiPicType | null> {
     // get data
     const {
       kriteria_id,
@@ -139,5 +153,269 @@ export class KebutuhanDokumentasiPicServices {
       updated_at: result.updated_at,
       status: result.status as Status,
     });
+  }
+
+  // find all by kriteria pic
+  static async findAllByKriteriaPic(
+    query: PaginationType & {
+      status?: Status;
+    },
+  ): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
+    // get query
+    const { status, limit = 8, page = 1, search, sort } = query;
+
+    // get page
+    const currentPage = page < 1 ? 1 : page;
+
+    // conditional
+    const conditional: Prisma.KebutuhanDokumentasiWhereInput = {
+      ...(search && {
+        kriteria: {
+          kriteriaPic: {
+            some: {
+              dosen: {
+                OR: [
+                  { nama: { contains: search } },
+                  { email: { contains: search } },
+                  { nidn: { contains: search } },
+                ],
+              },
+            },
+          },
+        },
+      }),
+      ...((status && { status }) || {}),
+    };
+
+    // get count data
+    const totalData = await prisma.kebutuhanDokumentasi.count({
+      where: conditional,
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
+
+    // call db
+    const result = await prisma.kebutuhanDokumentasi.findMany({
+      where: conditional,
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: {
+        kriteria: {
+          kode_kriteria: sort ? (sort as SortOrder) : "asc",
+        },
+      },
+      select: {
+        kriteria: {
+          select: {
+            kriteriaPic: {
+              select: {
+                kriteria: {
+                  select: {
+                    id: true,
+                    kode_kriteria: true,
+                    nama_kriteria: true,
+                  },
+                },
+                dosen: {
+                  select: {
+                    id: true,
+                    nama: true,
+                    email: true,
+                    nidn: true,
+                    dosenRole: {
+                      select: {
+                        role: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        status: true,
+      },
+    });
+
+    const groupedMap = new Map<
+      number,
+      Omit<ResponseKriteriaPicType, "created_at" | "updated_at"> & {
+        status: Status;
+      }
+    >();
+
+    for (const item of result) {
+      for (const itemChild of item.kriteria.kriteriaPic) {
+        const kriteriaId = itemChild.kriteria.id;
+
+        // dosen
+        const dosen = {
+          id: itemChild.dosen.id,
+          email: itemChild.dosen.email,
+          nidn: itemChild.dosen.nidn,
+          nama: itemChild.dosen.nama,
+          roles: itemChild.dosen.dosenRole.map(
+            (item) => item.role,
+          ) as DosenRole[],
+        };
+
+        // get exis data by kriteria id
+        const existingData = groupedMap.get(kriteriaId);
+
+        // set dosen
+        if (existingData) {
+          // check status
+          existingData.status = getPriorityStatus(
+            existingData.status,
+            item.status as Status,
+          );
+
+          // check dosen exist
+          const dosenExist = existingData?.dosen.find(
+            (item) => item.id === dosen.id,
+          );
+
+          if (!dosenExist) {
+            existingData.dosen.push(dosen);
+          }
+
+          continue;
+        }
+
+        groupedMap.set(kriteriaId, {
+          kriteria: {
+            id: itemChild.kriteria.id,
+            kode_kriteria: itemChild.kriteria.kode_kriteria,
+            nama_kriteria: itemChild.kriteria.nama_kriteria,
+          },
+          dosen: [dosen],
+          status: item.status as Status,
+        });
+      }
+    }
+
+    // grouped
+    const finalGrouped = Array.from(groupedMap.values());
+
+    // return
+    return toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType({
+      data: finalGrouped.map((item) => ({
+        kriteria_pic: {
+          kriteria: item.kriteria,
+          dosen: item.dosen,
+        },
+        status: item.status,
+      })),
+      meta: {
+        currentPage,
+        limit,
+        totalData,
+        totalPage,
+      },
+    });
+
+    // return result;
+  }
+
+  // find all by kriteria & pendekatan
+  static async findAllByKriteriaAndPendekatan(data: {
+    kriteria_id: number;
+    pendekatan_id: number;
+    query: PaginationType & {
+      status?: Status;
+    };
+  }): Promise<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null> {
+    // get data
+
+    const {
+      kriteria_id,
+      pendekatan_id,
+      query: { status, limit = 8, page = 1, search, sort },
+    } = data;
+
+    // get page
+    const currentPage = page < 1 ? 1 : page;
+
+    // conditional
+    const conditional: Prisma.KebutuhanDokumentasiWhereInput = {
+      kriteria_id,
+      pendekatan_id,
+      ...(search && {
+        OR: [
+          {
+            nama_kebutuhan_dokumentasi: {
+              nama_kebutuhan_dokumentasi: {
+                contains: search,
+              },
+            },
+          },
+          {
+            pic: {
+              nama: {
+                contains: search,
+              },
+            },
+          },
+        ],
+      }),
+      ...((status && { status }) || {}),
+    };
+
+    // get count data
+    const totalData = await prisma.kebutuhanDokumentasi.count({
+      where: conditional,
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
+
+    // call db
+    const result = await prisma.kebutuhanDokumentasi.findMany({
+      where: conditional,
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: {
+        kriteria: {
+          kode_kriteria: sort ? (sort as SortOrder) : "asc",
+        },
+      },
+      select: {
+        id: true,
+        nama_kebutuhan_dokumentasi: {
+          select: {
+            nama_kebutuhan_dokumentasi: true,
+          },
+        },
+        tipe_dokumentasi: true,
+        pic: true,
+        keterangan: true,
+        status: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    return toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType(
+      {
+        data: result.map((item) => ({
+          id: item.id,
+          nama_kebutuhan_dokumentasi:
+            item.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
+          tipe_dokumentasi: item.tipe_dokumentasi as TipeDokumentasi,
+          keterangan: item.keterangan,
+          pic: item.pic.nama,
+          status: item.status as Status,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+        })),
+        meta: {
+          currentPage,
+          limit,
+          totalData,
+          totalPage,
+        },
+      },
+    );
   }
 }

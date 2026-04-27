@@ -37,6 +37,6 @@ export interface ResponseKriteriaPicWithMetaType {
 }
 
 // toresponse kriteria model
-export const toKriteriaPicWithMetaResponse = (
+export const toResponseKriteriaPicWithMeta = (
   data: ResponseKriteriaPicWithMetaType,
 ): ResponseKriteriaPicWithMetaType => data;

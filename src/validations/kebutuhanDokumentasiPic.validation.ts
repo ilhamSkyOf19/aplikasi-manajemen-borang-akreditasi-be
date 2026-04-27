@@ -1,6 +1,7 @@
 import z from "zod";
 import { CreateKebutuhanDokumentasiPicRequestType } from "../models/kebutuhanDokumentasiPic.model";
-import { TipeDokumentasi } from "../utils/contstanst";
+import { Status, TipeDokumentasi } from "../utils/contstanst";
+import { PaginationType } from "../types/pagination";
 
 export class KebutuhanDokumentasiPicValidation {
   // create
@@ -62,4 +63,32 @@ export class KebutuhanDokumentasiPicValidation {
         });
       }
     }) satisfies z.ZodType<CreateKebutuhanDokumentasiPicRequestType>;
+
+  // query
+  static readonly QUERY = z
+    .object({
+      page: z.coerce.number().min(1).max(2147483647).catch(1),
+
+      limit: z.coerce.number().min(1).max(2147483647).catch(10),
+
+      search: z.string().min(1).max(1000).optional(),
+
+      sort: z.enum(["asc", "desc"]).catch("desc"),
+
+      status: z
+        .enum(["PENDING", "REVISION", "APPROVED"] as Status[])
+        .optional(),
+    })
+    .strict() satisfies z.ZodType<PaginationType & { status?: Status }>;
+
+  // params
+  static readonly PARAMS = z
+    .object({
+      kriteria_id: z.coerce.number().min(1).max(2147483647),
+      pendekatan_id: z.coerce.number().min(1).max(2147483647),
+    })
+    .strict() satisfies z.ZodType<{
+    kriteria_id: number;
+    pendekatan_id: number;
+  }>;
 }
