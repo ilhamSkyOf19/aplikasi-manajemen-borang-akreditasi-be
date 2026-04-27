@@ -328,43 +328,7 @@ export class DosenServices {
     });
   }
 
-  // //   // find all user for get ids
-  // //   static async findAllUserIds(filter?: UserRole[]): Promise<number[]> {
-  // //     const users = await prisma.user.findMany({
-  // //       where: {
-  // //         role: {
-  // //           notIn: filter,
-  // //         },
-  // //       },
-  // //       select: {
-  // //         id: true,
-  // //       },
-  // //     });
-
-  // //     return users.map((user) => user.id);
-  // //   }
-
-  // //   // get wd1 id
-  // static async getCountDosenWd1(): Promise<number> {
-  //   const result = await prisma.dosen.findMany({
-  //     where: { dosenRole: {
-  //       some: { role: "wakil_dekan_1" }
-  //     } },
-  //     select: { id: true },
-  //   });
-
-  //   return result.length;
-  // }
-
-  // //   static async getKaprodiId(): Promise<number> {
-  // //     const kaprodi = await prisma.user.findFirstOrThrow({
-  // //       where: { role: "kaprodi" },
-  // //       select: { id: true },
-  // //     });
-  // //     return kaprodi.id;
-  // //   }
-
-  // //   // delete by id
+  // delete by id
   static async delete(id: number): Promise<boolean> {
     // call db
     const result = await prisma.dosen.delete({

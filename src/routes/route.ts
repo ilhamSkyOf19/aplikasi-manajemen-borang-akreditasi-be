@@ -12,6 +12,7 @@ import dokumenBorangRoute from "./dokumenBorang.route";
 import dosenRoute from "./dosen.route";
 import kriteriaPicRouter from "./kriteriaPic.route";
 import kebutuhanDokumentasiPicRoute from "./kebutuhanDokumentasiPic.route";
+import verifikasiRoute from "./verifikasi.route";
 
 const appRoute: Router = Router();
 
@@ -35,6 +36,9 @@ appRoute.use("/api/kriteria-pic", kriteriaPicRouter);
 
 // kebutuhan dokumentasi pic router
 appRoute.use("/api/kebutuhan-dokumentasi-pic", kebutuhanDokumentasiPicRoute);
+
+// verifikasi route
+appRoute.use("/api/verifikasi", verifikasiRoute);
 
 // // tim akreditasi router
 // appRoute.use("/api/tim-akreditasi", timAkreditasiRoute);

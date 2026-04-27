@@ -22,6 +22,19 @@ export interface UpdateKriteriaPicType {
   dosen_id: number[];
 }
 
+// response create kriteria pic model
+export interface ResponseCreateUpdateKriteriaPicType {
+  kriteria_id: number;
+  dosen_id: number[];
+  created_at: Date;
+  updated_at: Date;
+}
+
+// to response
+export const toResponseCreateUpdateKriteriaPic = (
+  data: ResponseCreateUpdateKriteriaPicType,
+): ResponseCreateUpdateKriteriaPicType => data;
+
 // response kriteria model
 export interface ResponseKriteriaPicType extends Omit<IKriteriaPic, "id"> {}
 

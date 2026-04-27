@@ -193,6 +193,7 @@ model Riwayat {
   created_at               DateTime    @default(now())
   updated_at               DateTime    @updatedAt
   kebutuhan_dokumentasi_id Int?
+  status                   Status
   // dokumentasi_borang Int?
 
   kebutuhan_dokumentasi_pic KebutuhanDokumentasi? @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)

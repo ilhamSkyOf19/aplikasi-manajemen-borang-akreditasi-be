@@ -50,6 +50,25 @@ export interface UpdateKebutuhanDokumentasiPicRequestType extends Partial<Create
   keterangan_update: string;
 }
 
+// response create update
+export interface ResponseCreateUpdateKebutuhanDokumentasiPicType {
+  id: number;
+  kriteria_id: number;
+  pendekatan_id: number;
+  nama_dokumentasi_id: number;
+  pic_id: number;
+  tipe_dokumentasi: TipeDokumentasi;
+  status: Status;
+  keterangan: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// to response create update
+export const toResponseCreateUpdateKebutuhanDokumentasiPicType = (
+  data: ResponseCreateUpdateKebutuhanDokumentasiPicType,
+): ResponseCreateUpdateKebutuhanDokumentasiPicType => data;
+
 // response
 export interface ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType {
   data: Omit<IKebutuhanDokumentsiPic, "kriteria_pic" | "pendekatan">[];
@@ -95,81 +114,3 @@ export interface ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType {
 export const toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType = (
   data: ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
 ): ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType => data;
-
-// // response update status
-// export interface ResponsePicUpdateStatusType {
-//   id: number;
-//   namaDokumen: string;
-//   timAkreditasi: {
-//     id: number;
-//     namaTimAkreditasi: string;
-//     anggota: {
-//       id: number;
-//       nama: string;
-//     }[];
-//   }[];
-//   kriteria: {
-//     id: number;
-//     kriteria: number;
-//     namaKriteria: string;
-//   };
-//   pendekatan: {
-//     id: number;
-//     tahap: string;
-//     keterangan: string;
-//   };
-//   status: string;
-//   keterangan: string;
-//   createdAt: Date;
-//   updatedAt: Date;
-// }
-
-// // to response update status
-// export const toResponsePicUpdateStatusType = (
-//   pic: ResponsePicUpdateStatusType,
-// ) => pic;
-
-// // type for my pic
-
-// export interface PicItem {
-//   id: number;
-//   status: Status;
-//   keterangan: string;
-//   namaDokumen: string;
-//   kriteria: {
-//     id: number;
-//     kriteria: number;
-//     namaKriteria: string;
-//   };
-//   pendekatan: {
-//     id: number;
-//     tahap: string;
-//     keterangan: string;
-//   };
-// }
-
-// export interface DokumenItem {
-//   picId: number;
-//   dokumenId: number;
-//   namaDokumen: string;
-//   status: Status;
-//   keterangan: string;
-// }
-
-// export interface PendekatanGrouped {
-//   pendekatanId: number;
-//   tahap: string;
-//   keterangan: string;
-//   kebutuhanDokumen: DokumenItem[];
-// }
-
-// export interface KriteriaGrouped {
-//   kriteriaId: number;
-//   nomorKriteria: number;
-//   namaKriteria: string;
-//   pendekatan: Record<number, PendekatanGrouped>;
-// }
-
-// export interface MyPIcResponse extends Omit<KriteriaGrouped, "pendekatan"> {
-//   pendekatan: PendekatanGrouped[];
-// }

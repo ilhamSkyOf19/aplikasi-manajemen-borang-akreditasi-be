@@ -121,7 +121,7 @@ Cakupan:
 
 ---
 
-## 5. Debugging
+## 3. Debugging
 
 ### Tujuan
 
@@ -137,80 +137,6 @@ Memastikan seluruh endpoint berjalan sesuai alur dan tidak menghasilkan error ru
 - Jika data baru dibuat, ID hasil create digunakan dengan benar.
 - Transaction berjalan aman jika ada lebih dari satu operasi database.
 - Prisma error seperti `P2002`, `P2003`, dan `P2025` sudah ditangani error middleware.
-
----
-
-## 6. Testing Manual via Postman / Thunder Client
-
-### Create
-
-Tes beberapa kondisi:
-
-1. Menggunakan `nama_dokumentasi_id` dan `pic_id`.
-2. Menggunakan `nama_dokumentasi_new` dan `pic_new`.
-3. Mengirim data lama dan data baru bersamaan.
-4. Tidak mengirim data lama maupun data baru.
-5. Mengirim ID yang tidak ada di database.
-
----
-
-### Read
-
-Tes kondisi:
-
-1. Tanpa query.
-2. Dengan search.
-3. Dengan pagination.
-4. Dengan filter status.
-5. Dengan filter kriteria.
-6. Dengan sorting asc/desc.
-
----
-
-### Update
-
-Tes kondisi:
-
-1. Update sebagian field.
-2. Update semua field.
-3. Update dengan data lama.
-4. Update dengan data baru.
-5. Update dengan data lama dan baru bersamaan.
-6. Update ID yang tidak ditemukan.
-
----
-
-### Delete
-
-Tes kondisi:
-
-1. Delete data yang ada.
-2. Delete data yang tidak ada.
-3. Delete data yang masih memiliki relasi penting.
-
----
-
-## 7. Refactor Setelah CRUD Berjalan
-
-Setelah CRUD berhasil, lakukan refactor agar kode lebih rapi.
-
-### Bagian yang Bisa Dipisahkan
-
-- Helper validasi data lama dan baru.
-- Helper resolve ID final.
-- Mapper response.
-- Query condition untuk search, filter, dan pagination.
-- Response formatter.
-
-### Tujuan Refactor
-
-- Controller lebih pendek.
-- Service lebih fokus pada business logic.
-- Query Prisma lebih mudah dibaca.
-- Response lebih konsisten.
-- Debugging lebih mudah dilakukan.
-
----
 
 ## 8. Prioritas Pengerjaan
 

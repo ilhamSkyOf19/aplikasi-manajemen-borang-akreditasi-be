@@ -2,9 +2,11 @@ import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
 import {
   CreateKriteriaPicType,
+  ResponseCreateUpdateKriteriaPicType,
   ResponseKriteriaPicType,
   ResponseKriteriaPicWithMetaType,
   toKriteriaPicResponse,
+  toResponseCreateUpdateKriteriaPic,
   toResponseKriteriaPicWithMeta,
   UpdateKriteriaPicType,
 } from "../models/kriteriaPic.model";
@@ -15,7 +17,7 @@ export class KriteriaPicServices {
   // create
   static async create(
     data: CreateKriteriaPicType,
-  ): Promise<ResponseKriteriaPicType | null> {
+  ): Promise<ResponseCreateUpdateKriteriaPicType | null> {
     // get data
     const { dosen_id, kriteria_id } = data;
     // call db
@@ -37,27 +39,16 @@ export class KriteriaPicServices {
           },
         },
         select: {
-          id: true,
           created_at: true,
           updated_at: true,
           dosen: {
             select: {
               id: true,
-              nama: true,
-              nidn: true,
-              dosenRole: {
-                select: {
-                  role: true,
-                },
-              },
-              email: true,
             },
           },
           kriteria: {
             select: {
               id: true,
-              kode_kriteria: true,
-              nama_kriteria: true,
             },
           },
         },
@@ -68,19 +59,9 @@ export class KriteriaPicServices {
     if (!result || result.length === 0) return null;
 
     // return
-    return toKriteriaPicResponse({
-      kriteria: {
-        id: result[0].kriteria.id,
-        kode_kriteria: result[0].kriteria.kode_kriteria,
-        nama_kriteria: result[0].kriteria.nama_kriteria,
-      },
-      dosen: result.map((item) => ({
-        id: item.dosen.id,
-        email: item.dosen.email,
-        nidn: item.dosen.nidn,
-        nama: item.dosen.nama,
-        roles: item.dosen.dosenRole.map((item) => item.role) as DosenRole[],
-      })),
+    return toResponseCreateUpdateKriteriaPic({
+      kriteria_id: result[0].kriteria.id,
+      dosen_id: result.map((item) => item.dosen.id),
       created_at: result[0].created_at,
       updated_at: result[0].updated_at,
     });
@@ -234,7 +215,7 @@ export class KriteriaPicServices {
   static async update(
     kriteria_id: number,
     data: UpdateKriteriaPicType,
-  ): Promise<ResponseKriteriaPicType | null> {
+  ): Promise<ResponseCreateUpdateKriteriaPicType | null> {
     // get data
     const { dosen_id } = data;
     // call db
@@ -258,27 +239,16 @@ export class KriteriaPicServices {
           kriteria_id,
         },
         select: {
-          id: true,
           created_at: true,
           updated_at: true,
           dosen: {
             select: {
               id: true,
-              nama: true,
-              nidn: true,
-              email: true,
-              dosenRole: {
-                select: {
-                  role: true,
-                },
-              },
             },
           },
           kriteria: {
             select: {
               id: true,
-              kode_kriteria: true,
-              nama_kriteria: true,
             },
           },
         },
@@ -289,19 +259,9 @@ export class KriteriaPicServices {
     if (!result || result.length === 0) return null;
 
     // return
-    return toKriteriaPicResponse({
-      kriteria: {
-        id: result[0].kriteria.id,
-        kode_kriteria: result[0].kriteria.kode_kriteria,
-        nama_kriteria: result[0].kriteria.nama_kriteria,
-      },
-      dosen: result.map((item) => ({
-        id: item.dosen.id,
-        email: item.dosen.email,
-        nidn: item.dosen.nidn,
-        nama: item.dosen.nama,
-        roles: item.dosen.dosenRole.map((item) => item.role) as DosenRole[],
-      })),
+    return toResponseCreateUpdateKriteriaPic({
+      kriteria_id: result[0].kriteria.id,
+      dosen_id: result.map((item) => item.dosen.id),
       created_at: result[0].created_at,
       updated_at: result[0].updated_at,
     });

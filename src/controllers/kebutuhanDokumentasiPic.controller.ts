@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   CreateKebutuhanDokumentasiPicRequestType,
+  ResponseCreateUpdateKebutuhanDokumentasiPicType,
   ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType,
   ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
   ResponseKebutuhanDokumentasiPicType,
@@ -19,7 +20,7 @@ export class KebutuhanDokumentasiPicController {
   static async create(
     req: Request<{}, {}, CreateKebutuhanDokumentasiPicRequestType>,
     res: Response<
-      ResponseStructure<ResponseKebutuhanDokumentasiPicType | null>
+      ResponseStructure<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>
     >,
     next: NextFunction,
   ) {
@@ -122,7 +123,7 @@ export class KebutuhanDokumentasiPicController {
       }
 
       //   service succes
-      return ResponseResult.success<ResponseKebutuhanDokumentasiPicType | null>(
+      return ResponseResult.success<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>(
         service,
         res,
         201,
@@ -273,7 +274,7 @@ export class KebutuhanDokumentasiPicController {
   static async update(
     req: Request<{}, {}, UpdateKebutuhanDokumentasiPicRequestType>,
     res: Response<
-      ResponseStructure<ResponseKebutuhanDokumentasiPicType | null>,
+      ResponseStructure<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>,
       { validatedParams: { kebutuhan_dokumentasi_pic_id: number } }
     >,
     next: NextFunction,
@@ -383,10 +384,11 @@ export class KebutuhanDokumentasiPicController {
       }
 
       // create riwayat
-      const riwayat = await RiwayatService.create({
+      const riwayat = await RiwayatService.createForKebutuhanDokumentasiPic({
         tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
         keterangan: keterangan_update,
         kebutuhan_dokumentasi_pic_id: service.id,
+        status: Status.PENDING,
       });
 
       // check riwayat
@@ -395,7 +397,7 @@ export class KebutuhanDokumentasiPicController {
       }
 
       //   service succes
-      return ResponseResult.success<ResponseKebutuhanDokumentasiPicType | null>(
+      return ResponseResult.success<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>(
         service,
         res,
         201,

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   CreateKriteriaPicType,
+  ResponseCreateUpdateKriteriaPicType,
   ResponseKriteriaPicType,
   ResponseKriteriaPicWithMetaType,
   UpdateKriteriaPicType,
@@ -19,7 +20,9 @@ export class KriteriaPicController {
   // create
   static async create(
     req: Request<{}, {}, CreateKriteriaPicType>,
-    res: Response<ResponseStructure<ResponseKriteriaPicType | null>>,
+    res: Response<
+      ResponseStructure<ResponseCreateUpdateKriteriaPicType | null>
+    >,
     next: NextFunction,
   ) {
     try {
@@ -64,7 +67,7 @@ export class KriteriaPicController {
       }
 
       // response
-      return ResponseResult.success<ResponseKriteriaPicType | null>(
+      return ResponseResult.success<ResponseCreateUpdateKriteriaPicType | null>(
         result,
         res,
         201,
@@ -113,7 +116,9 @@ export class KriteriaPicController {
 
   static async update(
     req: Request<{ kriteria_id: string }, {}, UpdateKriteriaPicType>,
-    res: Response<ResponseStructure<ResponseKriteriaPicType | null>>,
+    res: Response<
+      ResponseStructure<ResponseCreateUpdateKriteriaPicType | null>
+    >,
     next: NextFunction,
   ) {
     try {
@@ -167,7 +172,7 @@ export class KriteriaPicController {
       }
 
       // response
-      return ResponseResult.success<ResponseKriteriaPicType | null>(
+      return ResponseResult.success<ResponseCreateUpdateKriteriaPicType | null>(
         result,
         res,
         200,

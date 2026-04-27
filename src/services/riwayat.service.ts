@@ -1,77 +1,76 @@
 import prisma from "../libs/prisma";
+import { ResponseKriteriaPicType } from "../models/kriteriaPic.model";
 import {
-  CreateRiwayatType,
-  ResponseRiwayatType,
-  toResponseRiwayatType,
+  CreateRiwayatKebutuhanDOkumentasiPicType,
+  ResponseCreateRiwayatKebutuhanDokumentasiPicType,
+  ResponseRiwayatKebutuhanDokumentasiPicType,
+  toResponseCreateRiwayatKebutuhanDokumentasiPicType,
+  toResponseRiwayatKebutuhanDokumentasiPicType,
 } from "../models/riwayat.model";
-import { TipeDokumentasi, Status, DosenRole } from "../utils/contstanst";
+import {
+  TipeDokumentasi,
+  Status,
+  DosenRole,
+  TipeRiwayat,
+} from "../utils/contstanst";
 
 export class RiwayatService {
   // create
-  static async create(data: CreateRiwayatType): Promise<any | null> {
-    const { tipe_riwayat, keterangan, kebutuhan_dokumentasi_pic_id } = data;
+  static async createForKebutuhanDokumentasiPic(
+    data: CreateRiwayatKebutuhanDOkumentasiPicType,
+  ): Promise<ResponseCreateRiwayatKebutuhanDokumentasiPicType | null> {
+    const { tipe_riwayat, keterangan, kebutuhan_dokumentasi_pic_id, status } =
+      data;
     // call db
-    const result = await prisma.riwayat.create({
-      data: {
-        tipe_riwayat,
-        keterangan,
-        kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_pic_id,
-      },
-      select: {
-        id: true,
-        tipe_riwayat: true,
-        keterangan: true,
-        created_at: true,
-        updated_at: true,
-        kebutuhanDokumentasi: {
-          select: {
-            id: true,
-            keterangan: true,
-            nama_kebutuhan_dokumentasi: {
-              select: {
-                nama_kebutuhan_dokumentasi: true,
-              },
-            },
-            pic: {
-              select: {
-                nama: true,
-              },
-            },
-            status: true,
-            tipe_dokumentasi: true,
-            kriteria: {
-              select: {
-                kriteriaPic: {
-                  select: {
-                    kriteria: {
-                      select: {
-                        id: true,
-                        nama_kriteria: true,
-                      },
-                    },
-                    dosen: {
-                      select: {
-                        id: true,
-                        nama: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            pendekatan: {
-              select: {
-                id: true,
-                tahap: true,
-                keterangan: true,
-              },
+    const result = await prisma.$transaction(async (tx) => {
+      // update status
+      await tx.kebutuhanDokumentasi.update({
+        where: {
+          id: kebutuhan_dokumentasi_pic_id,
+        },
+        data: {
+          status,
+        },
+      });
+
+      // create riwayat
+      const riwayat = await tx.riwayat.create({
+        data: {
+          tipe_riwayat,
+          keterangan,
+          kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_pic_id,
+          status,
+        },
+        select: {
+          id: true,
+          kebutuhan_dokumentasi_pic: {
+            select: {
+              id: true,
             },
           },
+          status: true,
+          tipe_riwayat: true,
+          keterangan: true,
+          created_at: true,
+          updated_at: true,
         },
-      },
+      });
+
+      return riwayat;
     });
 
-    return result;
+    // check
+    if (!result.kebutuhan_dokumentasi_pic) return null;
+
+    return toResponseCreateRiwayatKebutuhanDokumentasiPicType({
+      id: result.id,
+      kebutuhan_dokumentasi_pic_id: result.kebutuhan_dokumentasi_pic.id,
+      status: result.status as Status,
+      tipe_riwayat: result.tipe_riwayat as TipeRiwayat,
+      keterangan: result.keterangan,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
+    });
   }
 
   // // create many

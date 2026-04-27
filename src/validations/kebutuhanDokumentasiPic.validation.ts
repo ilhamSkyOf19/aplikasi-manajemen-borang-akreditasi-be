@@ -10,10 +10,10 @@ export class KebutuhanDokumentasiPicValidation {
   // create
   static readonly CREATE = z
     .object({
-      kriteria_id: z.number().min(1).max(2147483647),
-      pendekatan_id: z.number().min(1).max(2147483647),
-      nama_dokumentasi_id: z.number().min(1).max(2147483647).optional(),
-      pic_id: z.number().min(1).max(2147483647).optional(),
+      kriteria_id: z.number().int().min(1).max(2147483647),
+      pendekatan_id: z.number().int().min(1).max(2147483647),
+      nama_dokumentasi_id: z.number().int().min(1).max(2147483647).optional(),
+      pic_id: z.number().int().min(1).max(2147483647).optional(),
       nama_dokumentasi_new: z.string().min(1).max(200).optional(),
       pic_new: z.string().min(1).max(200).optional(),
       tipe_dokumentasi: z.enum(["DEFAULT", "PENELITIAN"] as TipeDokumentasi[]),
@@ -70,10 +70,10 @@ export class KebutuhanDokumentasiPicValidation {
   // update
   static readonly UPDATE = z
     .object({
-      kriteria_id: z.number().min(1).max(2147483647).optional(),
-      pendekatan_id: z.number().min(1).max(2147483647).optional(),
-      nama_dokumentasi_id: z.number().min(1).max(2147483647).optional(),
-      pic_id: z.number().min(1).max(2147483647).optional(),
+      kriteria_id: z.number().int().min(1).max(2147483647).optional(),
+      pendekatan_id: z.number().int().min(1).max(2147483647).optional(),
+      nama_dokumentasi_id: z.number().int().min(1).max(2147483647).optional(),
+      pic_id: z.number().min(1).int().max(2147483647).optional(),
       nama_dokumentasi_new: z.string().min(1).max(200).optional(),
       pic_new: z.string().min(1).max(200).optional(),
       tipe_dokumentasi: z

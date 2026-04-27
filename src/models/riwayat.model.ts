@@ -4,10 +4,10 @@ import { ITimAkreditasi } from "./timAkreditasi.model";
 import { PayloadDosenType } from "./dosen.model";
 import { IKebutuhanDokumentsiPic } from "./kebutuhanDokumentasiPic.model";
 
-export interface IRiwayat {
+export interface IRiwayatKebutuhanDokumentasiPic {
   id: number;
   tipe_riwayat: TipeRiwayat;
-  kebutuhan_dokumentasi_pic: Pick<
+  kebutuhan_dokumentasi_pic?: Pick<
     IKebutuhanDokumentsiPic,
     | "id"
     | "keterangan"
@@ -38,7 +38,8 @@ export interface IRiwayat {
 }
 
 // create
-export interface CreateRiwayatType {
+export interface CreateRiwayatKebutuhanDOkumentasiPicType {
+  status: Status;
   tipe_riwayat: TipeRiwayat;
   kebutuhan_dokumentasi_pic_id: number;
   keterangan: string;
@@ -49,10 +50,26 @@ export interface CreateRiwayatType {
 //   Omit<CreateRiwayatType, "picId">
 // > {}
 
+// response create riwayat kebutuhan dokumentasi pic
+export interface ResponseCreateRiwayatKebutuhanDokumentasiPicType {
+  id: number;
+  kebutuhan_dokumentasi_pic_id: number;
+  tipe_riwayat: TipeRiwayat;
+  status: Status;
+  keterangan: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// to response create
+export const toResponseCreateRiwayatKebutuhanDokumentasiPicType = (
+  riwayat: ResponseCreateRiwayatKebutuhanDokumentasiPicType,
+): ResponseCreateRiwayatKebutuhanDokumentasiPicType => riwayat;
+
 // response
-export interface ResponseRiwayatType extends IRiwayat {}
+export interface ResponseRiwayatKebutuhanDokumentasiPicType extends IRiwayatKebutuhanDokumentasiPic {}
 
 // to response
-export const toResponseRiwayatType = (
-  riwayat: ResponseRiwayatType,
-): ResponseRiwayatType => riwayat;
+export const toResponseRiwayatKebutuhanDokumentasiPicType = (
+  riwayat: ResponseRiwayatKebutuhanDokumentasiPicType,
+): ResponseRiwayatKebutuhanDokumentasiPicType => riwayat;
