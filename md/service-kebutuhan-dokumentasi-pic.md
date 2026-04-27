@@ -37,43 +37,7 @@ Validasi tidak hanya mengecek tipe data, tetapi juga mendukung alur bisnis:
 - `pic_id` dan `pic_new` tidak boleh diisi bersamaan.
 - Salah satu dari data lama atau data baru wajib diisi.
 
----
-
-## 3. Membuat Route
-
-### Tujuan
-
-Membuat endpoint untuk fitur kebutuhan dokumentasi dan PIC agar dapat diakses oleh frontend.
-
-### Cakupan Route
-
-Buat route untuk kebutuhan dokumentasi dan PIC:
-
-```ts
-router.post("/", authMiddleware, aclMiddleware([...]), Controller.create);
-router.get("/", authMiddleware, aclMiddleware([...]), Controller.getAll);
-router.get("/:id", authMiddleware, aclMiddleware([...]), Controller.getById);
-router.patch("/:id", authMiddleware, aclMiddleware([...]), Controller.update);
-router.delete("/:id", authMiddleware, aclMiddleware([...]), Controller.delete);
-```
-
-### Hak Akses
-
-Sesuaikan hak akses berdasarkan role sistem:
-
-- `wakil_dekan_1`
-- `kaprodi`
-- `tim_akreditasi`
-
-Contoh kemungkinan:
-
-- Kaprodi membuat kebutuhan dokumentasi dan PIC.
-- Wakil Dekan I melakukan verifikasi.
-- Tim Akreditasi hanya menerima dan mengunggah dokumentasi berdasarkan penugasan.
-
----
-
-## 4. Membuat CRUD Full
+## 2. Membuat CRUD Full
 
 ### A. Create
 
@@ -275,10 +239,10 @@ Urutan pengerjaan yang disarankan:
 - [✅] Service get all selesai.
 - [✅] Pagination selesai.
 - [✅] Search dan filter selesai.
-- [ ] Detail by ID selesai.
+- [✅] Detail by ID selesai.
 - [✅] Update selesai.
 - [✅] Buat Riwayat selesai.
-- [ ] Delete selesai.
-- [ ] Error handler dicek.
-- [ ] Response sudah konsisten.
-- [ ] Refactor controller dan service.
+- [✅] Delete selesai.
+- [✅] Error handler dicek.
+- [✅] Response sudah konsisten.
+- [✅] Refactor controller dan service.

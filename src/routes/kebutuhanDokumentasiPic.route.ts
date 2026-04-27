@@ -50,7 +50,7 @@ kebutuhanDokumentasiPicRoute.get(
 
 // find all by kriteria pic
 kebutuhanDokumentasiPicRoute.get(
-  "/:kriteria_id/:pendekatan_id",
+  "/by-kriteria-pendekatan/:kriteria_id/:pendekatan_id",
   [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
   zodValidationParams<{ kriteria_id: number; pendekatan_id: number }>(
     KebutuhanDokumentasiPicValidation.PARAMS,
@@ -59,6 +59,26 @@ kebutuhanDokumentasiPicRoute.get(
     KebutuhanDokumentasiPicValidation.QUERY,
   ),
   KebutuhanDokumentasiPicController.findAllByKriteriaPendekatan,
+);
+
+// find by id
+kebutuhanDokumentasiPicRoute.get(
+  "/:id",
+  [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
+  zodValidationParams<{ id: number }>(
+    KebutuhanDokumentasiPicValidation.PARAMS_ID,
+  ),
+  KebutuhanDokumentasiPicController.findById,
+);
+
+// delete
+kebutuhanDokumentasiPicRoute.delete(
+  "/:id",
+  [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
+  zodValidationParams<{ id: number }>(
+    KebutuhanDokumentasiPicValidation.PARAMS_ID,
+  ),
+  KebutuhanDokumentasiPicController.delete,
 );
 
 export default kebutuhanDokumentasiPicRoute;

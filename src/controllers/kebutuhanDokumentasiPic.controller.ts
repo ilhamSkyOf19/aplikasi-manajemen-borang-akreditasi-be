@@ -5,10 +5,8 @@ import {
   ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
   ResponseKebutuhanDokumentasiPicType,
   UpdateKebutuhanDokumentasiPicRequestType,
-  UpdateKebutuhanDokumentasiPicType,
 } from "../models/kebutuhanDokumentasiPic.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { checkBothFilled } from "../utils/utils";
 import { NamaDokumentasiServices } from "../services/namaDokumentasi.service";
 import { PicServices } from "../services/pic.service";
 import { KebutuhanDokumentasiPicServices } from "../services/kebutuhanDokumentasiPic.service";
@@ -233,11 +231,49 @@ export class KebutuhanDokumentasiPicController {
     }
   }
 
+  // find by id
+  static async findById(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumentasiPicType | null>,
+      {
+        validatedParams: { id: number };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { id } = res.locals.validatedParams;
+
+      // call service
+      const service = await KebutuhanDokumentasiPicServices.findById(id);
+
+      // check service
+      if (!service)
+        return ResponseResult.error(
+          res,
+          400,
+          "kebutuhan dokumentasi pic not found",
+        );
+
+      // return result
+      return ResponseResult.success<ResponseKebutuhanDokumentasiPicType | null>(
+        service,
+        res,
+        200,
+        "success read kebutuhan dokumentasi pic by id",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // update
   static async update(
     req: Request<{}, {}, UpdateKebutuhanDokumentasiPicRequestType>,
     res: Response<
-      ResponseStructure<any | null>,
+      ResponseStructure<ResponseKebutuhanDokumentasiPicType | null>,
       { validatedParams: { kebutuhan_dokumentasi_pic_id: number } }
     >,
     next: NextFunction,
@@ -359,11 +395,41 @@ export class KebutuhanDokumentasiPicController {
       }
 
       //   service succes
-      return ResponseResult.success<any | null>(
+      return ResponseResult.success<ResponseKebutuhanDokumentasiPicType | null>(
         service,
         res,
         201,
         "success update kebutuhan dokumentasi pic",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // delete
+  static async delete(
+    _req: Request,
+    res: Response<ResponseStructure<null>, { validatedParams: { id: number } }>,
+    next: NextFunction,
+  ) {
+    try {
+      // call db
+      const service = await KebutuhanDokumentasiPicServices.delete(
+        res.locals.validatedParams.id,
+      );
+
+      // check
+      if (!service) {
+        return ResponseResult.error(
+          res,
+          400,
+          "kebutuhan dokumentasi pic gagal dihapus",
+        );
+      }
+
+      return ResponseResult.successNoContent(
+        res,
+        "success delete kebutuhan dokumentasi pic",
       );
     } catch (error) {
       next(error);
