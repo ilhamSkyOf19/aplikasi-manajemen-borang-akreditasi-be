@@ -46,8 +46,8 @@ appRoute.use("/api/verifikasi", verifikasiRoute);
 // // pic router
 // appRoute.use("/api/pic", picRouter);
 
-// // riwayat router
-// appRoute.use("/api/riwayat", riwayatRouter);
+// riwayat router
+appRoute.use("/api/riwayat", riwayatRouter);
 
 // // notifikasi router
 // appRoute.use("/api/notifikasi", notifikasiRoute);

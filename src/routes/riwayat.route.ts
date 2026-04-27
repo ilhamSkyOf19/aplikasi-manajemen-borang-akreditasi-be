@@ -2,37 +2,21 @@ import { Router } from "express";
 import { RiwayatController } from "../controllers/riwayat.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
-import { zodValidation } from "../middlewares/validation.middleware";
-// import { RiwayatValidation } from "../validations/riwayat.validation";
-import { UpdateStatusType } from "../models/status.model";
-import { StatusValidation } from "../validations/status.validation";
+import { DosenRole } from "../utils/contstanst";
+import { zodValidationParams } from "../middlewares/validationParams.middleware";
+import { RiwayatValidation } from "../validations/riwayat.validation";
 
 const riwayatRouter: Router = Router();
 
-// read all by pic id
+// find all by kebutuhan dokumentasi id
 riwayatRouter.get(
-  "/:picId",
-  [
-    authMiddleware,
-    aclMiddleware(["kaprodi", "wakil_dekan_1", "tim_akreditasi"]),
-  ],
-  RiwayatController.readAllByPicId,
+  "/kebutuhan-dokumentasi-pic/:kebutuhan_dokumentasi_pic_id",
+  authMiddleware,
+  [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
+  zodValidationParams<{ kebutuhan_dokumentasi_pic_id: number }>(
+    RiwayatValidation.PARAMS_ID,
+  ),
+  RiwayatController.findAllByKebutuhanDokumentasiPicId,
 );
-
-// update status
-riwayatRouter.patch(
-  "/status/:id",
-  [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
-  zodValidation<UpdateStatusType>(StatusValidation.UPDATE_STATUS),
-  RiwayatController.updateStatus,
-);
-
-// update riwayat pic
-// riwayatRouter.patch(
-//   "/update-riwayat-pic/:picId/:riwayatId",
-//   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
-//   zodValidation<UpdateRiwayatType>(RiwayatValidation.UPDATE),
-//   RiwayatController.updateRiwayatPic,
-// );
 
 export default riwayatRouter;

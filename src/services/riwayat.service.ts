@@ -59,18 +59,52 @@ export class RiwayatService {
       return riwayat;
     });
 
-    // check
-    if (!result.kebutuhan_dokumentasi_pic) return null;
-
     return toResponseCreateRiwayatKebutuhanDokumentasiPicType({
       id: result.id,
-      kebutuhan_dokumentasi_pic_id: result.kebutuhan_dokumentasi_pic.id,
+      kebutuhan_dokumentasi_pic_id: result.kebutuhan_dokumentasi_pic?.id,
       status: result.status as Status,
       tipe_riwayat: result.tipe_riwayat as TipeRiwayat,
       keterangan: result.keterangan,
       created_at: result.created_at,
       updated_at: result.updated_at,
     });
+  }
+
+  // find all by kebutuhan dokumentasi id
+  static async findAllByKebutuhanDokumentasiPicId(
+    kebutuhan_dokumentasi_pic_id: number,
+  ): Promise<ResponseRiwayatKebutuhanDokumentasiPicType[]> {
+    // call db
+    const result = await prisma.riwayat.findMany({
+      where: {
+        kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_pic_id,
+      },
+      select: {
+        id: true,
+        kebutuhan_dokumentasi_pic: {
+          select: {
+            id: true,
+          },
+        },
+        status: true,
+        tipe_riwayat: true,
+        keterangan: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    return result.map((item) =>
+      toResponseRiwayatKebutuhanDokumentasiPicType({
+        id: item.id,
+        kebutuhan_dokumentasi_pic_id: item.kebutuhan_dokumentasi_pic?.id,
+        status: item.status as Status,
+        tipe_riwayat: item.tipe_riwayat as TipeRiwayat,
+        keterangan: item.keterangan,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      }),
+    );
   }
 
   // // create many
