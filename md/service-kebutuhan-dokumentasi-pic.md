@@ -259,9 +259,10 @@ Urutan pengerjaan yang disarankan:
 5. Buat get all dengan pagination dan filter.
 6. Buat detail by ID.
 7. Buat update.
-8. Buat delete.
-9. Debug semua endpoint.
-10. Refactor kode agar lebih bersih.
+8. Buat riwayat
+9. Buat delete.
+10. Debug semua endpoint.
+11. Refactor kode agar lebih bersih.
 
 ---
 
@@ -275,7 +276,8 @@ Urutan pengerjaan yang disarankan:
 - [✅] Pagination selesai.
 - [✅] Search dan filter selesai.
 - [ ] Detail by ID selesai.
-- [ ] Update selesai.
+- [✅] Update selesai.
+- [✅] Buat Riwayat selesai.
 - [ ] Delete selesai.
 - [ ] Error handler dicek.
 - [ ] Response sudah konsisten.

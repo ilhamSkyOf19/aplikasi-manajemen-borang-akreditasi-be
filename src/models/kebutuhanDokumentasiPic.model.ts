@@ -28,6 +28,9 @@ export interface CreateKebutuhanDokumentasiPic {
   keterangan: string;
 }
 
+// update
+export interface UpdateKebutuhanDokumentasiPicType extends Partial<CreateKebutuhanDokumentasiPic> {}
+
 // create request
 export interface CreateKebutuhanDokumentasiPicRequestType {
   kriteria_id: number;
@@ -42,9 +45,9 @@ export interface CreateKebutuhanDokumentasiPicRequestType {
   keterangan: string;
 }
 
-// update
-export interface UpdateKebutuhanDokumentasiPicType extends Partial<CreateKebutuhanDokumentasiPic> {
-  keteranganUpdate: string;
+// update request
+export interface UpdateKebutuhanDokumentasiPicRequestType extends Partial<CreateKebutuhanDokumentasiPicRequestType> {
+  keterangan_update: string;
 }
 
 // response

@@ -195,7 +195,7 @@ model Riwayat {
   kebutuhan_dokumentasi_id Int?
   // dokumentasi_borang Int?
 
-  kebutuhanDokumentasi KebutuhanDokumentasi? @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
+  kebutuhan_dokumentasi_pic KebutuhanDokumentasi? @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
 
   @@map("riwayat")
 }

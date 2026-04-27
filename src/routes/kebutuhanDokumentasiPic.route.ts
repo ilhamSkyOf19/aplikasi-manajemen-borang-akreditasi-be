@@ -3,7 +3,10 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import { DosenRole, Status } from "../utils/contstanst";
 import { zodValidation } from "../middlewares/validation.middleware";
-import { CreateKebutuhanDokumentasiPicRequestType } from "../models/kebutuhanDokumentasiPic.model";
+import {
+  CreateKebutuhanDokumentasiPicRequestType,
+  UpdateKebutuhanDokumentasiPicRequestType,
+} from "../models/kebutuhanDokumentasiPic.model";
 import { KebutuhanDokumentasiPicValidation } from "../validations/kebutuhanDokumentasiPic.validation";
 import { KebutuhanDokumentasiPicController } from "../controllers/kebutuhanDokumentasiPic.controller";
 import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
@@ -20,6 +23,19 @@ kebutuhanDokumentasiPicRoute.post(
     KebutuhanDokumentasiPicValidation.CREATE,
   ),
   KebutuhanDokumentasiPicController.create,
+);
+
+// update
+kebutuhanDokumentasiPicRoute.patch(
+  "/:kebutuhan_dokumentasi_pic_id",
+  [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
+  zodValidationParams<{ kebutuhan_dokumentasi_pic_id: number }>(
+    KebutuhanDokumentasiPicValidation.PARAMS_UPDATE,
+  ),
+  zodValidation<UpdateKebutuhanDokumentasiPicRequestType>(
+    KebutuhanDokumentasiPicValidation.UPDATE,
+  ),
+  KebutuhanDokumentasiPicController.update,
 );
 
 // find all by kriteria pic

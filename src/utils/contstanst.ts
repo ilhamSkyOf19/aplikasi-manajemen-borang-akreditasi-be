@@ -25,10 +25,10 @@ export enum TipeDokumentasi {
 }
 
 // jenis riwayat
-// export enum JenisRiwayat {
-//   dokumen_borang = "dokumen_borang",
-//   pic = "pic",
-// }
+export enum TipeRiwayat {
+  DOKUMENTASI_BORANG = "DOKUMENTASI_BORANG",
+  KEBUTUHAN_DOKUMENTASI = "KEBUTUHAN_DOKUMENTASI",
+}
 
 // flag revisi
 // export enum FlagRevisi {
