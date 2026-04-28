@@ -28,6 +28,9 @@ model Dosen {
   // dosen role 
   dosenRole DosenRole[]
 
+  // relasi ke file dokumen 
+  file_dokumen FileDokumen[]
+
   // dokumen borang
   // dokumentasi_borang DokumentasiBorang[]
 
@@ -120,6 +123,8 @@ model KebutuhanDokumentasi {
 
   riwayat Riwayat[]
 
+  dokumentasi_borang DokumentasiBorang[]
+
   @@unique([kriteria_id, pendekatan_id, nama_kebutuhan_dokumentasi_id])
   @@map("kebutuhan_dokumentasi")
 }
@@ -142,34 +147,114 @@ model Pic {
   @@map("pic")
 }
 
-// model KebutuhanDokumentasiPic {
-//   id                       Int @id @default(autoincrement())
-//   kebutuhan_dokumentasi_id Int
-//   pic_id                   Int
+// dokumentasi borang 
+model DokumentasiBorang {
+  id                       Int      @id @default(autoincrement())
+  kebutuhan_dokumentasi_id Int
+  status                   Status   @default(PENDING)
+  keterangan               String   @db.VarChar(1000)
+  created_at               DateTime @default(now())
+  updated_at               DateTime @updatedAt
 
-//   kebutuhanDokumentasi KebutuhanDokumentasi @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
-//   pic                  Pic                  @relation(fields: [pic_id], references: [id], onDelete: Cascade)
+  kebutuhan_dokumentasi KebutuhanDokumentasi @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
 
-//   @@unique([kebutuhan_dokumentasi_id, pic_id]) // Mencegah duplikasi
-//   @@map("kebutuhan_dokumentasi_pic")
+  // penelitian_detail DokumentasiBorangPenelitian?
+
+  folders FolderDokumen[]
+  files   DokumentasiBorangFile[]
+
+  @@index([kebutuhan_dokumentasi_id])
+  @@map("dokumentasi_borang")
+}
+
+// model DokumentasiBorangPenelitian {
+//   id                    Int      @id @default(autoincrement())
+//   dokumentasi_borang_id Int      @unique
+//   judul_penelitian      String?
+//   tahun_penelitian      Int?
+//   nama_peneliti         String?
+//   created_at            DateTime @default(now())
+//   updated_at            DateTime @updatedAt
+
+//   dokumentasi_borang DokumentasiBorang @relation(fields: [dokumentasi_borang_id], references: [id], onDelete: Cascade)
+
+//   @@map("dokumentasi_borang_penelitian")
 // }
 
-// model DokumentasiBorang {
-//   id           Int       @id @default(autoincrement())
-//   filename     String    @unique
-//   file_id      String?   @unique
-//   keterangan   String    @db.VarChar(1000)
-//   lokasi_file  LokasFile
-//   status       Status
-//   uploadedById Int
-//   createdAt    DateTime  @default(now())
-//   updatedAt    DateTime  @updatedAt
+// folder dokumen 
+model FolderDokumen {
+  id                    Int      @id @default(autoincrement())
+  dokumentasi_borang_id Int
+  nama_folder           String
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
 
-//   uploadedBy                            User                                    @relation(fields: [uploadedById], references: [id])
-//   kebutuhanDokumentasiDokumentasiBorang KebutuhanDokumentasiDokumentasiBorang[]
+  dokumentasi_borang DokumentasiBorang @relation(fields: [dokumentasi_borang_id], references: [id], onDelete: Cascade)
 
-//   @@map("dokumentasi_borang")
-// }
+  files DokumentasiBorangFile[]
+
+  @@unique([dokumentasi_borang_id, nama_folder])
+  @@index([dokumentasi_borang_id])
+  @@map("folder_dokumen")
+}
+
+// file dokumen 
+model FileDokumen {
+  id               Int             @id @default(autoincrement())
+  nama_file        String
+  storage_provider StorageProvider @default(SISTEM)
+  provider_file_id String?
+  uploaded_by_id   Int
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  is_active        Boolean         @default(false)
+
+  uploaded_by Dosen @relation(fields: [uploaded_by_id], references: [id])
+
+  dokumentasi_borang_files DokumentasiBorangFile[]
+
+  default_detail FileDokumenDefault?
+
+  @@index([uploaded_by_id])
+  @@map("file_dokumen")
+}
+
+model FileDokumenDefault {
+  id              Int      @id @default(autoincrement())
+  file_dokumen_id Int      @unique
+  nomor_dokumen   String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  file_dokumen FileDokumen @relation(fields: [file_dokumen_id], references: [id], onDelete: Cascade)
+
+  @@map("file_dokumen_default")
+}
+
+// dokumentasi borang file pivot 
+model DokumentasiBorangFile {
+  id                    Int      @id @default(autoincrement())
+  dokumentasi_borang_id Int
+  file_dokumen_id       Int
+  folder_dokumen_id     Int?
+  keterangan            String   @db.VarChar(1000)
+  status                Status   @default(PENDING)
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // relasi 
+  dokumentasi_borang DokumentasiBorang @relation(fields: [dokumentasi_borang_id], references: [id], onDelete: Cascade)
+
+  file_dokumen FileDokumen @relation(fields: [file_dokumen_id], references: [id], onDelete: Cascade)
+
+  folder_dokumen FolderDokumen? @relation(fields: [folder_dokumen_id], references: [id], onDelete: Cascade)
+
+  @@unique([dokumentasi_borang_id, file_dokumen_id, folder_dokumen_id])
+  @@index([dokumentasi_borang_id])
+  @@index([file_dokumen_id])
+  @@index([folder_dokumen_id])
+  @@map("dokumentasi_borang_file")
+}
 
 // model KebutuhanDokumentasiDokumentasiBorang {
 //   id                     Int      @id @default(autoincrement())
@@ -202,10 +287,10 @@ model Riwayat {
 }
 
 // // enum lokasi
-// enum LokasFile {
-//   GDRIVE
-//   SISTEM
-// }
+enum StorageProvider {
+  GDRIVE
+  SISTEM
+}
 
 // // =============================================
 // // ✅ MODEL BARU: NOTIFICATION

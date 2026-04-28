@@ -51,7 +51,7 @@ export enum TypeNotifikasi {
 }
 
 // lokasi file
-export enum LokasiFile {
+export enum StorageProvider {
   GDRIVE = "GDRIVE",
   SISTEM = "SISTEM",
 }
@@ -65,3 +65,6 @@ export const rolePriority = [
 
 // sort type asc or desc
 export type SortOrder = "asc" | "desc";
+
+// folder global upload
+export const FOLDER_GLOBAL_UPLOAD = "public/uploads/dokumentasi-borang";

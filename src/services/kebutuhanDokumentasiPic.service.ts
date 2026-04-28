@@ -477,6 +477,17 @@ export class KebutuhanDokumentasiPicServices {
     });
   }
 
+  // get  count by id
+  static async getCountById(id: number): Promise<number> {
+    const result = await prisma.kebutuhanDokumentasi.count({
+      where: {
+        id,
+      },
+    });
+
+    return result;
+  }
+
   // update
   static async update(
     kebutuhan_dokumentasi_id: number,

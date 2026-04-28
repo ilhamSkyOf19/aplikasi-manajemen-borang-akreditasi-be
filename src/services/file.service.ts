@@ -4,6 +4,9 @@ import fs from "fs";
 import path from "path";
 import fsAsync from "fs/promises";
 import driveApi from "../configs/driveapi.config";
+import { FilesRequest } from "../models/dokumentasiBorang.model";
+import { FOLDER_GLOBAL_UPLOAD, StorageProvider } from "../utils/contstanst";
+import { DriveApiService } from "./driveapi.service";
 
 type FileConfig = {
   allowedMimeTypes?: RegExp;
@@ -152,6 +155,91 @@ export class FileService {
         success: false,
         message: "File not found or failed to delete",
       };
+    }
+  }
+
+  // upload files from request
+  static async uploadFilesFromRequest(data: {
+    fileRequest: FilesRequest[];
+    uploadedFiles: Express.Multer.File[];
+  }): Promise<(FilesRequest & { provider_id?: string })[] | null> {
+    const { fileRequest, uploadedFiles } = data;
+
+    const uploadedGDriveIds: string[] = [];
+    const uploadedSistemPaths: string[] = [];
+
+    let uploadIndex = 0;
+
+    const result: (FilesRequest & {
+      provider_id?: string;
+    })[] = [];
+
+    try {
+      for (const file of fileRequest) {
+        if (file.old_file) {
+          result.push({
+            ...file,
+          });
+
+          continue;
+        }
+
+        const multerFile = uploadedFiles[uploadIndex++];
+
+        if (!multerFile) {
+          throw new Error("File upload tidak ditemukan");
+        }
+
+        const ext = path.extname(multerFile.originalname);
+        const finalName = `${file.nama_file}${ext}`;
+
+        if (file.storage_provider === StorageProvider.GDRIVE) {
+          const gdrive = await DriveApiService.upload({
+            fileBuffer: multerFile.buffer,
+            filename: finalName,
+            mimeType: multerFile.mimetype,
+            allowMimeType: ["application/pdf"],
+          });
+
+          if (!gdrive.success || !gdrive.fileId) {
+            throw new Error("Gagal upload file ke Google Drive");
+          }
+
+          uploadedGDriveIds.push(gdrive.fileId);
+
+          result.push({
+            ...file,
+            provider_id: gdrive.fileId,
+          });
+        } else {
+          if (!fs.existsSync(FOLDER_GLOBAL_UPLOAD)) {
+            fs.mkdirSync(FOLDER_GLOBAL_UPLOAD, {
+              recursive: true,
+            });
+          }
+
+          const filePath = path.join(FOLDER_GLOBAL_UPLOAD, finalName);
+
+          fs.writeFileSync(filePath, multerFile.buffer);
+
+          uploadedSistemPaths.push(filePath);
+
+          result.push({
+            ...file,
+          });
+        }
+      }
+
+      return result;
+    } catch (error) {
+      // delete file
+      await Promise.all(
+        uploadedGDriveIds.map((id) => DriveApiService.deleteFile(id)),
+      );
+
+      uploadedSistemPaths.forEach((p) => FileService.deleteFile(p));
+
+      return null;
     }
   }
 }

@@ -1,4 +1,3 @@
-import { Request } from "express";
 import { ZodType } from "zod";
 import { ResponseStructure } from "../types/response";
 
@@ -14,11 +13,12 @@ export const validation = <T>(
   if (!result.success) {
     const errorMessages = result.error.issues.map((err) => err.message)[0];
 
-    const errorPath = result.error.issues.map((err) => err.path)[0];
+    const path = result.error.issues.map((error) => error.path.join("."));
     return {
       meta: {
-        message: `${errorPath} : ${errorMessages}`,
+        message: errorMessages,
         statusCode: 400,
+        customField: path,
       },
       data: null,
     };
