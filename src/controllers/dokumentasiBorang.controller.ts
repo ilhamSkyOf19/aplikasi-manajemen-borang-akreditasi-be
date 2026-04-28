@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   CreateDokumentasiBorangDefaultRequestType,
   FilesRequest,
+  ResponseCreateUpdateDokumentasiBorangType,
 } from "../models/dokumentasiBorang.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { AuthRequest } from "../types/authRequest";
@@ -11,21 +12,19 @@ import { DokumentasiBorangServices } from "../services/dokumentasiBorang.service
 import { validation } from "../validations/validation";
 import { DokumentasiBorangValidation } from "../validations/dokumentasiBorang.validationn";
 import { KebutuhanDokumentasiPicServices } from "../services/kebutuhanDokumentasiPic.service";
+import { FolderService } from "../services/folder.service";
+import { TipeDokumentasi } from "../utils/contstanst";
 
 export class DokumentasiBorangController {
   // create
   static async createDokumentasiBorangDefatult(
     req: AuthRequest<{}, {}, CreateDokumentasiBorangDefaultRequestType>,
-    res: Response<ResponseStructure<any | null>>,
+    res: Response<
+      ResponseStructure<ResponseCreateUpdateDokumentasiBorangType | null>
+    >,
     next: NextFunction,
   ) {
     try {
-      // berikan type ke response nya service maupun controller nya
-
-      // berikan uniqe ke name file nya di prisma serta membuat pengecekan terhadap name file
-
-      // cek kode keselurusan
-
       // validasi
       const body = validation<
         Omit<CreateDokumentasiBorangDefaultRequestType, "files"> & {
@@ -36,6 +35,9 @@ export class DokumentasiBorangController {
         kebutuhan_dokumentasi_pic_id: Number(
           req.body.kebutuhan_dokumentasi_pic_id,
         ),
+        old_folder: req.body.old_folder
+          ? Number(req.body.old_folder)
+          : undefined,
         files: JSON.parse(req.body.files),
       });
 
@@ -51,24 +53,75 @@ export class DokumentasiBorangController {
       }
 
       // get body
-      const { files, kebutuhan_dokumentasi_pic_id, keterangan, new_folder } =
+      const { files, kebutuhan_dokumentasi_pic_id, new_folder, old_folder } =
         body.data!;
 
       // check kebutuhan dokumentasi id
       const checkKebutuhanDokumentasi =
-        await KebutuhanDokumentasiPicServices.getCountById(
+        await KebutuhanDokumentasiPicServices.getExistAndTipeDokumen(
           kebutuhan_dokumentasi_pic_id,
         );
 
       // check
-      if (checkKebutuhanDokumentasi === 0) {
-        // delete files
-
+      if (!checkKebutuhanDokumentasi)
         return ResponseResult.error(
           res,
           404,
           "kebutuhan dokumentasi pic not found",
         );
+
+      // check tipe dokumentasi
+      if (checkKebutuhanDokumentasi.tipe_dokumen !== TipeDokumentasi.DEFAULT)
+        return ResponseResult.error(
+          res,
+          404,
+          "tipe kebutuhan dokumentasi tidak sesuai",
+        );
+
+      // check new folder
+      if (new_folder) {
+        const findFolder = await FolderService.findUniqeByNama({
+          folder: new_folder,
+          kebutuhan_dokumentasi_pic_id: kebutuhan_dokumentasi_pic_id,
+        });
+        // check
+        if (findFolder) {
+          return ResponseResult.error(res, 400, "folder name already exist");
+        }
+      }
+
+      // check old folder
+      if (old_folder) {
+        const findFolder = await FolderService.findUniqeById({
+          id: old_folder,
+          kebutuhan_dokumentasi_pic_id: kebutuhan_dokumentasi_pic_id,
+        });
+
+        if (!findFolder) {
+          return ResponseResult.error(res, 400, "folder not found");
+        }
+      }
+
+      // check nama file if exist
+      if (files && files.length > 0) {
+        // get nama file
+        const getNamaFile = files
+          .map((item) => item.nama_file?.toLocaleLowerCase() ?? undefined)
+          .filter((item) => item !== undefined);
+
+        // check duplicate
+        const hasDuplicate = new Set(getNamaFile).size !== getNamaFile.length;
+
+        if (hasDuplicate) {
+          return ResponseResult.error(res, 400, "nama file duplicate");
+        }
+
+        const findNamaFile = await FileDokumenService.findByNames(getNamaFile);
+
+        // check
+        if (findNamaFile > 0) {
+          return ResponseResult.error(res, 400, "nama file already exist");
+        }
       }
 
       // files
@@ -123,8 +176,8 @@ export class DokumentasiBorangController {
       const service = await DokumentasiBorangServices.createDefault({
         files: uploadFiles,
         kebutuhan_dokumentasi_pic_id: Number(kebutuhan_dokumentasi_pic_id),
-        keterangan,
         new_folder,
+        old_folder,
         uploaded_by_id: Number(dosen_id),
       });
 
@@ -133,7 +186,13 @@ export class DokumentasiBorangController {
         return ResponseResult.error(res, 400, "gagal upload file");
       }
 
-      return ResponseResult.success<any | null>(service, res, 200, "success");
+      // return
+      return ResponseResult.success<ResponseCreateUpdateDokumentasiBorangType | null>(
+        service,
+        res,
+        200,
+        "success",
+      );
     } catch (error) {
       next(error);
     }

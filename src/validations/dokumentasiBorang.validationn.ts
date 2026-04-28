@@ -77,11 +77,48 @@ export class DokumentasiBorangValidation {
   static readonly CREATE_DEFAULT = z
     .object({
       kebutuhan_dokumentasi_pic_id: z.number().int().positive().max(2147483647),
-      keterangan: z.string().min(1).max(1000),
-      new_folder: z.string().optional(),
+      new_folder: z.string().trim().optional(),
+      old_folder: z.number().int().positive().max(2147483647).optional(),
       files: z.array(this.FILE_REQUEST_SCHEMA).min(1).max(4),
     })
-    .strict() satisfies z.ZodType<
+    .strict()
+    .superRefine((data, ctx) => {
+      // check new folder and old folder
+      const hasNewFolder =
+        data.new_folder !== undefined && data.new_folder !== null;
+      const hasOldFolder =
+        data.old_folder !== undefined && data.old_folder !== null;
+
+      // jika new folder ada maka old folder tidak boleh ada
+      if (hasNewFolder) {
+        if (hasOldFolder) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["old_folder"],
+            message: "jika new folder ada maka old folder tidak boleh ada",
+          });
+        }
+      }
+
+      // jika old folder ada maka new folder tidak boleh ada
+      if (hasOldFolder) {
+        if (hasNewFolder) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["new_folder"],
+            message: "jika old folder ada maka new folder tidak boleh ada",
+          });
+        }
+      }
+
+      if (!hasNewFolder && !hasOldFolder) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["old_folder"],
+          message: "old folder atau new folder wajib di isi salah satu",
+        });
+      }
+    }) satisfies z.ZodType<
     Omit<CreateDokumentasiBorangDefaultRequestType, "files"> & {
       files: FilesRequest[];
     }

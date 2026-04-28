@@ -152,7 +152,6 @@ model DokumentasiBorang {
   id                       Int      @id @default(autoincrement())
   kebutuhan_dokumentasi_id Int
   status                   Status   @default(PENDING)
-  keterangan               String   @db.VarChar(1000)
   created_at               DateTime @default(now())
   updated_at               DateTime @updatedAt
 
@@ -163,6 +162,7 @@ model DokumentasiBorang {
   folders FolderDokumen[]
   files   DokumentasiBorangFile[]
 
+  @@unique([kebutuhan_dokumentasi_id])
   @@index([kebutuhan_dokumentasi_id])
   @@map("dokumentasi_borang")
 }
@@ -201,10 +201,11 @@ model FolderDokumen {
 // file dokumen 
 model FileDokumen {
   id               Int             @id @default(autoincrement())
-  nama_file        String
+  nama_file        String          @unique
   storage_provider StorageProvider @default(SISTEM)
   provider_file_id String?
   uploaded_by_id   Int
+  keterangan       String          @db.VarChar(1000)
   created_at       DateTime        @default(now())
   updated_at       DateTime        @updatedAt
   is_active        Boolean         @default(false)
@@ -237,8 +238,6 @@ model DokumentasiBorangFile {
   dokumentasi_borang_id Int
   file_dokumen_id       Int
   folder_dokumen_id     Int?
-  keterangan            String   @db.VarChar(1000)
-  status                Status   @default(PENDING)
   created_at            DateTime @default(now())
   updated_at            DateTime @updatedAt
 

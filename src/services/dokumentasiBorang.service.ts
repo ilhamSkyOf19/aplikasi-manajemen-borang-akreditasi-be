@@ -1,19 +1,24 @@
 import prisma from "../libs/prisma";
-import { CreateDokumentasiBorangDefaultType } from "../models/dokumentasiBorang.model";
-import { CreateKebutuhanDokumentasiPic } from "../models/kebutuhanDokumentasiPic.model";
+import {
+  CreateDokumentasiBorangDefaultType,
+  ResponseCreateUpdateDokumentasiBorangType,
+  toResponseCreateUpdateDokumentasiBorangType,
+} from "../models/dokumentasiBorang.model";
+import { ResponseResult } from "../types/response";
+import { Status } from "../utils/contstanst";
 
 export class DokumentasiBorangServices {
   // create
   static async createDefault(
     data: CreateDokumentasiBorangDefaultType,
-  ): Promise<any | null> {
+  ): Promise<ResponseCreateUpdateDokumentasiBorangType | null> {
     // get data
     const {
-      keterangan,
       kebutuhan_dokumentasi_pic_id,
       files,
       uploaded_by_id,
       new_folder,
+      old_folder,
     } = data;
 
     // transaction
@@ -29,41 +34,55 @@ export class DokumentasiBorangServices {
       });
 
       // check
-      if (!kebutuhanDokumentasi) return null;
+      if (!kebutuhanDokumentasi)
+        throw new Error("Kebutuhan dokumentasi tidak ada");
 
       //   create dokumentasi
-      const dokumentasiBorang = await tx.dokumentasiBorang.create({
-        data: {
+      const dokumentasiBorang = await tx.dokumentasiBorang.upsert({
+        where: {
           kebutuhan_dokumentasi_id: kebutuhanDokumentasi.id,
-          keterangan,
+        },
+        update: {},
+        create: {
+          kebutuhan_dokumentasi_id: kebutuhanDokumentasi.id,
         },
         select: {
           id: true,
           kebutuhan_dokumentasi_id: true,
+          status: true,
         },
       });
 
       // check
-      if (!dokumentasiBorang) return null;
+      if (!dokumentasiBorang) throw new Error("Dokumentasi borang tidak ada");
 
       // create folder
-      let folder: { id: number; nama_folder: string } | null = null;
+      let folder: { id: number } | null = null;
       // check folder
       if (new_folder) {
         folder = await tx.folderDokumen.create({
           data: {
-            dokumentasi_borang_id: kebutuhanDokumentasi.id,
+            dokumentasi_borang_id: dokumentasiBorang.id,
             nama_folder: new_folder,
           },
           select: {
             id: true,
-            nama_folder: true,
           },
         });
       }
 
+      // check
+      if (old_folder)
+        // push
+        folder = {
+          id: old_folder,
+        };
+
       //   create file many
-      const resultFiles = [];
+      const resultFiles: (Omit<
+        ResponseCreateUpdateDokumentasiBorangType,
+        "file_dokumen_id"
+      > & { file_dokumen_id: number })[] = [];
 
       for (const file of files) {
         // file dokumen id
@@ -82,7 +101,7 @@ export class DokumentasiBorangServices {
           });
 
           // check
-          if (!existingFile) return null;
+          if (!existingFile) throw new Error("File tidak ada");
 
           // push
           fileDokumenId = existingFile.id;
@@ -93,6 +112,7 @@ export class DokumentasiBorangServices {
               storage_provider: file.storage_provider!,
               provider_file_id: file.provider_id!,
               uploaded_by_id: uploaded_by_id,
+              keterangan: file.keterangan!,
               default_detail: {
                 create: {},
               },
@@ -111,25 +131,71 @@ export class DokumentasiBorangServices {
           data: {
             dokumentasi_borang_id: dokumentasiBorang.id,
             file_dokumen_id: fileDokumenId,
-            folder_dokumen_id: folder?.id ?? null,
-            keterangan: keterangan,
+            folder_dokumen_id: new_folder
+              ? folder?.id
+              : old_folder
+                ? old_folder
+                : null,
           },
           select: {
             id: true,
             dokumentasi_borang_id: true,
             file_dokumen_id: true,
             folder_dokumen_id: true,
-            keterangan: true,
-            status: true,
+            created_at: true,
+            updated_at: true,
           },
         });
 
-        resultFiles.push(pivot);
+        resultFiles.push({
+          id: pivot.id,
+          dokumentasi_borang_id: pivot.dokumentasi_borang_id,
+          file_dokumen_id: fileDokumenId,
+          folder_dokumen_id: pivot.folder_dokumen_id ?? 0,
+          status: dokumentasiBorang.status as Status,
+          created_at: pivot.created_at,
+          updated_at: pivot.updated_at,
+        });
       }
 
       return resultFiles;
     });
 
-    return result;
+    // check result
+    if (!result) return null;
+
+    // grouped
+    const groupedResult = new Map<
+      number,
+      ResponseCreateUpdateDokumentasiBorangType
+    >();
+
+    for (const item of result) {
+      const kebutuhanDokumentasiId = item.dokumentasi_borang_id;
+
+      // existing data
+      const existingData = groupedResult.get(kebutuhanDokumentasiId);
+
+      // file dokumen id
+      const fileDokumenId = item.file_dokumen_id;
+
+      // check existing data
+      if (existingData) {
+        // check file dokumen id and push
+        existingData.file_dokumen_id.push(fileDokumenId);
+
+        continue;
+      }
+
+      groupedResult.set(kebutuhanDokumentasiId, {
+        ...item,
+        file_dokumen_id: [fileDokumenId],
+      });
+    }
+
+    // final grouped
+    const finalGroupedResult = Array.from(groupedResult.values())[0];
+
+    return toResponseCreateUpdateDokumentasiBorangType(finalGroupedResult);
   }
 }

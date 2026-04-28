@@ -478,14 +478,26 @@ export class KebutuhanDokumentasiPicServices {
   }
 
   // get  count by id
-  static async getCountById(id: number): Promise<number> {
-    const result = await prisma.kebutuhanDokumentasi.count({
+  static async getExistAndTipeDokumen(
+    id: number,
+  ): Promise<{ id: number; tipe_dokumen: TipeDokumentasi } | null> {
+    const result = await prisma.kebutuhanDokumentasi.findUnique({
       where: {
         id,
       },
+      select: {
+        id: true,
+        tipe_dokumentasi: true,
+      },
     });
 
-    return result;
+    // check
+    if (!result) return null;
+
+    return {
+      id: result.id,
+      tipe_dokumen: result.tipe_dokumentasi as TipeDokumentasi,
+    };
   }
 
   // update
