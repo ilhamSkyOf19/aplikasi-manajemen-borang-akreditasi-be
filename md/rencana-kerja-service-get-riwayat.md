@@ -84,21 +84,21 @@ Urutan pengerjaan yang disarankan:
 
 ## Checklist
 
-- [ ] Validation params `kebutuhan_dokumentasi_id` selesai.
-- [ ] Validation query pagination selesai.
-- [ ] Service `findAllByKebutuhanDokumentasiId` selesai.
-- [ ] Cek data kebutuhan dokumentasi berdasarkan ID selesai.
-- [ ] Query find all riwayat berdasarkan kebutuhan dokumentasi ID selesai.
-- [ ] Sorting berdasarkan `created_at` selesai.
-- [ ] Pagination selesai.
-- [ ] Controller selesai.
-- [ ] Route selesai.
-- [ ] ACL selesai.
-- [ ] Response success selesai.
-- [ ] Response error selesai.
-- [ ] Testing data ditemukan selesai.
-- [ ] Testing data tidak ditemukan selesai.
-- [ ] Testing riwayat kosong selesai.
-- [ ] Refactor kode selesai.
+- [✅] Validation params `kebutuhan_dokumentasi_id` selesai.
+- [✅] Validation query pagination selesai.
+- [✅] Service `findAllByKebutuhanDokumentasiId` selesai.
+- [✅] Cek data kebutuhan dokumentasi berdasarkan ID selesai.
+- [✅] Query find all riwayat berdasarkan kebutuhan dokumentasi ID selesai.
+- [✅] Sorting berdasarkan `created_at` selesai.
+- [✅] Pagination selesai.
+- [✅] Controller selesai.
+- [✅] Route selesai.
+- [✅] ACL selesai.
+- [✅] Response success selesai.
+- [✅] Response error selesai.
+- [✅] Testing data ditemukan selesai.
+- [✅] Testing data tidak ditemukan selesai.
+- [✅] Testing riwayat kosong selesai.
+- [✅] Refactor kode selesai.
 
 ---
