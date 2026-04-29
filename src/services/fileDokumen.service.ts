@@ -1,17 +1,25 @@
 import prisma from "../libs/prisma";
+import { TipeDokumentasi } from "../utils/contstanst";
 
 export class FileDokumenService {
   // find by ids
-  static async findByIds(ids: number[]): Promise<number> {
-    const result = await prisma.fileDokumen.count({
+  static async findByIdsAndGetTipe(
+    ids: number[],
+  ): Promise<{ tipe_file: TipeDokumentasi }[]> {
+    const result = await prisma.fileDokumen.findMany({
       where: {
         id: {
           in: ids,
         },
       },
+      select: {
+        tipe_file: true,
+      },
     });
 
-    return result;
+    return result.map((item) => ({
+      tipe_file: item.tipe_file as TipeDokumentasi,
+    }));
   }
 
   // find many by nama file

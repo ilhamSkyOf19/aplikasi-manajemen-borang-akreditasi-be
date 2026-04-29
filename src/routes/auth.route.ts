@@ -6,6 +6,7 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import LimiterMiddleware from "../middlewares/limiter.middleware";
 import { DosenValidation } from "../validations/dosen.validation";
+import { DosenRole } from "../utils/contstanst";
 
 const authRoute: Router = Router();
 
@@ -20,7 +21,7 @@ authRoute.post(
 // register
 authRoute.post(
   "/register",
-  // [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
   zodValidation<CreateDosenType>(DosenValidation.CREATE),
   AuthController.register,
 );

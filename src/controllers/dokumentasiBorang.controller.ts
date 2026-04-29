@@ -3,6 +3,7 @@ import {
   CreateDokumentasiBorangDefaultRequestType,
   FilesRequest,
   ResponseCreateUpdateDokumentasiBorangType,
+  ResponseDokumentasiBorangType,
 } from "../models/dokumentasiBorang.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { AuthRequest } from "../types/authRequest";
@@ -13,7 +14,7 @@ import { validation } from "../validations/validation";
 import { DokumentasiBorangValidation } from "../validations/dokumentasiBorang.validationn";
 import { KebutuhanDokumentasiPicServices } from "../services/kebutuhanDokumentasiPic.service";
 import { FolderService } from "../services/folder.service";
-import { TipeDokumentasi } from "../utils/contstanst";
+import { Status, TipeDokumentasi } from "../utils/contstanst";
 
 export class DokumentasiBorangController {
   // create
@@ -58,7 +59,7 @@ export class DokumentasiBorangController {
 
       // check kebutuhan dokumentasi id
       const checkKebutuhanDokumentasi =
-        await KebutuhanDokumentasiPicServices.getExistAndTipeDokumen(
+        await KebutuhanDokumentasiPicServices.getExistAndTipeDokumenAndStatus(
           kebutuhan_dokumentasi_pic_id,
         );
 
@@ -68,6 +69,14 @@ export class DokumentasiBorangController {
           res,
           404,
           "kebutuhan dokumentasi pic not found",
+        );
+
+      // check status
+      if (checkKebutuhanDokumentasi.status !== Status.APPROVED)
+        return ResponseResult.error(
+          res,
+          404,
+          "status kebutuhan dokumentasi belum disetujui",
         );
 
       // check tipe dokumentasi
@@ -138,16 +147,20 @@ export class DokumentasiBorangController {
 
         // check
         if (oldFiles.length > 0) {
-          const findFiles = await FileDokumenService.findByIds(oldFiles);
+          const findFiles =
+            await FileDokumenService.findByIdsAndGetTipe(oldFiles);
 
           // check
-          if (!findFiles && findFiles === 0) {
-            // delete files
-            if (req.files) {
-              await FileService.deleteFiles(req.files as Express.Multer.File[]);
-            }
+          if (!findFiles && findFiles === 0)
             return ResponseResult.error(res, 404, "file not found");
-          }
+
+          // check tipe
+          if (
+            !findFiles.map((item) =>
+              item.tipe_file.includes(checkKebutuhanDokumentasi.tipe_dokumen),
+            )
+          )
+            return ResponseResult.error(res, 404, "tipe file tidak sesuai");
         }
       }
 
@@ -188,6 +201,40 @@ export class DokumentasiBorangController {
 
       // return
       return ResponseResult.success<ResponseCreateUpdateDokumentasiBorangType | null>(
+        service,
+        res,
+        200,
+        "success",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find all by kebutuhan dokumentasi pic id
+  static async findAllByKebutuhanDokumentasiPicId(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseDokumentasiBorangType | null>,
+      { validatedParams: { kebutuhan_dokumentasi_id: number } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { kebutuhan_dokumentasi_id } = res.locals.validatedParams;
+
+      // call service
+      const service =
+        await DokumentasiBorangServices.findAllByKebutuhanDokumentasiId(
+          kebutuhan_dokumentasi_id,
+        );
+
+      // check
+      if (!service) return ResponseResult.error(res, 400, "service gagal");
+
+      // return
+      return ResponseResult.success<ResponseDokumentasiBorangType | null>(
         service,
         res,
         200,

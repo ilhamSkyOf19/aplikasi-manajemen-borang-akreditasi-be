@@ -1,9 +1,36 @@
-import { Status, StorageProvider } from "../utils/contstanst";
+import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 import { IKebutuhanDokumentsiPic } from "./kebutuhanDokumentasiPic.model";
+
+// type dokumentasi default
+export interface IDokumentasiBorangDefault {
+  id: number;
+  nama_file: string;
+  nomor_dokumen?: string;
+  uploaded_by: {
+    id: number;
+    nama: string;
+    nidn: string;
+  };
+  keterangan: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface IFolderDokumentasiBorang {
+  id: number;
+  nama_folder: string;
+  files_dokumentasi_default?: IDokumentasiBorangDefault[];
+}
 
 export interface IDokumentasiBorang {
   id: number;
-  kebutuhan_dokumentasi_id: IKebutuhanDokumentsiPic;
+  kebutuhan_dokumentasi: {
+    id: number;
+    tipe_dokumentasi: TipeDokumentasi;
+  };
+  status: Status;
+  files_dokumentasi_default?: IDokumentasiBorangDefault[];
+  folders?: IFolderDokumentasiBorang[];
 }
 
 export type FilesRequest = {
@@ -45,3 +72,11 @@ export interface ResponseCreateUpdateDokumentasiBorangType {
 export const toResponseCreateUpdateDokumentasiBorangType = (
   data: ResponseCreateUpdateDokumentasiBorangType,
 ): ResponseCreateUpdateDokumentasiBorangType => data;
+
+// response dokumentasi borang
+export interface ResponseDokumentasiBorangType extends IDokumentasiBorang {}
+
+// to response dokumentasi borang
+export const toResponseDokumentasiBorangType = (
+  data: ResponseDokumentasiBorangType,
+): ResponseDokumentasiBorangType => data;

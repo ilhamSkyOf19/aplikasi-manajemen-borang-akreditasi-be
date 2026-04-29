@@ -206,6 +206,7 @@ model FileDokumen {
   provider_file_id String?
   uploaded_by_id   Int
   keterangan       String          @db.VarChar(1000)
+  tipe_file        TipeDokumentasi
   created_at       DateTime        @default(now())
   updated_at       DateTime        @updatedAt
   is_active        Boolean         @default(false)
@@ -248,7 +249,7 @@ model DokumentasiBorangFile {
 
   folder_dokumen FolderDokumen? @relation(fields: [folder_dokumen_id], references: [id], onDelete: Cascade)
 
-  @@unique([dokumentasi_borang_id, file_dokumen_id, folder_dokumen_id])
+  @@unique([dokumentasi_borang_id, file_dokumen_id])
   @@index([dokumentasi_borang_id])
   @@index([file_dokumen_id])
   @@index([folder_dokumen_id])

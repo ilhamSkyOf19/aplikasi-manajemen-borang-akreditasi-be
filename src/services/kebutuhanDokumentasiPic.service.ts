@@ -478,9 +478,11 @@ export class KebutuhanDokumentasiPicServices {
   }
 
   // get  count by id
-  static async getExistAndTipeDokumen(
-    id: number,
-  ): Promise<{ id: number; tipe_dokumen: TipeDokumentasi } | null> {
+  static async getExistAndTipeDokumenAndStatus(id: number): Promise<{
+    id: number;
+    tipe_dokumen: TipeDokumentasi;
+    status: Status;
+  } | null> {
     const result = await prisma.kebutuhanDokumentasi.findUnique({
       where: {
         id,
@@ -488,6 +490,7 @@ export class KebutuhanDokumentasiPicServices {
       select: {
         id: true,
         tipe_dokumentasi: true,
+        status: true,
       },
     });
 
@@ -497,6 +500,7 @@ export class KebutuhanDokumentasiPicServices {
     return {
       id: result.id,
       tipe_dokumen: result.tipe_dokumentasi as TipeDokumentasi,
+      status: result.status as Status,
     };
   }
 

@@ -1,8 +1,11 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import { DokumenBorangController } from "../controllers/dokumenBorang.controller";
 import { FileService } from "../services/file.service";
 import { DokumentasiBorangController } from "../controllers/dokumentasiBorang.controller";
+import { zodValidationParams } from "../middlewares/validationParams.middleware";
+import { DokumentasiBorangValidation } from "../validations/dokumentasiBorang.validationn";
+import { aclMiddleware } from "../middlewares/acl.middleware";
+import { DosenRole } from "../utils/contstanst";
 
 const dokumentasiBorangRoute: Router = Router();
 
@@ -14,9 +17,19 @@ const upload = FileService.uploadFile({
 // create
 dokumentasiBorangRoute.post(
   "/upload-dokumentasi-default",
-  authMiddleware,
+  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
   upload.array("dokumentasi", 4),
   DokumentasiBorangController.createDokumentasiBorangDefatult,
+);
+
+// find
+dokumentasiBorangRoute.get(
+  "/by-kebutuhan-dokumentasi/:kebutuhan_dokumentasi_id",
+  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  zodValidationParams<{ kebutuhan_dokumentasi_id: number }>(
+    DokumentasiBorangValidation.PARAMS_KEBUTUHAN_DOKUMENTASI_PIC_ID,
+  ),
+  DokumentasiBorangController.findAllByKebutuhanDokumentasiPicId,
 );
 
 export default dokumentasiBorangRoute;

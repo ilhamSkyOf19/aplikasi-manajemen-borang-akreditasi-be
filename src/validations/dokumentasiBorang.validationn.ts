@@ -22,9 +22,19 @@ export class DokumentasiBorangValidation {
       const hasOldFile = data.old_file !== undefined && data.old_file !== null;
       const hasNewFile =
         data.nama_file !== undefined && data.nama_file !== null;
+      const hasKeterangan =
+        data.keterangan !== undefined && data.keterangan !== null;
 
       // jika pakai old file , maka nama file dan storage provider tidak boleh di isi
       if (hasOldFile) {
+        if (hasKeterangan) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["keterangan"],
+            message: "jika old file ada maka keterangan tidak boleh diisi",
+          });
+        }
+
         if (hasNewFile) {
           ctx.addIssue({
             code: "custom",
@@ -110,17 +120,20 @@ export class DokumentasiBorangValidation {
           });
         }
       }
-
-      if (!hasNewFolder && !hasOldFolder) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["old_folder"],
-          message: "old folder atau new folder wajib di isi salah satu",
-        });
-      }
     }) satisfies z.ZodType<
     Omit<CreateDokumentasiBorangDefaultRequestType, "files"> & {
       files: FilesRequest[];
     }
   >;
+
+  // params kebutuhan dokumentasi by id
+  static readonly PARAMS_KEBUTUHAN_DOKUMENTASI_PIC_ID = z
+    .object({
+      kebutuhan_dokumentasi_id: z.coerce
+        .number()
+        .int()
+        .positive()
+        .max(2147483647),
+    })
+    .strict() satisfies z.ZodType<{ kebutuhan_dokumentasi_id: number }>;
 }
