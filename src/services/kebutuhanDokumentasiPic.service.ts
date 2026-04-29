@@ -6,7 +6,6 @@ import {
   ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType,
   ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
   ResponseKebutuhanDokumentasiPicType,
-  ResponseKebutuhanDokumentasiPicWithMetaType,
   toResponseCreateUpdateKebutuhanDokumentasiPicType,
   toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType,
   toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,

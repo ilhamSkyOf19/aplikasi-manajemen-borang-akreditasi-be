@@ -219,13 +219,13 @@ export class DokumentasiBorangServices {
       },
       select: {
         id: true,
+        status: true,
         kebutuhan_dokumentasi: {
           select: {
             id: true,
             tipe_dokumentasi: true,
           },
         },
-        status: true,
         files: {
           select: {
             folder_dokumen: {

@@ -1,13 +1,10 @@
 import { TipeRiwayat, Status } from "../utils/contstanst";
-import { IPic } from "./pic.model";
-import { ITimAkreditasi } from "./timAkreditasi.model";
-import { PayloadDosenType } from "./dosen.model";
-import { IKebutuhanDokumentsiPic } from "./kebutuhanDokumentasiPic.model";
 
-export interface IRiwayatKebutuhanDokumentasiPic {
+export interface IRiwayat {
   id: number;
   tipe_riwayat: TipeRiwayat;
   kebutuhan_dokumentasi_pic_id?: number;
+  dokumentasi_borang_id?: number;
   status: Status;
   keterangan: string;
   created_at: Date;
@@ -15,10 +12,18 @@ export interface IRiwayatKebutuhanDokumentasiPic {
 }
 
 // create
-export interface CreateRiwayatKebutuhanDOkumentasiPicType {
+export interface CreateRiwayatKebutuhanDokumentasiPicType {
   status: Status;
   tipe_riwayat: TipeRiwayat;
   kebutuhan_dokumentasi_pic_id: number;
+  keterangan: string;
+}
+
+// create riwayat dokumentasi borang
+export interface CreateRiwayatDokumentasiBorangType {
+  status: Status;
+  tipe_riwayat: TipeRiwayat;
+  dokumentasi_borang_id: number;
   keterangan: string;
 }
 
@@ -27,18 +32,10 @@ export interface CreateRiwayatKebutuhanDOkumentasiPicType {
 //   Omit<CreateRiwayatType, "picId">
 // > {}
 
-// response create riwayat kebutuhan dokumentasi pic
-export interface ResponseCreateRiwayatKebutuhanDokumentasiPicType extends IRiwayatKebutuhanDokumentasiPic {}
-
-// to response create
-export const toResponseCreateRiwayatKebutuhanDokumentasiPicType = (
-  riwayat: ResponseCreateRiwayatKebutuhanDokumentasiPicType,
-): ResponseCreateRiwayatKebutuhanDokumentasiPicType => riwayat;
-
 // response
-export interface ResponseRiwayatKebutuhanDokumentasiPicType extends IRiwayatKebutuhanDokumentasiPic {}
+export interface ResponseRiwayatType extends IRiwayat {}
 
 // to response
-export const toResponseRiwayatKebutuhanDokumentasiPicType = (
-  riwayat: ResponseRiwayatKebutuhanDokumentasiPicType,
-): ResponseRiwayatKebutuhanDokumentasiPicType => riwayat;
+export const toResponseRiwayatType = (
+  riwayat: ResponseRiwayatType,
+): ResponseRiwayatType => riwayat;

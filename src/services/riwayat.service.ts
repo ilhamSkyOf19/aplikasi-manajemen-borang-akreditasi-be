@@ -1,11 +1,10 @@
 import prisma from "../libs/prisma";
 import { ResponseKriteriaPicType } from "../models/kriteriaPic.model";
 import {
-  CreateRiwayatKebutuhanDOkumentasiPicType,
-  ResponseCreateRiwayatKebutuhanDokumentasiPicType,
-  ResponseRiwayatKebutuhanDokumentasiPicType,
-  toResponseCreateRiwayatKebutuhanDokumentasiPicType,
-  toResponseRiwayatKebutuhanDokumentasiPicType,
+  CreateRiwayatDokumentasiBorangType,
+  CreateRiwayatKebutuhanDokumentasiPicType,
+  ResponseRiwayatType,
+  toResponseRiwayatType,
 } from "../models/riwayat.model";
 import {
   TipeDokumentasi,
@@ -17,8 +16,8 @@ import {
 export class RiwayatService {
   // create
   static async createForKebutuhanDokumentasiPic(
-    data: CreateRiwayatKebutuhanDOkumentasiPicType,
-  ): Promise<ResponseCreateRiwayatKebutuhanDokumentasiPicType | null> {
+    data: CreateRiwayatKebutuhanDokumentasiPicType,
+  ): Promise<ResponseRiwayatType | null> {
     const { tipe_riwayat, keterangan, kebutuhan_dokumentasi_pic_id, status } =
       data;
     // call db
@@ -59,7 +58,7 @@ export class RiwayatService {
       return riwayat;
     });
 
-    return toResponseCreateRiwayatKebutuhanDokumentasiPicType({
+    return toResponseRiwayatType({
       id: result.id,
       kebutuhan_dokumentasi_pic_id: result.kebutuhan_dokumentasi_pic?.id,
       status: result.status as Status,
@@ -73,7 +72,7 @@ export class RiwayatService {
   // find all by kebutuhan dokumentasi id
   static async findAllByKebutuhanDokumentasiPicId(
     kebutuhan_dokumentasi_pic_id: number,
-  ): Promise<ResponseRiwayatKebutuhanDokumentasiPicType[]> {
+  ): Promise<ResponseRiwayatType[]> {
     // call db
     const result = await prisma.riwayat.findMany({
       where: {
@@ -95,7 +94,7 @@ export class RiwayatService {
     });
 
     return result.map((item) =>
-      toResponseRiwayatKebutuhanDokumentasiPicType({
+      toResponseRiwayatType({
         id: item.id,
         kebutuhan_dokumentasi_pic_id: item.kebutuhan_dokumentasi_pic?.id,
         status: item.status as Status,
@@ -105,6 +104,60 @@ export class RiwayatService {
         updated_at: item.updated_at,
       }),
     );
+  }
+
+  // create dokumentasi borang
+  static async createForDokumentasiBorang(
+    data: CreateRiwayatDokumentasiBorangType,
+  ): Promise<ResponseRiwayatType | null> {
+    const { tipe_riwayat, keterangan, dokumentasi_borang_id, status } = data;
+    // call db
+    const result = await prisma.$transaction(async (tx) => {
+      // update status
+      await tx.dokumentasiBorang.update({
+        where: {
+          id: dokumentasi_borang_id,
+        },
+        data: {
+          status,
+        },
+      });
+
+      // create riwayat
+      const riwayat = await tx.riwayat.create({
+        data: {
+          tipe_riwayat,
+          keterangan,
+          dokumentasi_borang_id: dokumentasi_borang_id,
+          status,
+        },
+        select: {
+          id: true,
+          dokumentasi_borang: {
+            select: {
+              id: true,
+            },
+          },
+          status: true,
+          tipe_riwayat: true,
+          keterangan: true,
+          created_at: true,
+          updated_at: true,
+        },
+      });
+
+      return riwayat;
+    });
+
+    return toResponseRiwayatType({
+      id: result.id,
+      dokumentasi_borang_id: result.dokumentasi_borang?.id,
+      status: result.status as Status,
+      tipe_riwayat: result.tipe_riwayat as TipeRiwayat,
+      keterangan: result.keterangan,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
+    });
   }
 
   // // create many

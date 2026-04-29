@@ -1,5 +1,11 @@
 import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
-import { IKebutuhanDokumentsiPic } from "./kebutuhanDokumentasiPic.model";
+
+// verifikasi request
+export interface VerifikasiDokumentasiBorangType {
+  dokumentasi_borang_id: number;
+  status: Status;
+  keterangan_verifikasi: string;
+}
 
 // type dokumentasi default
 export interface IDokumentasiBorangDefault {

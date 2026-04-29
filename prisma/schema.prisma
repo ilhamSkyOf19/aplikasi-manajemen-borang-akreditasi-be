@@ -159,8 +159,9 @@ model DokumentasiBorang {
 
   // penelitian_detail DokumentasiBorangPenelitian?
 
-  folders FolderDokumen[]
-  files   DokumentasiBorangFile[]
+  folders  FolderDokumen[]
+  files    DokumentasiBorangFile[]
+  riwayats Riwayat[]
 
   @@unique([kebutuhan_dokumentasi_id])
   @@index([kebutuhan_dokumentasi_id])
@@ -276,10 +277,13 @@ model Riwayat {
   created_at               DateTime    @default(now())
   updated_at               DateTime    @updatedAt
   kebutuhan_dokumentasi_id Int?
+  dokumentasi_borang_id    Int?
   status                   Status
   // dokumentasi_borang Int?
 
   kebutuhan_dokumentasi_pic KebutuhanDokumentasi? @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
+
+  dokumentasi_borang DokumentasiBorang? @relation(fields: [dokumentasi_borang_id], references: [id], onDelete: Cascade)
 
   @@map("riwayat")
 }
