@@ -84,6 +84,7 @@ Urutan pengerjaan yang disarankan:
 
 ## Checklist
 
+- [ ] Membuat Get untuk riwayat dokumentasi.
 - [✅] Validation params `kebutuhan_dokumentasi_id` selesai.
 - [✅] Validation query pagination selesai.
 - [✅] Service `findAllByKebutuhanDokumentasiId` selesai.
