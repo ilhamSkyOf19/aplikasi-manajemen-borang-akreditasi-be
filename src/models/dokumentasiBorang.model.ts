@@ -4,6 +4,7 @@ import { IKebutuhanDokumentsiPic } from "./kebutuhanDokumentasiPic.model";
 // type dokumentasi default
 export interface IDokumentasiBorangDefault {
   id: number;
+  provider_file_id?: string;
   nama_file: string;
   nomor_dokumen?: string;
   uploaded_by: {
@@ -80,3 +81,11 @@ export interface ResponseDokumentasiBorangType extends IDokumentasiBorang {}
 export const toResponseDokumentasiBorangType = (
   data: ResponseDokumentasiBorangType,
 ): ResponseDokumentasiBorangType => data;
+
+// response folder and files
+export interface ResponseFoldersAndFilesType extends IFolderDokumentasiBorang {}
+
+// to response folder and files
+export const toResponseFoldersAndFilesType = (
+  data: ResponseFoldersAndFilesType,
+): ResponseFoldersAndFilesType => data;

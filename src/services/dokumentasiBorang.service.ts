@@ -5,8 +5,10 @@ import {
   IFolderDokumentasiBorang,
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
+  ResponseFoldersAndFilesType,
   toResponseCreateUpdateDokumentasiBorangType,
   toResponseDokumentasiBorangType,
+  toResponseFoldersAndFilesType,
 } from "../models/dokumentasiBorang.model";
 import { ResponseResult } from "../types/response";
 import { Status, TipeDokumentasi } from "../utils/contstanst";
@@ -283,6 +285,7 @@ export class DokumentasiBorangServices {
               item.file_dokumen.default_detail?.nomor_dokumen ?? undefined,
             created_at: item.file_dokumen.created_at,
             updated_at: item.file_dokumen.updated_at,
+            provider_file_id: item.file_dokumen.provider_file_id ?? undefined,
           };
 
           // const folder id
@@ -319,7 +322,7 @@ export class DokumentasiBorangServices {
         }
         break;
       default:
-        return null;
+        throw null;
     }
 
     // final grouped
@@ -339,5 +342,107 @@ export class DokumentasiBorangServices {
       files_dokumentasi_default: finalGroupedFilesDefaultNotHaveFolder,
       folders: finalGroupedFilesByFolder,
     });
+  }
+
+  // find file by folder id and dokumentasi borang id
+  static async findFilesByFolderIdAndDokumentasiBorangId(data: {
+    folder_id: number;
+    dokumentasi_borang_id: number;
+  }): Promise<ResponseFoldersAndFilesType | null> {
+    // get data
+    const { dokumentasi_borang_id, folder_id } = data;
+
+    // call db
+    const result = await prisma.dokumentasiBorangFile.findMany({
+      where: {
+        folder_dokumen_id: folder_id,
+        dokumentasi_borang_id: dokumentasi_borang_id,
+      },
+      select: {
+        folder_dokumen: {
+          select: {
+            id: true,
+            nama_folder: true,
+          },
+        },
+        file_dokumen: {
+          select: {
+            id: true,
+            provider_file_id: true,
+            nama_file: true,
+            keterangan: true,
+            uploaded_by: {
+              select: {
+                id: true,
+                nama: true,
+                nidn: true,
+              },
+            },
+            default_detail: {
+              select: {
+                nomor_dokumen: true,
+              },
+            },
+            created_at: true,
+            updated_at: true,
+            tipe_file: true,
+          },
+        },
+      },
+    });
+
+    // grouped files by folder
+    const gorupedFilesByFolder = new Map<number, IFolderDokumentasiBorang>();
+
+    for (const item of result) {
+      const dataFolder = {
+        id: item.folder_dokumen?.id,
+        nama_folder: item.folder_dokumen?.nama_folder,
+      };
+
+      // check folder
+      if (!dataFolder) throw new Error("Folder tidak ada");
+
+      // existing data
+      const existingData = gorupedFilesByFolder.get(data.folder_id);
+
+      switch (item.file_dokumen.tipe_file) {
+        case TipeDokumentasi.DEFAULT:
+          const fileDokumentasiDefault: IDokumentasiBorangDefault = {
+            id: item.file_dokumen.id,
+            nama_file: item.file_dokumen.nama_file,
+            keterangan: item.file_dokumen.keterangan,
+            uploaded_by: item.file_dokumen.uploaded_by,
+            nomor_dokumen:
+              item.file_dokumen.default_detail?.nomor_dokumen ?? undefined,
+            created_at: item.file_dokumen.created_at,
+            updated_at: item.file_dokumen.updated_at,
+            provider_file_id: item.file_dokumen.provider_file_id ?? undefined,
+          };
+
+          // check existing data
+          if (existingData) {
+            existingData.files_dokumentasi_default?.push(
+              fileDokumentasiDefault,
+            );
+
+            continue;
+          }
+
+          gorupedFilesByFolder.set(dataFolder.id!, {
+            id: dataFolder.id!,
+            nama_folder: dataFolder.nama_folder!,
+            files_dokumentasi_default: [fileDokumentasiDefault],
+          });
+          break;
+        default:
+          return null;
+      }
+    }
+
+    // final grouped
+    const finalGrouped = Array.from(gorupedFilesByFolder.values())[0];
+
+    return toResponseFoldersAndFilesType(finalGrouped);
   }
 }

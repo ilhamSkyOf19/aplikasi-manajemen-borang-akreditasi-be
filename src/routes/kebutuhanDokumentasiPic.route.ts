@@ -50,7 +50,7 @@ kebutuhanDokumentasiPicRoute.get(
 
 // find all by kriteria pic
 kebutuhanDokumentasiPicRoute.get(
-  "/by-kriteria-pendekatan/:kriteria_id/:pendekatan_id",
+  "/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
   [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
   zodValidationParams<{ kriteria_id: number; pendekatan_id: number }>(
     KebutuhanDokumentasiPicValidation.PARAMS,

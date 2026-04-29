@@ -136,4 +136,15 @@ export class DokumentasiBorangValidation {
         .max(2147483647),
     })
     .strict() satisfies z.ZodType<{ kebutuhan_dokumentasi_id: number }>;
+
+  // params dokumentasi borang id and folder id
+  static readonly PARAMS_DOKUMENTASI_BORANG_ID_AND_FOLDER_ID = z
+    .object({
+      dokumentasi_borang_id: z.coerce.number().int().positive().max(2147483647),
+      folder_id: z.coerce.number().int().positive().max(2147483647),
+    })
+    .strict() satisfies z.ZodType<{
+    folder_id: number;
+    dokumentasi_borang_id: number;
+  }>;
 }

@@ -250,9 +250,7 @@ model DokumentasiBorangFile {
   folder_dokumen FolderDokumen? @relation(fields: [folder_dokumen_id], references: [id], onDelete: Cascade)
 
   @@unique([dokumentasi_borang_id, file_dokumen_id])
-  @@index([dokumentasi_borang_id])
-  @@index([file_dokumen_id])
-  @@index([folder_dokumen_id])
+  @@index([dokumentasi_borang_id, folder_dokumen_id])
   @@map("dokumentasi_borang_file")
 }
 

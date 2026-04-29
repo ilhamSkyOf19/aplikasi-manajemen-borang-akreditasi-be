@@ -4,6 +4,7 @@ import {
   FilesRequest,
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
+  ResponseFoldersAndFilesType,
 } from "../models/dokumentasiBorang.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { AuthRequest } from "../types/authRequest";
@@ -148,7 +149,7 @@ export class DokumentasiBorangController {
         // check
         if (oldFiles.length > 0) {
           const findFiles =
-            await FileDokumenService.findByIdsAndGetTipe(oldFiles);
+            await FileDokumenService.findByIdsAndGetTipeAndActive(oldFiles);
 
           // check
           if (!findFiles && findFiles === 0)
@@ -156,11 +157,18 @@ export class DokumentasiBorangController {
 
           // check tipe
           if (
-            !findFiles.map((item) =>
-              item.tipe_file.includes(checkKebutuhanDokumentasi.tipe_dokumen),
+            !findFiles.some(
+              (item) =>
+                item.tipe_file.includes(
+                  checkKebutuhanDokumentasi.tipe_dokumen,
+                ) || item.is_active === true,
             )
           )
-            return ResponseResult.error(res, 404, "tipe file tidak sesuai");
+            return ResponseResult.error(
+              res,
+              404,
+              "tipe file tidak sesuai atau file belum active",
+            );
         }
       }
 
@@ -235,6 +243,47 @@ export class DokumentasiBorangController {
 
       // return
       return ResponseResult.success<ResponseDokumentasiBorangType | null>(
+        service,
+        res,
+        200,
+        "success",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find all by kebutuhan dokumentasi pic id and folder id
+  static async findFilesByFolderIdAndDokumentasiBorangId(
+    req: Request,
+    res: Response<
+      ResponseStructure<ResponseFoldersAndFilesType | null>,
+      {
+        validatedParams: {
+          dokumentasi_borang_id: number;
+          folder_id: number;
+        };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { dokumentasi_borang_id, folder_id } = res.locals.validatedParams;
+
+      // call service
+      const service =
+        await DokumentasiBorangServices.findFilesByFolderIdAndDokumentasiBorangId(
+          {
+            folder_id,
+            dokumentasi_borang_id,
+          },
+        );
+
+      // check service
+      if (!service) return ResponseResult.error(res, 400, "gagal membaca data");
+
+      return ResponseResult.success<ResponseFoldersAndFilesType | null>(
         service,
         res,
         200,

@@ -3,9 +3,9 @@ import { TipeDokumentasi } from "../utils/contstanst";
 
 export class FileDokumenService {
   // find by ids
-  static async findByIdsAndGetTipe(
+  static async findByIdsAndGetTipeAndActive(
     ids: number[],
-  ): Promise<{ tipe_file: TipeDokumentasi }[]> {
+  ): Promise<{ tipe_file: TipeDokumentasi; is_active: boolean }[]> {
     const result = await prisma.fileDokumen.findMany({
       where: {
         id: {
@@ -14,11 +14,13 @@ export class FileDokumenService {
       },
       select: {
         tipe_file: true,
+        is_active: true,
       },
     });
 
     return result.map((item) => ({
       tipe_file: item.tipe_file as TipeDokumentasi,
+      is_active: item.is_active,
     }));
   }
 
