@@ -9,11 +9,11 @@ import {
 } from "../models/kebutuhanDokumentasiPic.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { NamaDokumentasiServices } from "../services/namaDokumentasi.service";
-import { PicServices } from "../services/pic.service";
 import { KebutuhanDokumentasiPicServices } from "../services/kebutuhanDokumentasiPic.service";
 import { PaginationType } from "../types/pagination";
 import { Status, TipeRiwayat } from "../utils/contstanst";
 import { RiwayatService } from "../services/riwayat.service";
+import { PicKebutuhanDokumentasiServices } from "../services/picKebutuhanDokumentasi.service";
 
 export class KebutuhanDokumentasiPicController {
   // create
@@ -61,7 +61,8 @@ export class KebutuhanDokumentasiPicController {
 
         // check pic
         if (pic_new) {
-          const picNewService = await PicServices.create(pic_new);
+          const picNewService =
+            await PicKebutuhanDokumentasiServices.create(pic_new);
 
           if (!picNewService) {
             return ResponseResult.error(res, 400, "pic gagal dibuat");
@@ -89,7 +90,9 @@ export class KebutuhanDokumentasiPicController {
 
         if (pic_id) {
           // find pic
-          const getPic = await PicServices.findById(pic_id as number);
+          const getPic = await PicKebutuhanDokumentasiServices.findById(
+            pic_id as number,
+          );
 
           // check pic
           if (!getPic) {
@@ -319,7 +322,8 @@ export class KebutuhanDokumentasiPicController {
 
         // check pic
         if (pic_new) {
-          const picNewService = await PicServices.create(pic_new);
+          const picNewService =
+            await PicKebutuhanDokumentasiServices.create(pic_new);
 
           if (!picNewService) {
             return ResponseResult.error(res, 400, "pic gagal dibuat");
@@ -347,7 +351,9 @@ export class KebutuhanDokumentasiPicController {
 
         if (pic_id) {
           // find pic
-          const getPic = await PicServices.findById(pic_id as number);
+          const getPic = await PicKebutuhanDokumentasiServices.findById(
+            pic_id as number,
+          );
 
           // check pic
           if (!getPic) {

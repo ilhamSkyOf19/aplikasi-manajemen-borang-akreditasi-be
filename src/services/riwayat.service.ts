@@ -70,17 +70,36 @@ export class RiwayatService {
   }
 
   // find all by kebutuhan dokumentasi id
-  static async findAllByKebutuhanDokumentasiPicId(
-    kebutuhan_dokumentasi_pic_id: number,
-  ): Promise<ResponseRiwayatType[]> {
+  static async findAllRiwayatByKebutuhanDokumentasiOrDokumentasiBorang(data: {
+    id: number;
+    tipe_riwayat: TipeRiwayat;
+  }): Promise<ResponseRiwayatType[]> {
+    // get data
+    const { id, tipe_riwayat } = data;
     // call db
     const result = await prisma.riwayat.findMany({
       where: {
-        kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_pic_id,
+        OR: [
+          {
+            kebutuhan_dokumentasi_id:
+              tipe_riwayat === TipeRiwayat.KEBUTUHAN_DOKUMENTASI
+                ? id
+                : undefined,
+          },
+          {
+            dokumentasi_borang_id:
+              tipe_riwayat === TipeRiwayat.DOKUMENTASI_BORANG ? id : undefined,
+          },
+        ],
       },
       select: {
         id: true,
         kebutuhan_dokumentasi_pic: {
+          select: {
+            id: true,
+          },
+        },
+        dokumentasi_borang: {
           select: {
             id: true,
           },
@@ -97,6 +116,7 @@ export class RiwayatService {
       toResponseRiwayatType({
         id: item.id,
         kebutuhan_dokumentasi_pic_id: item.kebutuhan_dokumentasi_pic?.id,
+        dokumentasi_borang_id: item.dokumentasi_borang?.id,
         status: item.status as Status,
         tipe_riwayat: item.tipe_riwayat as TipeRiwayat,
         keterangan: item.keterangan,

@@ -5,6 +5,8 @@ import {
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
   ResponseFoldersAndFilesType,
+  UpdateDokumentasiBorangDefaultRequestType,
+  UpdateDokumentasiBorangDefaultType,
 } from "../models/dokumentasiBorang.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { AuthRequest } from "../types/authRequest";
@@ -81,7 +83,9 @@ export class DokumentasiBorangController {
         );
 
       // check tipe dokumentasi
-      if (checkKebutuhanDokumentasi.tipe_dokumen !== TipeDokumentasi.DEFAULT)
+      if (
+        checkKebutuhanDokumentasi.tipe_dokumentasi !== TipeDokumentasi.DEFAULT
+      )
         return ResponseResult.error(
           res,
           404,
@@ -92,7 +96,7 @@ export class DokumentasiBorangController {
       if (new_folder) {
         const findFolder = await FolderService.findUniqeByNama({
           folder: new_folder,
-          kebutuhan_dokumentasi_pic_id: kebutuhan_dokumentasi_pic_id,
+          kebutuhan_dokumentasi_pic_id: checkKebutuhanDokumentasi.id,
         });
         // check
         if (findFolder) {
@@ -104,7 +108,7 @@ export class DokumentasiBorangController {
       if (old_folder) {
         const findFolder = await FolderService.findUniqeById({
           id: old_folder,
-          kebutuhan_dokumentasi_pic_id: kebutuhan_dokumentasi_pic_id,
+          kebutuhan_dokumentasi_pic_id: checkKebutuhanDokumentasi.id,
         });
 
         if (!findFolder) {
@@ -160,7 +164,7 @@ export class DokumentasiBorangController {
             !findFiles.some(
               (item) =>
                 item.tipe_file.includes(
-                  checkKebutuhanDokumentasi.tipe_dokumen,
+                  checkKebutuhanDokumentasi.tipe_dokumentasi,
                 ) || item.is_active === true,
             )
           )
@@ -281,9 +285,228 @@ export class DokumentasiBorangController {
         );
 
       // check service
-      if (!service) return ResponseResult.error(res, 400, "gagal membaca data");
+      if (!service)
+        return ResponseResult.error(res, 400, "Data tidak ditemukan");
 
       return ResponseResult.success<ResponseFoldersAndFilesType | null>(
+        service,
+        res,
+        200,
+        "success",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // update
+  static async updateDokumentasiBorangDefatult(
+    req: AuthRequest<{}, {}, UpdateDokumentasiBorangDefaultRequestType>,
+    res: Response<
+      ResponseStructure<ResponseCreateUpdateDokumentasiBorangType | null>,
+      { validatedParams: { dokumentasi_borang_id: number; file_id: number } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // validasi
+      const body = validation<
+        Omit<UpdateDokumentasiBorangDefaultRequestType, "file"> & {
+          file?: FilesRequest;
+        }
+      >(DokumentasiBorangValidation.UPDATE_DEFAULT, {
+        ...req.body,
+        old_folder: req.body.old_folder
+          ? Number(req.body.old_folder)
+          : undefined,
+        file: req.body.file ? JSON.parse(req.body.file) : undefined,
+      });
+
+      // check body
+      if (body.meta.statusCode !== 200) {
+        // return
+        return ResponseResult.error(
+          res,
+          body.meta.statusCode,
+          body.meta.message,
+          body.meta.customField,
+        );
+      }
+
+      // get body
+      const { file, new_folder, old_folder, nomor_dokumen } = body.data!;
+
+      // get params
+      const { dokumentasi_borang_id, file_id } = res.locals.validatedParams;
+
+      // check kebutuhan dokumentasi id
+      const checkDokumentasiBorang =
+        await DokumentasiBorangServices.findDokumentasiBorangGetIdStatusTipeDokumentasi(
+          dokumentasi_borang_id,
+        );
+
+      // check
+      if (!checkDokumentasiBorang)
+        return ResponseResult.error(
+          res,
+          404,
+          "dokumentasi borang tidak di temukan",
+        );
+
+      // check file id
+      const checkFileDokumen = await FileDokumenService.findById(file_id);
+
+      if (!checkFileDokumen)
+        return ResponseResult.error(res, 404, "file dokumen tidak ada");
+
+      // check pivot
+      const checkPivot =
+        await DokumentasiBorangServices.findPivotByDokumentasiBorangAndFileId({
+          dokumentasi_borang_id: checkDokumentasiBorang.id,
+          file_id: checkFileDokumen.id,
+        });
+
+      if (!checkPivot)
+        return ResponseResult.error(res, 404, "relasi pivot tidak ditemukan");
+
+      // check status
+      if (checkDokumentasiBorang.status !== Status.REVISION)
+        return ResponseResult.error(
+          res,
+          404,
+          "status dokumentasi borang belum revisi",
+        );
+
+      // check tipe dokumentasi
+      if (checkDokumentasiBorang.tipe_dokumentasi !== TipeDokumentasi.DEFAULT)
+        return ResponseResult.error(
+          res,
+          404,
+          "tipe kebutuhan dokumentasi tidak sesuai",
+        );
+
+      // check new folder
+      if (new_folder) {
+        const findFolder = await FolderService.findUniqeByNama({
+          folder: new_folder,
+          dokumentasi_borang_id: checkDokumentasiBorang.id,
+        });
+        // check
+        if (findFolder) {
+          return ResponseResult.error(res, 400, "folder name already exist");
+        }
+      }
+
+      // check old folder
+      if (old_folder) {
+        const findFolder = await FolderService.findUniqeById({
+          id: old_folder,
+          dokumentasi_borang_id: checkDokumentasiBorang.id,
+        });
+
+        if (!findFolder) {
+          return ResponseResult.error(res, 400, "folder not found");
+        }
+      }
+
+      // result uploaded file
+      let resultAfterUploaded:
+        | (FilesRequest & { provider_id?: string })
+        | null = null;
+      // check nama file if exist
+      if (file) {
+        if (file.nama_file) {
+          const findNamaFile = await FileDokumenService.findByName(
+            file.nama_file,
+          );
+
+          // check
+          if (findNamaFile) {
+            return ResponseResult.error(res, 400, "nama file already exist");
+          }
+        }
+
+        // check
+        if (file.old_file) {
+          const findFiles =
+            await FileDokumenService.findByIdAndGetTipeAndActive(file.old_file);
+
+          // check
+          if (!findFiles)
+            return ResponseResult.error(res, 404, "file not found");
+
+          // check tipe
+          if (
+            findFiles.is_active === false ||
+            findFiles.tipe_file !== TipeDokumentasi.DEFAULT
+          )
+            return ResponseResult.error(
+              res,
+              404,
+              "tipe file tidak sesuai atau file belum active",
+            );
+
+          // check duplicat pivot
+          const checkDuplicatPivotOldFile =
+            await DokumentasiBorangServices.findPivotByDokumentasiBorangAndFileId(
+              {
+                dokumentasi_borang_id: checkDokumentasiBorang.id,
+                file_id: file.old_file,
+              },
+            );
+
+          if (checkDuplicatPivotOldFile)
+            return ResponseResult.error(
+              res,
+              404,
+              "File sudah digunakan pada dokumentasi yang sama",
+            );
+        }
+
+        if (!req.file) {
+          return ResponseResult.error(res, 400, "file harus diupload");
+        }
+
+        //   upload file
+        const uploadFile = await FileService.uploadFilesFromRequest({
+          fileRequest: [file],
+          uploadedFiles: [req.file],
+        });
+
+        //   check upload files
+        if (!uploadFile) {
+          return ResponseResult.error(res, 400, "gagal upload file");
+        }
+
+        // set
+        resultAfterUploaded = uploadFile[0];
+      }
+
+      // get user id
+      const dosen_id = req.data?.id!;
+
+      //   call service
+      const service = await DokumentasiBorangServices.updateDefault({
+        file: resultAfterUploaded ?? undefined,
+        dokumentasi_borang_id: checkDokumentasiBorang.id,
+        new_folder,
+        old_folder,
+        uploaded_by_id: Number(dosen_id),
+        file_id: checkFileDokumen.id,
+        default_detail: nomor_dokumen
+          ? {
+              nomor_dokumen: nomor_dokumen,
+            }
+          : undefined,
+      });
+
+      //   check
+      if (!service) {
+        return ResponseResult.error(res, 400, "gagal upload file");
+      }
+
+      // return
+      return ResponseResult.success<ResponseCreateUpdateDokumentasiBorangType | null>(
         service,
         res,
         200,

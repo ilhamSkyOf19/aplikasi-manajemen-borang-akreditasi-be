@@ -1,31 +1,36 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { ResponseRiwayatKebutuhanDokumentasiPicType } from "../models/riwayat.model";
+import { ResponseRiwayatType } from "../models/riwayat.model";
 import { RiwayatService } from "../services/riwayat.service";
+import { TipeRiwayat } from "../utils/contstanst";
 
 export class RiwayatController {
   // find all by kebutuhan dokumentasi id
-  static async findAllByKebutuhanDokumentasiPicId(
+  static async findAllRiwayatByKebutuhanDokumentasiOrDokumentasiBorang(
     _req: Request,
     res: Response<
-      ResponseStructure<ResponseRiwayatKebutuhanDokumentasiPicType[]>,
-      { validatedParams: { kebutuhan_dokumentasi_pic_id: number } }
+      ResponseStructure<ResponseRiwayatType[]>,
+      {
+        validatedParams: {
+          id: number;
+          tipe_riwayat: TipeRiwayat;
+        };
+      }
     >,
     next: NextFunction,
   ) {
     try {
       // get params
-      const { kebutuhan_dokumentasi_pic_id } = res.locals.validatedParams;
+      const { id, tipe_riwayat } = res.locals.validatedParams;
 
       // call db
-      const result = await RiwayatService.findAllByKebutuhanDokumentasiPicId(
-        kebutuhan_dokumentasi_pic_id,
-      );
+      const result =
+        await RiwayatService.findAllRiwayatByKebutuhanDokumentasiOrDokumentasiBorang(
+          { id, tipe_riwayat },
+        );
 
       // return result
-      return ResponseResult.success<
-        ResponseRiwayatKebutuhanDokumentasiPicType[]
-      >(result, res);
+      return ResponseResult.success<ResponseRiwayatType[]>(result, res);
     } catch (error) {
       next(error);
     }

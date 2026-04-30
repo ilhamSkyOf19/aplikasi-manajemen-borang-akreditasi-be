@@ -80,6 +80,11 @@ export const errorMiddleware = (
     );
   }
 
+  // error throw
+  if (err instanceof Error) {
+    return ResponseResult.error(res, 400, err.message);
+  }
+
   // generic error catch
   return ResponseResult.error(
     res,

@@ -83,15 +83,14 @@ export class FileService {
   // delete form path
   static async deleteFormPath(
     fileName: string,
-    filePath: string,
   ): Promise<{ success: boolean; message: string }> {
-    if (!filePath || !fileName) {
+    if (!fileName) {
       throw new Error(`Invalid path or filename: ${fileName}`);
     }
 
     const filePathFull = path.join(
       process.cwd(),
-      `public/uploads/${filePath}/${fileName}`,
+      `${FOLDER_GLOBAL_UPLOAD}/${fileName}`,
     );
 
     await fsAsync.access(filePathFull);
@@ -105,13 +104,11 @@ export class FileService {
 
   // delete multiple
   static async deleteMultipleFilesFormPath(
-    files: { fileName: string; filePath: string }[],
+    files: { fileName: string }[],
   ): Promise<{ success: boolean; message: string; file: string }[]> {
     // delete
     const results = await Promise.allSettled(
-      files.map(({ fileName, filePath }) =>
-        this.deleteFormPath(fileName, filePath),
-      ),
+      files.map(({ fileName }) => this.deleteFormPath(fileName)),
     );
 
     // result
@@ -209,6 +206,7 @@ export class FileService {
 
           result.push({
             ...file,
+            nama_file: finalName,
             provider_id: gdrive.fileId,
           });
         } else {
@@ -226,6 +224,7 @@ export class FileService {
 
           result.push({
             ...file,
+            nama_file: finalName,
           });
         }
       }

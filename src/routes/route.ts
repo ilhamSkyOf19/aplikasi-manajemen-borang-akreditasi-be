@@ -5,7 +5,6 @@ import kriteriaRouter from "./kriteria.route";
 import timAkreditasiRoute from "./timAkreditasi.route";
 import LimiterMiddleware from "../middlewares/limiter.middleware";
 import userRoute from "./dosen.route";
-import picRouter from "./pic.route";
 import riwayatRouter from "./riwayat.route";
 import notifikasiRoute from "./notifikasi.route";
 import dokumenBorangRoute from "./dokumenBorang.route";
@@ -14,6 +13,7 @@ import kriteriaPicRouter from "./kriteriaPic.route";
 import kebutuhanDokumentasiPicRoute from "./kebutuhanDokumentasiPic.route";
 import verifikasiRoute from "./verifikasi.route";
 import dokumentasiBorangRoute from "./dokumentasiBorang.route";
+import picKebutuhanDokumentasiRoute from "./picKebutuhanDokumentasi.route";
 
 const appRoute: Router = Router();
 
@@ -43,6 +43,9 @@ appRoute.use("/api/verifikasi", verifikasiRoute);
 
 // dokumentasi borang route
 appRoute.use("/api/dokumentasi-borang", dokumentasiBorangRoute);
+
+// pic kebutuhan dokumentasi route
+appRoute.use("/api/pic-kebutuhan-dokumentasi", picKebutuhanDokumentasiRoute);
 
 // // tim akreditasi router
 // appRoute.use("/api/tim-akreditasi", timAkreditasiRoute);

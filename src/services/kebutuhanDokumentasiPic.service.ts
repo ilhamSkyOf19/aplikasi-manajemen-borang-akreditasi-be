@@ -479,7 +479,7 @@ export class KebutuhanDokumentasiPicServices {
   // get  count by id
   static async getExistAndTipeDokumenAndStatus(id: number): Promise<{
     id: number;
-    tipe_dokumen: TipeDokumentasi;
+    tipe_dokumentasi: TipeDokumentasi;
     status: Status;
   } | null> {
     const result = await prisma.kebutuhanDokumentasi.findUnique({
@@ -498,7 +498,7 @@ export class KebutuhanDokumentasiPicServices {
 
     return {
       id: result.id,
-      tipe_dokumen: result.tipe_dokumentasi as TipeDokumentasi,
+      tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
       status: result.status as Status,
     };
   }

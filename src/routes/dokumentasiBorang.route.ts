@@ -22,6 +22,17 @@ dokumentasiBorangRoute.post(
   DokumentasiBorangController.createDokumentasiBorangDefatult,
 );
 
+// update
+dokumentasiBorangRoute.patch(
+  "/by-dokumentasi-borang/:dokumentasi_borang_id/file-id/:file_id",
+  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  upload.single("dokumentasi"),
+  zodValidationParams<{ dokumentasi_borang_id: number; file_id: number }>(
+    DokumentasiBorangValidation.PARAMS_DOKUMENTASI_BORANG_ID_AND_FILE_ID,
+  ),
+  DokumentasiBorangController.updateDokumentasiBorangDefatult,
+);
+
 // find
 dokumentasiBorangRoute.get(
   "/by-kebutuhan-dokumentasi/:kebutuhan_dokumentasi_id",

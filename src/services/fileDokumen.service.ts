@@ -1,5 +1,5 @@
 import prisma from "../libs/prisma";
-import { TipeDokumentasi } from "../utils/contstanst";
+import { StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 
 export class FileDokumenService {
   // find by ids
@@ -24,6 +24,64 @@ export class FileDokumenService {
     }));
   }
 
+  static async findByIdAndGetTipeAndActive(
+    id: number,
+  ): Promise<{ tipe_file: TipeDokumentasi; is_active: boolean } | null> {
+    const result = await prisma.fileDokumen.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        tipe_file: true,
+        is_active: true,
+      },
+    });
+
+    // check
+    if (!result) return null;
+
+    return {
+      is_active: result.is_active,
+      tipe_file: result.tipe_file as TipeDokumentasi,
+    };
+  }
+
+  // find by id and active
+  static async findById(id: number): Promise<{
+    id: number;
+    is_active: boolean;
+    storage_provider: StorageProvider;
+    provider_file_id?: string;
+    nama_file: string;
+    uploaded_by_id: number;
+  } | null> {
+    const result = await prisma.fileDokumen.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        is_active: true,
+        storage_provider: true,
+        provider_file_id: true,
+        nama_file: true,
+        uploaded_by_id: true,
+      },
+    });
+
+    // check
+    if (!result) return null;
+
+    return {
+      id: result.id,
+      is_active: result.is_active,
+      nama_file: result.nama_file,
+      storage_provider: result.storage_provider as StorageProvider,
+      provider_file_id: result.provider_file_id ?? undefined,
+      uploaded_by_id: result.uploaded_by_id,
+    };
+  }
+
   // find many by nama file
   static async findByNames(nama_file: string[]): Promise<number> {
     const result = await prisma.fileDokumen.findMany({
@@ -35,5 +93,22 @@ export class FileDokumenService {
     });
 
     return result.length;
+  }
+
+  // find by name
+  static async findByName(nama_file: string): Promise<number | null> {
+    const result = await prisma.fileDokumen.findFirst({
+      where: {
+        nama_file,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    // check
+    if (!result) return null;
+
+    return result.id;
   }
 }
