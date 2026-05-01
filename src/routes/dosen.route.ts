@@ -6,6 +6,9 @@ import { zodValidation } from "../middlewares/validation.middleware";
 import { UpdateDosenType } from "../models/dosen.model";
 import { DosenValidation } from "../validations/dosen.validation";
 import { DosenRole } from "../utils/contstanst";
+import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
+import { PaginationType } from "../types/pagination";
+import { zodValidationParams } from "../middlewares/validationParams.middleware";
 
 const dosenRoute: Router = Router();
 
@@ -13,15 +16,19 @@ const dosenRoute: Router = Router();
 dosenRoute.get(
   "/",
   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  zodValidationQuery<PaginationType & { role?: DosenRole }>(
+    DosenValidation.QUERY_PARAMS,
+  ),
   DosenController.findAll,
 );
 
 // // read by id
-// dosenRoute.get(
-//   "/:id",
-//   [authMiddleware, aclMiddleware(["wakil_dekan_1"])],
-//   UserController.readById,
-// );
+dosenRoute.get(
+  "/:id",
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  zodValidationParams<{ id: number }>(DosenValidation.PARAMS_ID),
+  DosenController.findById,
+);
 
 // // update dosen
 dosenRoute.patch(
@@ -32,10 +39,10 @@ dosenRoute.patch(
 );
 
 // // delete
-dosenRoute.delete(
-  "/:id",
-  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
-  DosenController.delete,
-);
+// dosenRoute.delete(
+//   "/:id",
+//   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+//   DosenController.delete,
+// );
 
 export default dosenRoute;

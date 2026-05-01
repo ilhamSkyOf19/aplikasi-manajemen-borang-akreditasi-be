@@ -13,13 +13,16 @@ export const aclMiddleware =
   ) => {
     try {
       // get user id
-      const dosenId = req.data?.id;
+      const data = req.data;
 
       // role dosen
       const roleDosen = req.data?.role;
 
       // check db
-      const dosen = await DosenServices.findById(dosenId!);
+      const dosen = await DosenServices.findByIdAndRole({
+        id: data?.id!,
+        role: data?.role!,
+      });
       // check roles
       if (
         !dosen ||

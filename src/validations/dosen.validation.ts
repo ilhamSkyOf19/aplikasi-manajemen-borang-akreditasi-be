@@ -5,6 +5,7 @@ import {
   UpdateDosenType,
 } from "../models/dosen.model";
 import { DosenRole } from "../utils/contstanst";
+import { PaginationType } from "../types/pagination";
 
 export class DosenValidation {
   // only char schema
@@ -84,4 +85,28 @@ export class DosenValidation {
         .optional(),
     })
     .strict() satisfies z.ZodType<UpdateDosenType>;
+
+  // pagination
+  static readonly QUERY_PARAMS = z
+    .object({
+      page: z
+        .string()
+        .transform((val) => parseInt(val))
+        .optional(),
+      limit: z
+        .string()
+        .transform((val) => parseInt(val))
+        .optional(),
+      search: z.string().trim().optional(),
+      sort: z.enum(["asc", "desc"]).optional(),
+      role: z.enum(DosenRole).optional(),
+    })
+    .strict() satisfies z.ZodType<PaginationType & { role?: DosenRole }>;
+
+  // params id
+  static readonly PARAMS_ID = z
+    .object({
+      id: z.coerce.number().int().positive().max(2147483647),
+    })
+    .strict() satisfies z.ZodType<{ id: number }>;
 }

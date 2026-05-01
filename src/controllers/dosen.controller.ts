@@ -16,13 +16,16 @@ import { checkSort } from "../utils/utils";
 export class DosenController {
   // find all dosen
   static async findAll(
-    req: Request<{}, {}, {}, PaginationType & { role?: string }>,
-    res: Response<ResponseStructure<ResponseDosenWithMetaType | null>>,
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseDosenWithMetaType | null>,
+      { validatedQuery: PaginationType & { role?: DosenRole } }
+    >,
     next: NextFunction,
   ) {
     try {
       // get params
-      const { limit, page, search, role, sort } = req.query;
+      const { limit, page, search, role, sort } = res.locals.validatedQuery;
       // check sort
       const cleanSort = checkSort(sort);
 
@@ -64,33 +67,35 @@ export class DosenController {
   }
 
   // //   read by id
-  // static async readById(
-  //   req: Request<{ id: string }>,
-  //   res: Response<ResponseStructure<PayloadUserType | null>>,
-  //   next: NextFunction,
-  // ) {
-  //   try {
-  //     // get params
-  //     const id = req.params.id;
-  //     // check params
-  //     const checkId = checkParamsId(res, id);
-  //     // call service
-  //     const service = await UserService.findUserById(checkId as number);
-  //     // check service
-  //     if (!service) {
-  //       return ResponseResult.error(res, 404, "user not found");
-  //     }
-  //     // return success
-  //     return ResponseResult.success<PayloadUserType | null>(
-  //       service,
-  //       res,
-  //       200,
-  //       "success read user by id",
-  //     );
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
+  static async findById(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseDosenType | null>,
+      { validatedParams: { id: number } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { id } = res.locals.validatedParams;
+      // call service
+      const service = await DosenServices.findById(id);
+      // check service
+      if (!service) {
+        return ResponseResult.error(res, 404, "user not found");
+      }
+      // return success
+      return ResponseResult.success<ResponseDosenType | null>(
+        service,
+        res,
+        200,
+        "success read dosen by id",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // // update
   static async update(
     req: Request<{ id: string }, {}, UpdateDosenType>,
@@ -138,42 +143,42 @@ export class DosenController {
   }
 
   // delete
-  static async delete(
-    req: Request<{ id: string }>,
-    res: Response<ResponseStructure<null>>,
-    next: NextFunction,
-  ) {
-    try {
-      // get id from params
-      const id = req.params.id;
-      // check params
-      const checkId = checkParamsId(res, id);
+  // static async delete(
+  //   req: Request<{ id: string }>,
+  //   res: Response<ResponseStructure<null>>,
+  //   next: NextFunction,
+  // ) {
+  //   try {
+  //     // get id from params
+  //     const id = req.params.id;
+  //     // check params
+  //     const checkId = checkParamsId(res, id);
 
-      // find user by id
-      const dosen = await DosenServices.findById(checkId as number);
-      // check user
-      if (!dosen) {
-        return ResponseResult.error(res, 404, "dosen not found");
-      }
+  //     // find user by id
+  //     const dosen = await DosenServices.findById(checkId as number);
+  //     // check user
+  //     if (!dosen) {
+  //       return ResponseResult.error(res, 404, "dosen not found");
+  //     }
 
-      // check role dosen
-      if (dosen.roles.includes(DosenRole.wakil_dekan_1)) {
-        // check count role wd 1
-        const countWd1 = await DosenServices.findCountRole(
-          DosenRole.wakil_dekan_1,
-        );
+  //     // check role dosen
+  //     if (dosen.roles.includes(DosenRole.wakil_dekan_1)) {
+  //       // check count role wd 1
+  //       const countWd1 = await DosenServices.findCountRole(
+  //         DosenRole.wakil_dekan_1,
+  //       );
 
-        if (countWd1 === 1) {
-          return ResponseResult.error(res, 400, "cannot delete wd 1");
-        }
-      }
+  //       if (countWd1 === 1) {
+  //         return ResponseResult.error(res, 400, "cannot delete wd 1");
+  //       }
+  //     }
 
-      // call service
-      await DosenServices.delete(checkId as number);
-      // return success
-      return ResponseResult.successNoContent(res, "success delete dosen");
-    } catch (error) {
-      next(error);
-    }
-  }
+  //     // call service
+  //     await DosenServices.delete(checkId as number);
+  //     // return success
+  //     return ResponseResult.successNoContent(res, "success delete dosen");
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 }

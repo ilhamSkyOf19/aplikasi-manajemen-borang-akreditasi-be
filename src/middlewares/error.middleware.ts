@@ -18,11 +18,14 @@ export const errorMiddleware = (
     // switch case
 
     const modelName = err.meta?.modelName as unknown as string;
+    const message = err.message;
+    const match = message.match(/constraint:\s*`([^`]+)`/);
+    const constraintName = match?.[1] ?? null;
 
     switch (err.code) {
       case "P2002":
         return ResponseResult.error(res, 409, `unique constraint failed `, [
-          modelName,
+          constraintName || modelName,
         ]);
 
       case "P2025":

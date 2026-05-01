@@ -27,9 +27,9 @@ authRoute.post(
 );
 
 // // me
-// authRoute.get("/me", authMiddleware, AuthController.me);
+authRoute.get("/me", authMiddleware, AuthController.me);
 
 // // logout
-// authRoute.post("/logout", authMiddleware, AuthController.logout);
+authRoute.post("/logout", authMiddleware, AuthController.logout);
 
 export default authRoute;

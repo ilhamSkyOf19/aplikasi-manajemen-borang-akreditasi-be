@@ -133,53 +133,62 @@ export class AuthController {
     }
   }
 
-  // // // auth me
-  // // static async me(
-  // //   req: AuthRequest,
-  // //   res: Response<ResponseStructure<PayloadUserType | null>>,
-  // //   next: NextFunction,
-  // // ) {
-  // //   try {
-  // //     // get res data
-  // //     const data = req.data;
+  // auth me
+  static async me(
+    req: AuthRequest,
+    res: Response<ResponseStructure<PayloadDosenType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get res data
+      const data = req.data;
 
-  // //     // cek data
-  // //     if (!data) return ResponseResult.unauthorized(res, "Token not found");
+      // cek data
+      if (!data) return ResponseResult.unauthorized(res, "Token not found");
 
-  // //     // call service
-  // //     const service = await UserService.findUserById(data.id);
+      // call service
+      const service = await DosenServices.findByIdAndRole({
+        id: data.id,
+        role: data.role,
+      });
 
-  // //     // return success
-  // //     return ResponseResult.success<PayloadUserType | null>(
-  // //       service,
-  // //       res,
-  // //       200,
-  // //       "success login user",
-  // //     );
-  // //   } catch (error) {
-  // //     next(error);
-  // //   }
-  // // }
+      // return success
+      return ResponseResult.success<PayloadDosenType | null>(
+        {
+          id: service?.id!,
+          nama: service?.nama!,
+          nidn: service?.nidn!,
+          email: service?.email!,
+          role: service?.roles[0]!,
+        },
+        res,
+        200,
+        "success login user",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 
-  // // // logout
-  // // static async logout(
-  // //   _req: Request,
-  // //   res: Response<ResponseStructure<null>>,
-  // //   next: NextFunction,
-  // // ) {
-  // //   try {
-  // //     const isProduction = process.env.NODE_ENV === "production";
+  // logout
+  static async logout(
+    _req: Request,
+    res: Response<ResponseStructure<null>>,
+    next: NextFunction,
+  ) {
+    try {
+      const isProduction = process.env.NODE_ENV === "production";
 
-  // //     // Clear cookie
-  // //     res.clearCookie("token", {
-  // //       httpOnly: true,
-  // //       secure: isProduction,
-  // //       sameSite: isProduction ? "none" : "lax",
-  // //     });
+      // Clear cookie
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+      });
 
-  // //     return ResponseResult.success<null>(null, res, 200, "success logout");
-  // //   } catch (error) {
-  // //     next(error);
-  // //   }
-  // // }
+      return ResponseResult.success<null>(null, res, 200, "success logout");
+    } catch (error) {
+      next(error);
+    }
+  }
 }

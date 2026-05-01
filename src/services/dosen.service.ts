@@ -117,7 +117,52 @@ export class DosenServices {
     };
   }
 
-  // //   // find user by id
+  // find dosen by id and role
+  static async findByIdAndRole(data: {
+    id: number;
+    role: DosenRole;
+  }): Promise<ResponseDosenType | null> {
+    const dosen = await prisma.dosen.findUnique({
+      where: {
+        id: data.id,
+        dosenRole: {
+          some: {
+            role: data.role,
+          },
+        },
+      },
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        nidn: true,
+        dosenRole: {
+          select: {
+            role: true,
+          },
+        },
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    // check
+    if (!dosen) return null;
+
+    return {
+      id: dosen.id,
+      nama: dosen.nama,
+      email: dosen.email,
+      nidn: dosen.nidn,
+      created_at: dosen.created_at,
+      updated_at: dosen.updated_at,
+      roles: [
+        dosen.dosenRole.find((dr) => dr.role === data.role)!.role,
+      ] as DosenRole[],
+    };
+  }
+
+  // find by id and role
   static async findById(id: number): Promise<ResponseDosenType | null> {
     const dosen = await prisma.dosen.findUnique({
       where: {
