@@ -38,3 +38,20 @@ export interface ResponseKriteriaWithMetaType {
 export const toKriteriaWithMetaResponse = (
   kriteria: ResponseKriteriaWithMetaType,
 ): ResponseKriteriaWithMetaType => kriteria;
+
+export interface ResponseKriteriaPicWithMetaType {
+  meta: MetaType;
+  data: (IKriteria & {
+    dosen: {
+      id: number;
+      nama: string;
+      email: string;
+      nidn: string;
+    }[];
+  })[];
+}
+
+// toresponse kriteria model
+export const toResponseKriteriPicWithMetaType = (
+  kriteria: ResponseKriteriaPicWithMetaType,
+): ResponseKriteriaPicWithMetaType => kriteria;

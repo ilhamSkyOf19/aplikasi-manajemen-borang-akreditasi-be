@@ -60,7 +60,7 @@ model DosenRole {
 model Kriteria {
   id            Int      @id @default(autoincrement())
   kode_kriteria Int      @unique
-  nama_kriteria String
+  nama_kriteria String   @unique
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 

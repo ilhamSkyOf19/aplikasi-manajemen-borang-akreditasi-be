@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   CreateKriteriaType,
+  ResponseKriteriaPicWithMetaType,
   ResponseKriteriaType,
   ResponseKriteriaWithMetaType,
   UpdateKriteriaType,
@@ -10,9 +11,7 @@ import { KriteriaServices } from "../services/kriteria.service";
 import { PaginationType } from "../types/pagination";
 import { checkQueryPagination } from "../utils/checkQueryPagination";
 import checkParamsId from "../utils/checkParamsId";
-import { NotifikasiService } from "../services/notifikasi.service";
 import { checkSort } from "../utils/utils";
-import { SortOrder } from "../../generated/prisma/internal/prismaNamespace";
 
 export class KriteriaController {
   // create
@@ -45,19 +44,19 @@ export class KriteriaController {
 
   // //   read detail by id
   static async findById(
-    req: Request<{ id: string }>,
-    res: Response<ResponseStructure<ResponseKriteriaType | null>>,
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseKriteriaType | null>,
+      { validatedParams: { id: number } }
+    >,
     next: NextFunction,
   ) {
     try {
       // parse id
-      const id = req.params.id;
-
-      //check id
-      const cleanId = checkParamsId(res, id);
+      const { id } = res.locals.validatedParams;
 
       // call service
-      const service = await KriteriaServices.findById(cleanId as number);
+      const service = await KriteriaServices.findById(id);
 
       //   check
       if (!service) {
@@ -78,26 +77,23 @@ export class KriteriaController {
 
   // //   read all
   static async findAll(
-    req: Request<{}, {}, {}, PaginationType>,
-    res: Response<ResponseStructure<ResponseKriteriaWithMetaType | null>>,
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseKriteriaWithMetaType | null>,
+      { validatedQuery: PaginationType }
+    >,
     next: NextFunction,
   ) {
     try {
       // get params
-      const { limit, page, search, sort } = req.query;
-
-      // check sort
-      const cleanSort = checkSort(sort);
-
-      // check query
-      const checkQuery = checkQueryPagination(page, limit);
+      const { limit, page, search, sort } = res.locals.validatedQuery;
 
       // call service
       const service = await KriteriaServices.findAll({
-        limit: checkQuery.limit,
-        page: checkQuery.page,
+        limit,
+        page,
         search,
-        sort: cleanSort,
+        sort,
       });
 
       // return
@@ -112,24 +108,54 @@ export class KriteriaController {
     }
   }
 
+  // find all with pic
+  static async findAllWithPic(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseKriteriaPicWithMetaType | null>,
+      { validatedQuery: PaginationType }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { limit, page, search, sort } = res.locals.validatedQuery;
+
+      // call service
+      const service = await KriteriaServices.findAllKriteriaWithPic({
+        limit,
+        page,
+        search,
+        sort,
+      });
+
+      // return
+      return ResponseResult.success<ResponseKriteriaPicWithMetaType | null>(
+        service,
+        res,
+        200,
+        "success read all kriteria",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // //   update
   static async update(
-    req: Request<{ id: string }, {}, UpdateKriteriaType>,
-    res: Response<ResponseStructure<ResponseKriteriaType | null>>,
+    req: Request<{}, {}, UpdateKriteriaType>,
+    res: Response<
+      ResponseStructure<ResponseKriteriaType | null>,
+      { validatedParams: { id: number } }
+    >,
     next: NextFunction,
   ) {
     try {
       // parse id
-      const id = req.params.id;
-
-      //check id
-      const cleanId = checkParamsId(res, id);
+      const { id } = res.locals.validatedParams;
 
       // call service
-      const service = await KriteriaServices.update(
-        cleanId as number,
-        req.body,
-      );
+      const service = await KriteriaServices.update(id, req.body);
 
       // return
       return ResponseResult.success<ResponseKriteriaType | null>(

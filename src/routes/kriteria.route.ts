@@ -9,6 +9,9 @@ import {
 } from "../models/kriteria.model";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import { DosenRole } from "../utils/contstanst";
+import { zodValidationParams } from "../middlewares/validationParams.middleware";
+import { PaginationType } from "../types/pagination";
+import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
 
 const kriteriaRouter: Router = Router();
 
@@ -23,7 +26,23 @@ kriteriaRouter.get(
       DosenRole.wakil_dekan_1,
     ]),
   ],
+  zodValidationQuery<PaginationType>(KriteriaValidation.QUERY),
   KriteriaController.findAll,
+);
+
+// find all with pic
+kriteriaRouter.get(
+  "/with-pic",
+  [
+    authMiddleware,
+    aclMiddleware([
+      DosenRole.kaprodi,
+      DosenRole.tim_akreditasi,
+      DosenRole.wakil_dekan_1,
+    ]),
+  ],
+  zodValidationQuery<PaginationType>(KriteriaValidation.QUERY),
+  KriteriaController.findAllWithPic,
 );
 
 // read by id
@@ -37,6 +56,7 @@ kriteriaRouter.get(
       DosenRole.wakil_dekan_1,
     ]),
   ],
+  zodValidationParams<{ id: number }>(KriteriaValidation.PARAMS_ID),
   KriteriaController.findById,
 );
 
@@ -52,6 +72,7 @@ kriteriaRouter.post(
 kriteriaRouter.patch(
   "/:id",
   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  zodValidationParams<{ id: number }>(KriteriaValidation.PARAMS_ID),
   zodValidation<UpdateKriteriaType>(KriteriaValidation.UPDATE),
   KriteriaController.update,
 );

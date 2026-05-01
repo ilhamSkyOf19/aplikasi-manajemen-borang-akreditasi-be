@@ -34,15 +34,17 @@ dosenRoute.get(
 dosenRoute.patch(
   "/:id",
   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  zodValidationParams<{ id: number }>(DosenValidation.PARAMS_ID),
   zodValidation<UpdateDosenType>(DosenValidation.UPDATE),
   DosenController.update,
 );
 
 // // delete
-// dosenRoute.delete(
-//   "/:id",
-//   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
-//   DosenController.delete,
-// );
+dosenRoute.delete(
+  "/:id",
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  zodValidationParams<{ id: number }>(DosenValidation.PARAMS_ID),
+  DosenController.delete,
+);
 
 export default dosenRoute;
