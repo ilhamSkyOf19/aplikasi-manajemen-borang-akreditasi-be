@@ -29,3 +29,6 @@ export interface ResponseCreateUpdateKriteriaPicType {
 export const toResponseCreateUpdateKriteriaPic = (
   data: ResponseCreateUpdateKriteriaPicType,
 ): ResponseCreateUpdateKriteriaPicType => data;
+
+// response kriteria model
+export interface ResponseKriteriaPicType extends Omit<IKriteriaPic, "id"> {}

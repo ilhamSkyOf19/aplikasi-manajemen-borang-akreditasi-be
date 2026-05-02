@@ -68,3 +68,5 @@ export type SortOrder = "asc" | "desc";
 
 // folder global upload
 export const FOLDER_GLOBAL_UPLOAD = "public/uploads/dokumentasi-borang";
+
+export const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;

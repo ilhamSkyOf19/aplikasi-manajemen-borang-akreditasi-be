@@ -157,9 +157,7 @@ export class DosenServices {
       nidn: dosen.nidn,
       created_at: dosen.created_at,
       updated_at: dosen.updated_at,
-      roles: [
-        dosen.dosenRole.find((dr) => dr.role === data.role)!.role,
-      ] as DosenRole[],
+      roles: dosen.dosenRole.map((dr) => dr.role as DosenRole),
     };
   }
 

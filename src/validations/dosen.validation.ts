@@ -117,4 +117,11 @@ export class DosenValidation {
       page: z.coerce.number().min(1).max(2147483647).catch(1),
     })
     .strict() satisfies z.ZodType<{ search?: string; page?: number }>;
+
+  // switch role
+  static readonly SWITCH_ROLE = z
+    .object({
+      role: z.enum(DosenRole),
+    })
+    .strict() satisfies z.ZodType<{ role: DosenRole }>;
 }

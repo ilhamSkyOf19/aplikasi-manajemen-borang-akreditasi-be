@@ -8,7 +8,6 @@ import { KriteriaPicServices } from "../services/kriteriaPic.service";
 import { DosenServices } from "../services/dosen.service";
 import { DosenRole } from "../utils/contstanst";
 import { KriteriaServices } from "../services/kriteria.service";
-import checkParamsId from "../utils/checkParamsId";
 
 export class KriteriaPicController {
   // create

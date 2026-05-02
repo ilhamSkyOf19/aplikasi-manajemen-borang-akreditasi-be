@@ -38,6 +38,14 @@ export interface PayloadDosenType extends Omit<
   role: DosenRole;
 }
 
+export interface PayloadDosenForAuthMeType extends Omit<
+  IDosen,
+  "password" | "created_at" | "updated_at" | "roles"
+> {
+  role: DosenRole;
+  haveRoles: DosenRole[];
+}
+
 // response user model
 export interface ResponseDosenType extends Omit<IDosen, "password"> {}
 

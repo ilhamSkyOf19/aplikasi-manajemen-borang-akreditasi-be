@@ -29,6 +29,14 @@ authRoute.post(
 // // me
 authRoute.get("/me", authMiddleware, AuthController.me);
 
+// switch
+authRoute.post(
+  "/switch-role",
+  authMiddleware,
+  zodValidation<{ role: DosenRole }>(DosenValidation.SWITCH_ROLE),
+  AuthController.switchRole,
+);
+
 // // logout
 authRoute.post("/logout", authMiddleware, AuthController.logout);
 

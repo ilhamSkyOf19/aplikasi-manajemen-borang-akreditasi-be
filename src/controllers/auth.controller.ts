@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   CreateDosenType,
   LoginDosenType,
+  PayloadDosenForAuthMeType,
   PayloadDosenType,
   ResponseDosenType,
 } from "../models/dosen.model";
@@ -10,7 +11,7 @@ import { DosenServices } from "../services/dosen.service";
 import argon2 from "argon2";
 import { generateAccessToken } from "../utils/jwt";
 import { AuthRequest } from "../types/authRequest";
-import { DosenRole, rolePriority } from "../utils/contstanst";
+import { COOKIE_MAX_AGE, DosenRole, rolePriority } from "../utils/contstanst";
 
 export class AuthController {
   // register
@@ -107,8 +108,6 @@ export class AuthController {
         role: defaultRole,
       });
 
-      const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
-
       // set cookie
       res.cookie("token", token, {
         httpOnly: true,
@@ -136,7 +135,7 @@ export class AuthController {
   // auth me
   static async me(
     req: AuthRequest,
-    res: Response<ResponseStructure<PayloadDosenType | null>>,
+    res: Response<ResponseStructure<PayloadDosenForAuthMeType | null>>,
     next: NextFunction,
   ) {
     try {
@@ -152,14 +151,72 @@ export class AuthController {
         role: data.role,
       });
 
+      // check service
+      if (!service) return ResponseResult.unauthorized(res, "Token not found");
+
       // return success
+      return ResponseResult.success<PayloadDosenForAuthMeType | null>(
+        {
+          id: service.id,
+          nama: service.nama,
+          nidn: service.nidn,
+          email: service.email,
+          role: service.roles.find((role) => role === data.role)!,
+          haveRoles: service.roles,
+        },
+        res,
+        200,
+        "success login user",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // switch role
+  static async switchRole(
+    req: AuthRequest<{}, {}, { role: DosenRole }>,
+    res: Response<ResponseStructure<PayloadDosenType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get data
+      const { role } = req.body;
+
+      // get req data
+      const { id } = req?.data as { id: number };
+
+      // find dosen by id and role
+      const dosen = await DosenServices.findByIdAndRole({
+        id: id,
+        role,
+      });
+
+      // check
+      if (!dosen) return ResponseResult.error(res, 400, "Data tidak valid");
+
+      // generate token
+      const token = generateAccessToken({
+        ...dosen,
+        role,
+      });
+
+      // set cookie
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict" as const,
+        maxAge: COOKIE_MAX_AGE,
+        path: "/api",
+      });
+
       return ResponseResult.success<PayloadDosenType | null>(
         {
-          id: service?.id!,
-          nama: service?.nama!,
-          nidn: service?.nidn!,
-          email: service?.email!,
-          role: service?.roles[0]!,
+          id: dosen?.id!,
+          nama: dosen?.nama!,
+          nidn: dosen?.nidn!,
+          email: dosen?.email!,
+          role: role,
         },
         res,
         200,
