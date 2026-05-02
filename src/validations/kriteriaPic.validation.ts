@@ -1,24 +1,18 @@
 import z from "zod";
-import {
-  CreateKriteriaType,
-  UpdateKriteriaType,
-} from "../models/kriteria.model";
-import {
-  CreateKriteriaPicType,
-  UpdateKriteriaPicType,
-} from "../models/kriteriaPic.model";
+import { AddPicToKriteriaType } from "../models/kriteriaPic.model";
 
 export class KriteriaPicValidation {
-  static readonly CREATE = z
+  static readonly ADD_PIC = z
     .object({
       kriteria_id: z.number().min(1).max(2147483647),
       dosen_id: z.array(z.number().min(1)).min(1),
     })
-    .strict() satisfies z.ZodType<CreateKriteriaPicType>;
+    .strict() satisfies z.ZodType<AddPicToKriteriaType>;
 
-  static readonly UPDATE = z
+  // params id
+  static readonly PARAMS_KRITERIA_ID = z
     .object({
-      dosen_id: z.array(z.number().min(1)).min(1),
+      kriteria_id: z.coerce.number().int().positive().max(2147483647),
     })
-    .strict() satisfies z.ZodType<UpdateKriteriaPicType>;
+    .strict() satisfies z.ZodType<{ kriteria_id: number }>;
 }

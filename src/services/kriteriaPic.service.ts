@@ -1,27 +1,41 @@
 import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
 import {
-  CreateKriteriaPicType,
+  AddPicToKriteriaType,
   ResponseCreateUpdateKriteriaPicType,
-  ResponseKriteriaPicType,
-  ResponseKriteriaPicWithMetaType,
-  toKriteriaPicResponse,
   toResponseCreateUpdateKriteriaPic,
-  toResponseKriteriaPicWithMeta,
-  UpdateKriteriaPicType,
 } from "../models/kriteriaPic.model";
 import { PaginationType } from "../types/pagination";
 import { DosenRole, SortOrder } from "../utils/contstanst";
 
 export class KriteriaPicServices {
   // create
-  static async create(
-    data: CreateKriteriaPicType,
+  static async addPicToKriteria(
+    data: AddPicToKriteriaType,
   ): Promise<ResponseCreateUpdateKriteriaPicType | null> {
-    // get data
     const { dosen_id, kriteria_id } = data;
-    // call db
+
     const result = await prisma.$transaction(async (tx) => {
+      // cek apakah kriteria sudah punya PIC
+      const existingPic = await tx.kriteriaPic.findMany({
+        where: {
+          kriteria_id,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      // jika sudah ada, hapus PIC lama pada kriteria tersebut
+      if (existingPic.length > 0) {
+        await tx.kriteriaPic.deleteMany({
+          where: {
+            kriteria_id,
+          },
+        });
+      }
+
+      // tambahkan PIC baru
       await tx.kriteriaPic.createMany({
         data: dosen_id.map((dosenId) => ({
           kriteria_id,
@@ -30,13 +44,10 @@ export class KriteriaPicServices {
         skipDuplicates: true,
       });
 
-      // return
+      // ambil data terbaru
       return tx.kriteriaPic.findMany({
         where: {
           kriteria_id,
-          dosen_id: {
-            in: dosen_id,
-          },
         },
         select: {
           created_at: true,
@@ -55,148 +66,13 @@ export class KriteriaPicServices {
       });
     });
 
-    // check
     if (!result || result.length === 0) return null;
 
-    // return
     return toResponseCreateUpdateKriteriaPic({
       kriteria_id: result[0].kriteria.id,
       dosen_id: result.map((item) => item.dosen.id),
       created_at: result[0].created_at,
       updated_at: result[0].updated_at,
-    });
-  }
-
-  // find all
-  static async findAll(
-    query: PaginationType,
-  ): Promise<ResponseKriteriaPicWithMetaType | null> {
-    // get query
-    const { page = 1, limit = 8, search, sort } = query;
-
-    // current page
-    const currentPage = page < 1 ? 1 : page;
-
-    // contional
-    const conditional: Prisma.KriteriaPicWhereInput = {
-      ...(search && {
-        OR: [
-          {
-            kriteria: {
-              nama_kriteria: {
-                contains: search,
-              },
-            },
-          },
-          {
-            dosen: {
-              nama: {
-                contains: search,
-              },
-            },
-          },
-        ],
-      }),
-    };
-
-    // get count data
-    const totalData = await prisma.kriteriaPic.count({
-      where: conditional,
-    });
-
-    // get total page
-    const totalPage = Math.ceil(totalData / limit);
-
-    // call db
-    const result = await prisma.kriteriaPic.findMany({
-      where: conditional,
-      skip: (currentPage - 1) * limit,
-      take: limit,
-      orderBy: {
-        kriteria: {
-          kode_kriteria: sort ? (sort as SortOrder) : "asc",
-        },
-      },
-      select: {
-        id: true,
-        created_at: true,
-        updated_at: true,
-        dosen: {
-          select: {
-            id: true,
-            nama: true,
-            nidn: true,
-            dosenRole: {
-              select: {
-                role: true,
-              },
-            },
-            email: true,
-          },
-        },
-        kriteria: {
-          select: {
-            id: true,
-            kode_kriteria: true,
-            nama_kriteria: true,
-          },
-        },
-      },
-    });
-
-    // gruped
-    const groupedMap = new Map<number, ResponseKriteriaPicType>();
-
-    for (const item of result) {
-      const kriteriaId = item.kriteria.id;
-
-      // dosen
-      const dosen = {
-        id: item.dosen.id,
-        email: item.dosen.email,
-        nidn: item.dosen.nidn,
-        nama: item.dosen.nama,
-        roles: item.dosen.dosenRole.map((item) => item.role) as DosenRole[],
-      };
-
-      // get exis data by kriteria id
-      const existingData = groupedMap.get(kriteriaId);
-
-      // set dosen
-      if (existingData) {
-        existingData.dosen.push(dosen);
-
-        if (item.updated_at > existingData.updated_at) {
-          existingData.updated_at = item.updated_at;
-        }
-
-        continue;
-      }
-
-      groupedMap.set(kriteriaId, {
-        kriteria: {
-          id: item.kriteria.id,
-          kode_kriteria: item.kriteria.kode_kriteria,
-          nama_kriteria: item.kriteria.nama_kriteria,
-        },
-        dosen: [dosen],
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-      });
-    }
-
-    // grouped
-    const finalGrouped = Array.from(groupedMap.values());
-
-    // return
-    return toResponseKriteriaPicWithMeta({
-      data: finalGrouped,
-      meta: {
-        totalData,
-        totalPage,
-        currentPage,
-        limit,
-      },
     });
   }
 
@@ -209,72 +85,5 @@ export class KriteriaPicServices {
         },
       },
     });
-  }
-
-  // update kriteria pic
-  static async update(
-    kriteria_id: number,
-    data: UpdateKriteriaPicType,
-  ): Promise<ResponseCreateUpdateKriteriaPicType | null> {
-    // get data
-    const { dosen_id } = data;
-    // call db
-    const result = await prisma.$transaction(async (tx) => {
-      await tx.kriteriaPic.deleteMany({
-        where: {
-          kriteria_id,
-        },
-      });
-
-      await tx.kriteriaPic.createMany({
-        data: dosen_id.map((dosenId) => ({
-          kriteria_id,
-          dosen_id: dosenId,
-        })),
-        skipDuplicates: true,
-      });
-
-      return tx.kriteriaPic.findMany({
-        where: {
-          kriteria_id,
-        },
-        select: {
-          created_at: true,
-          updated_at: true,
-          dosen: {
-            select: {
-              id: true,
-            },
-          },
-          kriteria: {
-            select: {
-              id: true,
-            },
-          },
-        },
-      });
-    });
-
-    // check
-    if (!result || result.length === 0) return null;
-
-    // return
-    return toResponseCreateUpdateKriteriaPic({
-      kriteria_id: result[0].kriteria.id,
-      dosen_id: result.map((item) => item.dosen.id),
-      created_at: result[0].created_at,
-      updated_at: result[0].updated_at,
-    });
-  }
-
-  // delete
-  static async delete(kriteria_id: number): Promise<number> {
-    const result = await prisma.kriteriaPic.deleteMany({
-      where: {
-        kriteria_id,
-      },
-    });
-
-    return result.count;
   }
 }

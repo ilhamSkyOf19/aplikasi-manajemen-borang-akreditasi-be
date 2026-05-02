@@ -81,6 +81,7 @@ kriteriaRouter.patch(
 kriteriaRouter.delete(
   "/:id",
   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  zodValidationParams<{ id: number }>(KriteriaValidation.PARAMS_ID),
   KriteriaController.delete,
 );
 

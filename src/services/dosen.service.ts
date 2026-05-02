@@ -4,6 +4,7 @@ import {
   CreateDosenType,
   LoginDosenType,
   PayloadDosenType,
+  ResponseDosenChooseWithMetaType,
   ResponseDosenType,
   ResponseDosenWithMetaType,
   toDosenResponse,
@@ -305,6 +306,81 @@ export class DosenServices {
         totalPage,
         limit,
       },
+    };
+  }
+
+  // find all role tim akreditasi for choose
+  static async findAllRoleTimAkreditasiForChoose(data: {
+    search?: string;
+    page?: number;
+  }): Promise<ResponseDosenChooseWithMetaType | null> {
+    // get data
+    const { page, search } = data;
+
+    // get current page
+    const currentPage = page ? page : 1;
+
+    const conditional: Prisma.DosenRoleWhereInput = {
+      AND: [
+        {
+          role: {
+            in: [DosenRole.tim_akreditasi],
+          },
+        },
+        ...(search
+          ? [
+              {
+                dosen: {
+                  OR: [
+                    {
+                      nama: {
+                        contains: search,
+                      },
+                    },
+                    {
+                      email: {
+                        contains: search,
+                      },
+                    },
+                    {
+                      nidn: {
+                        contains: search,
+                      },
+                    },
+                  ],
+                },
+              },
+            ]
+          : []),
+      ],
+    };
+
+    // call db
+    const result = await prisma.dosenRole.findMany({
+      where: conditional,
+      select: {
+        dosen: {
+          select: {
+            id: true,
+            nama: true,
+          },
+        },
+      },
+      skip: (currentPage - 1) * 8,
+      take: 8,
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+
+    return {
+      meta: {
+        totalData: result.length,
+        currentPage,
+        totalPage: Math.ceil(result.length / 8),
+        limit: 8,
+      },
+      data: result.map((item) => item.dosen),
     };
   }
 

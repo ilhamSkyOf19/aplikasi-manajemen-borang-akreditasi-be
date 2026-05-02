@@ -22,6 +22,16 @@ dosenRoute.get(
   DosenController.findAll,
 );
 
+// find all by role tim akreditasi for choose
+dosenRoute.get(
+  "/by-role-tim-akreditasi-for-choose",
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  zodValidationQuery<{ search?: string; page?: number }>(
+    DosenValidation.QUERY_SEARCH_AND_PAGE,
+  ),
+  DosenController.findAllRoleTimAkreditasiForChoose,
+);
+
 // // read by id
 dosenRoute.get(
   "/:id",

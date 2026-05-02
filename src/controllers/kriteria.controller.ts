@@ -9,9 +9,6 @@ import {
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { KriteriaServices } from "../services/kriteria.service";
 import { PaginationType } from "../types/pagination";
-import { checkQueryPagination } from "../utils/checkQueryPagination";
-import checkParamsId from "../utils/checkParamsId";
-import { checkSort } from "../utils/utils";
 
 export class KriteriaController {
   // create
@@ -171,16 +168,15 @@ export class KriteriaController {
 
   // //   delete
   static async delete(
-    req: Request<{ id: string }>,
-    res: Response<ResponseStructure<null>>,
+    _req: Request,
+    res: Response<ResponseStructure<null>, { validatedParams: { id: number } }>,
     next: NextFunction,
   ) {
     try {
-      // check id
-      const cleanId = checkParamsId(res, req.params.id);
+      // get params
+      const { id } = res.locals.validatedParams;
 
-      // call service
-      await KriteriaServices.delete(cleanId as number);
+      await KriteriaServices.delete(id);
 
       // return
       return ResponseResult.successNoContent(res, "success delete");

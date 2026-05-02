@@ -109,4 +109,12 @@ export class DosenValidation {
       id: z.coerce.number().int().positive().max(2147483647),
     })
     .strict() satisfies z.ZodType<{ id: number }>;
+
+  // query search and page
+  static readonly QUERY_SEARCH_AND_PAGE = z
+    .object({
+      search: z.string().trim().optional(),
+      page: z.coerce.number().min(1).max(2147483647).catch(1),
+    })
+    .strict() satisfies z.ZodType<{ search?: string; page?: number }>;
 }

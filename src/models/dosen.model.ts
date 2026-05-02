@@ -59,3 +59,9 @@ export interface ResponseDosenWithMetaType {
 export const toResponseDosenWithMeta = (
   dosen: ResponseDosenWithMetaType,
 ): ResponseDosenWithMetaType => dosen;
+
+// response choose
+export interface ResponseDosenChooseWithMetaType {
+  data: Pick<IDosen, "id" | "nama">[];
+  meta: MetaType;
+}

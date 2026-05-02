@@ -1,8 +1,7 @@
 import { PaginationType } from "../types/pagination";
 import { DosenRole } from "../utils/contstanst";
-import { checkQueryPagination } from "../utils/checkQueryPagination";
 import {
-  PayloadDosenType,
+  ResponseDosenChooseWithMetaType,
   ResponseDosenType,
   ResponseDosenWithMetaType,
   UpdateDosenType,
@@ -10,8 +9,6 @@ import {
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { NextFunction, Request, Response } from "express";
 import { DosenServices } from "../services/dosen.service";
-import checkParamsId from "../utils/checkParamsId";
-import { checkSort } from "../utils/utils";
 
 export class DosenController {
   // find all dosen
@@ -26,11 +23,6 @@ export class DosenController {
     try {
       // get params
       const { limit, page, search, role, sort } = res.locals.validatedQuery;
-      // check sort
-      const cleanSort = checkSort(sort);
-
-      // check query
-      const checkQuery = checkQueryPagination(page, limit);
 
       // check query status
       if (role) {
@@ -48,14 +40,49 @@ export class DosenController {
       }
       // call service
       const service = await DosenServices.findAll({
-        limit: checkQuery.limit,
-        page: checkQuery.page,
+        limit,
+        page,
         search,
         role: role as DosenRole,
-        sort: cleanSort,
+        sort,
       });
       // return success
       return ResponseResult.success<ResponseDosenWithMetaType | null>(
+        service,
+        res,
+        200,
+        "success read dosen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find all by role tim akreditasi
+  static async findAllRoleTimAkreditasiForChoose(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseDosenChooseWithMetaType | null>,
+      {
+        validatedQuery: {
+          search?: string;
+          page?: number;
+        };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get query
+      const { page, search } = res.locals.validatedQuery;
+
+      // call service
+      const service = await DosenServices.findAllRoleTimAkreditasiForChoose({
+        page,
+        search,
+      });
+
+      return ResponseResult.success<ResponseDosenChooseWithMetaType | null>(
         service,
         res,
         200,
