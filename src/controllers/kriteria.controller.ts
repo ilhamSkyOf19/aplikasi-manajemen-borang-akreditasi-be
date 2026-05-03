@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   CreateKriteriaType,
+  ResponseKriteriaChooseType,
   ResponseKriteriaPicWithMetaType,
   ResponseKriteriaType,
   ResponseKriteriaWithMetaType,
@@ -132,6 +133,28 @@ export class KriteriaController {
         res,
         200,
         "success read all kriteria",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find all no pic
+  static async findAllForChoose(
+    _req: Request,
+    res: Response<ResponseStructure<ResponseKriteriaChooseType[] | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // call service
+      const service = await KriteriaServices.findAllForChoose();
+
+      // return
+      return ResponseResult.success<ResponseKriteriaChooseType[] | null>(
+        service,
+        res,
+        200,
+        "success find all kriteria",
       );
     } catch (error) {
       next(error);

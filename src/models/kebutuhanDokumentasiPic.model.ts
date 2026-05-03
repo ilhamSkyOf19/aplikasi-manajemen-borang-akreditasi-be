@@ -13,9 +13,15 @@ export interface IKebutuhanDokumentsiPic {
   id: number;
   kriteria_pic: Omit<ResponseKriteriaPicType, "created_at" | "updated_at">;
   pendekatan: IPendekatan;
-  nama_kebutuhan_dokumentasi: string;
+  nama_kebutuhan_dokumentasi: {
+    id: number;
+    nama: string;
+  };
   tipe_dokumentasi: TipeDokumentasi;
-  pic: string[];
+  pic: {
+    id: number;
+    nama: string;
+  }[];
   keterangan: string;
   created_at: Date;
   updated_at: Date;

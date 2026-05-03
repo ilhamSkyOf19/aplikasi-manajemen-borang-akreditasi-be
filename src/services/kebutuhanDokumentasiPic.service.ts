@@ -368,13 +368,19 @@ export class KebutuhanDokumentasiPicServices {
         id: true,
         nama_kebutuhan_dokumentasi: {
           select: {
+            id: true,
             nama_kebutuhan_dokumentasi: true,
           },
         },
         tipe_dokumentasi: true,
         kebutuhan_dokumentasi_pic: {
           select: {
-            pic: true,
+            pic: {
+              select: {
+                id: true,
+                nama: true,
+              },
+            },
           },
         },
         keterangan: true,
@@ -388,11 +394,16 @@ export class KebutuhanDokumentasiPicServices {
       {
         data: result.map((item) => ({
           id: item.id,
-          nama_kebutuhan_dokumentasi:
-            item.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
+          nama_kebutuhan_dokumentasi: {
+            id: item.nama_kebutuhan_dokumentasi.id,
+            nama: item.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
+          },
           tipe_dokumentasi: item.tipe_dokumentasi as TipeDokumentasi,
           keterangan: item.keterangan,
-          pic: item.kebutuhan_dokumentasi_pic.map((item) => item.pic.nama),
+          pic: item.kebutuhan_dokumentasi_pic.map((item) => ({
+            id: item.pic.id,
+            nama: item.pic.nama,
+          })),
           status: item.status as Status,
           created_at: item.created_at,
           updated_at: item.updated_at,
@@ -455,6 +466,7 @@ export class KebutuhanDokumentasiPicServices {
         },
         nama_kebutuhan_dokumentasi: {
           select: {
+            id: true,
             nama_kebutuhan_dokumentasi: true,
           },
         },
@@ -463,6 +475,7 @@ export class KebutuhanDokumentasiPicServices {
           select: {
             pic: {
               select: {
+                id: true,
                 nama: true,
               },
             },
@@ -522,9 +535,14 @@ export class KebutuhanDokumentasiPicServices {
       kriteria_pic: kriteriaPic,
       pendekatan: result.pendekatan,
       tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
-      pic: result.kebutuhan_dokumentasi_pic.map((item) => item.pic.nama),
-      nama_kebutuhan_dokumentasi:
-        result.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
+      pic: result.kebutuhan_dokumentasi_pic.map((item) => ({
+        id: item.pic.id,
+        nama: item.pic.nama,
+      })),
+      nama_kebutuhan_dokumentasi: {
+        id: result.nama_kebutuhan_dokumentasi.id,
+        nama: result.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
+      },
       keterangan: result.keterangan,
       created_at: result.created_at,
       updated_at: result.updated_at,

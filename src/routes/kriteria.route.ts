@@ -45,6 +45,20 @@ kriteriaRouter.get(
   KriteriaController.findAllWithPic,
 );
 
+// find all for choose
+kriteriaRouter.get(
+  "/for-choose",
+  [
+    authMiddleware,
+    aclMiddleware([
+      DosenRole.kaprodi,
+      DosenRole.tim_akreditasi,
+      DosenRole.wakil_dekan_1,
+    ]),
+  ],
+  KriteriaController.findAllForChoose,
+);
+
 // read by id
 kriteriaRouter.get(
   "/:id",

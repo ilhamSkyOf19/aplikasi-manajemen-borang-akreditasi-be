@@ -55,3 +55,10 @@ export interface ResponseKriteriaPicWithMetaType {
 export const toResponseKriteriPicWithMetaType = (
   kriteria: ResponseKriteriaPicWithMetaType,
 ): ResponseKriteriaPicWithMetaType => kriteria;
+
+// response for choose
+export interface ResponseKriteriaChooseType {
+  id: number;
+  nama_kriteria: string;
+  kode_kriteria: number;
+}

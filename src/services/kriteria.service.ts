@@ -2,6 +2,7 @@ import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
 import {
   CreateKriteriaType,
+  ResponseKriteriaChooseType,
   ResponseKriteriaPicWithMetaType,
   ResponseKriteriaType,
   ResponseKriteriaWithMetaType,
@@ -183,6 +184,23 @@ export class KriteriaServices {
         dosen: item.kriteriaPic.map((kp) => kp.dosen),
       })),
     });
+  }
+
+  // find all get id and name kriteria by kriteria pic id
+  static async findAllForChoose(): Promise<ResponseKriteriaChooseType[]> {
+    const result = await prisma.kriteria.findMany({
+      select: {
+        id: true,
+        kode_kriteria: true,
+        nama_kriteria: true,
+      },
+    });
+
+    return result.map((item) => ({
+      id: item.id,
+      kode_kriteria: item.kode_kriteria,
+      nama_kriteria: item.nama_kriteria,
+    }));
   }
 
   // //   delete kriteria
