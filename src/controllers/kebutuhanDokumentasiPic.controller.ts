@@ -28,22 +28,19 @@ export class KebutuhanDokumentasiPicController {
       // get body
       const {
         nama_dokumentasi_new,
-        pic_new,
         kriteria_id,
         pendekatan_id,
         nama_dokumentasi_id,
-        pic_id,
         tipe_dokumentasi,
         keterangan,
+        pic,
       } = req.body;
 
       //   nama dokumentasi new
       let namaKebutuhanDokumentasiNew: number | null = null;
-      //   pic new
-      let picNew: number | null = null;
 
       //   check nama dokumentasi new || pic new
-      if (nama_dokumentasi_new || pic_new) {
+      if (nama_dokumentasi_new) {
         if (nama_dokumentasi_new) {
           const namaDokumentasi =
             await NamaDokumentasiServices.create(nama_dokumentasi_new);
@@ -58,60 +55,47 @@ export class KebutuhanDokumentasiPicController {
 
           namaKebutuhanDokumentasiNew = namaDokumentasi.id;
         }
+      }
 
-        // check pic
-        if (pic_new) {
-          const picNewService =
-            await PicKebutuhanDokumentasiServices.create(pic_new);
-
-          if (!picNewService) {
-            return ResponseResult.error(res, 400, "pic gagal dibuat");
-          }
-
-          picNew = picNewService.id;
+      if (nama_dokumentasi_id) {
+        //   find nama dokumentasi
+        const getNamaDokumentasi = await NamaDokumentasiServices.findById(
+          nama_dokumentasi_id as number,
+        );
+        // check nama dokumentasi
+        if (!getNamaDokumentasi) {
+          return ResponseResult.error(
+            res,
+            400,
+            "Nama dokumentasi tidak ditemukan",
+          );
         }
       }
 
-      if (pic_id || nama_dokumentasi_id) {
-        if (nama_dokumentasi_id) {
-          //   find nama dokumentasi
-          const getNamaDokumentasi = await NamaDokumentasiServices.findById(
-            nama_dokumentasi_id as number,
-          );
-          // check nama dokumentasi
-          if (!getNamaDokumentasi) {
-            return ResponseResult.error(
-              res,
-              400,
-              "Nama dokumentasi tidak ditemukan",
-            );
-          }
-        }
+      if (pic.some((pic) => pic.pic_old)) {
+        // find pic
+        const getPicOld = pic
+          .map((pic) => pic.pic_old!)
+          .filter((item) => item !== null && item !== undefined);
 
-        if (pic_id) {
-          // find pic
-          const getPic = await PicKebutuhanDokumentasiServices.findById(
-            pic_id as number,
-          );
+        const getPic =
+          await PicKebutuhanDokumentasiServices.findByIds(getPicOld);
 
-          // check pic
-          if (!getPic) {
-            return ResponseResult.error(res, 400, "pic tidak ditemukan");
-          }
+        // check pic
+        if (getPic === 0) {
+          return ResponseResult.error(res, 400, "pic tidak ditemukan");
         }
       }
 
       //   final data
       const finalNamaDokumentasiId =
         nama_dokumentasi_id ?? namaKebutuhanDokumentasiNew;
-
-      const finalPicId = pic_id ?? picNew;
       //   call service
       const service = await KebutuhanDokumentasiPicServices.create({
         kriteria_id,
         pendekatan_id,
         nama_dokumentasi_id: finalNamaDokumentasiId as number,
-        pic_id: finalPicId as number,
+        pic,
         tipe_dokumentasi,
         keterangan,
       });
@@ -288,11 +272,10 @@ export class KebutuhanDokumentasiPicController {
       // get body
       const {
         nama_dokumentasi_new,
-        pic_new,
         kriteria_id,
         pendekatan_id,
         nama_dokumentasi_id,
-        pic_id,
+        pic,
         tipe_dokumentasi,
         keterangan,
         keterangan_update,
@@ -304,7 +287,7 @@ export class KebutuhanDokumentasiPicController {
       let picNew: number | null = null;
 
       //   check nama dokumentasi new || pic new
-      if (nama_dokumentasi_new || pic_new) {
+      if (nama_dokumentasi_new) {
         if (nama_dokumentasi_new) {
           const namaDokumentasi =
             await NamaDokumentasiServices.create(nama_dokumentasi_new);
@@ -319,44 +302,35 @@ export class KebutuhanDokumentasiPicController {
 
           namaKebutuhanDokumentasiNew = namaDokumentasi.id;
         }
+      }
 
-        // check pic
-        if (pic_new) {
-          const picNewService =
-            await PicKebutuhanDokumentasiServices.create(pic_new);
-
-          if (!picNewService) {
-            return ResponseResult.error(res, 400, "pic gagal dibuat");
-          }
-
-          picNew = picNewService.id;
+      if (nama_dokumentasi_id) {
+        //   find nama dokumentasi
+        const getNamaDokumentasi = await NamaDokumentasiServices.findById(
+          nama_dokumentasi_id as number,
+        );
+        // check nama dokumentasi
+        if (!getNamaDokumentasi) {
+          return ResponseResult.error(
+            res,
+            400,
+            "Nama dokumentasi tidak ditemukan",
+          );
         }
       }
 
-      if (pic_id || nama_dokumentasi_id) {
-        if (nama_dokumentasi_id) {
-          //   find nama dokumentasi
-          const getNamaDokumentasi = await NamaDokumentasiServices.findById(
-            nama_dokumentasi_id as number,
-          );
-          // check nama dokumentasi
-          if (!getNamaDokumentasi) {
-            return ResponseResult.error(
-              res,
-              400,
-              "Nama dokumentasi tidak ditemukan",
-            );
-          }
-        }
-
-        if (pic_id) {
+      if (pic && pic.length > 0) {
+        if (pic?.some((pic) => pic.pic_old)) {
           // find pic
-          const getPic = await PicKebutuhanDokumentasiServices.findById(
-            pic_id as number,
-          );
+          const getPicOld = pic
+            .map((pic) => pic.pic_old!)
+            .filter((item) => item !== null && item !== undefined);
+
+          const getPic =
+            await PicKebutuhanDokumentasiServices.findByIds(getPicOld);
 
           // check pic
-          if (!getPic) {
+          if (getPic === 0) {
             return ResponseResult.error(res, 400, "pic tidak ditemukan");
           }
         }
@@ -366,15 +340,14 @@ export class KebutuhanDokumentasiPicController {
       const finalNamaDokumentasiId =
         nama_dokumentasi_id ?? namaKebutuhanDokumentasiNew;
 
-      const finalPicId = pic_id ?? picNew;
       //   call service
       const service = await KebutuhanDokumentasiPicServices.update(
         kebutuhan_dokumentasi_pic_id,
         {
           kriteria_id,
           pendekatan_id,
-          nama_dokumentasi_id: finalNamaDokumentasiId as number,
-          pic_id: finalPicId as number,
+          nama_dokumentasi_id: finalNamaDokumentasiId ?? undefined,
+          pic,
           tipe_dokumentasi,
           keterangan,
         },

@@ -1,38 +1,25 @@
 import z from "zod";
 import {
   CreateKebutuhanDokumentasiPicRequestType,
+  PicRequestType,
   UpdateKebutuhanDokumentasiPicRequestType,
 } from "../models/kebutuhanDokumentasiPic.model";
 import { Status, TipeDokumentasi } from "../utils/contstanst";
 import { PaginationType } from "../types/pagination";
 
 export class KebutuhanDokumentasiPicValidation {
-  // create
-  static readonly CREATE = z
+  // schema pic
+  private static readonly picSchema = z
     .object({
-      kriteria_id: z.number().int().min(1).max(2147483647),
-      pendekatan_id: z.number().int().min(1).max(2147483647),
-      nama_dokumentasi_id: z.number().int().min(1).max(2147483647).optional(),
-      pic_id: z.number().int().min(1).max(2147483647).optional(),
-      nama_dokumentasi_new: z.string().min(1).max(200).optional(),
-      pic_new: z.string().min(1).max(200).optional(),
-      tipe_dokumentasi: z.enum(["DEFAULT", "PENELITIAN"] as TipeDokumentasi[]),
-      keterangan: z.string().min(1).max(1000),
+      pic_old: z.number().int().min(1).max(2147483647).optional(),
+      pic_new: z.string().min(1).max(100).optional(),
     })
-    .strict()
     .superRefine((data, ctx) => {
-      const hasPicId = data.pic_id !== undefined && data.pic_id !== null;
+      const hasPicId = data.pic_old !== undefined && data.pic_old !== null;
       const hasPicNew =
         data.pic_new !== undefined && data.pic_new.trim() !== "";
 
-      const hasNamaDokumentasiId =
-        data.nama_dokumentasi_id !== undefined &&
-        data.nama_dokumentasi_id !== null;
-
-      const hasNamaDokumentasiNew =
-        data.nama_dokumentasi_new !== undefined &&
-        data.nama_dokumentasi_new.trim() !== "";
-
+      // check pic id & pic new
       if (!hasPicId && !hasPicNew) {
         ctx.addIssue({
           code: "custom",
@@ -45,9 +32,32 @@ export class KebutuhanDokumentasiPicValidation {
         ctx.addIssue({
           code: "custom",
           path: ["pic_id"],
-          message: "pic_id dan pic_new tidak boleh diisi bersamaan",
+          message: "pic_id atau pic_new tidak boleh diisi bersamaan",
         });
       }
+    })
+    .strict() satisfies z.ZodType<PicRequestType>;
+
+  // create
+  static readonly CREATE = z
+    .object({
+      kriteria_id: z.number().int().min(1).max(2147483647),
+      pendekatan_id: z.number().int().min(1).max(2147483647),
+      nama_dokumentasi_id: z.number().int().min(1).max(2147483647).optional(),
+      pic: z.array(this.picSchema).min(1),
+      nama_dokumentasi_new: z.string().min(1).max(200).optional(),
+      tipe_dokumentasi: z.enum(["DEFAULT", "PENELITIAN"] as TipeDokumentasi[]),
+      keterangan: z.string().min(1).max(1000),
+    })
+    .strict()
+    .superRefine((data, ctx) => {
+      const hasNamaDokumentasiId =
+        data.nama_dokumentasi_id !== undefined &&
+        data.nama_dokumentasi_id !== null;
+
+      const hasNamaDokumentasiNew =
+        data.nama_dokumentasi_new !== undefined &&
+        data.nama_dokumentasi_new.trim() !== "";
 
       if (!hasNamaDokumentasiId && !hasNamaDokumentasiNew) {
         ctx.addIssue({
@@ -73,9 +83,8 @@ export class KebutuhanDokumentasiPicValidation {
       kriteria_id: z.number().int().min(1).max(2147483647).optional(),
       pendekatan_id: z.number().int().min(1).max(2147483647).optional(),
       nama_dokumentasi_id: z.number().int().min(1).max(2147483647).optional(),
-      pic_id: z.number().min(1).int().max(2147483647).optional(),
+      pic: z.array(this.picSchema).min(1).optional(),
       nama_dokumentasi_new: z.string().min(1).max(200).optional(),
-      pic_new: z.string().min(1).max(200).optional(),
       tipe_dokumentasi: z
         .enum(["DEFAULT", "PENELITIAN"] as TipeDokumentasi[])
         .optional(),
@@ -84,10 +93,6 @@ export class KebutuhanDokumentasiPicValidation {
     })
     .strict()
     .superRefine((data, ctx) => {
-      const hasPicId = data.pic_id !== undefined && data.pic_id !== null;
-      const hasPicNew =
-        data.pic_new !== undefined && data.pic_new.trim() !== "";
-
       const hasNamaDokumentasiId =
         data.nama_dokumentasi_id !== undefined &&
         data.nama_dokumentasi_id !== null;
@@ -95,14 +100,6 @@ export class KebutuhanDokumentasiPicValidation {
       const hasNamaDokumentasiNew =
         data.nama_dokumentasi_new !== undefined &&
         data.nama_dokumentasi_new.trim() !== "";
-
-      if (hasPicId && hasPicNew) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["pic_id"],
-          message: "pic_id dan pic_new tidak boleh diisi bersamaan",
-        });
-      }
 
       if (hasNamaDokumentasiId && hasNamaDokumentasiNew) {
         ctx.addIssue({

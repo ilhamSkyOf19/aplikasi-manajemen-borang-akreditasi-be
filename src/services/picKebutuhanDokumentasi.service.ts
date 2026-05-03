@@ -21,14 +21,16 @@ export class PicKebutuhanDokumentasiServices {
   }
 
   //   find by id
-  static async findById(id: number): Promise<number> {
-    const result = await prisma.pic.findUnique({
+  static async findByIds(id: number[]): Promise<number> {
+    const result = await prisma.pic.findMany({
       where: {
-        id,
+        id: {
+          in: id,
+        },
       },
     });
 
-    return result?.id ?? 0;
+    return result?.length ?? 0;
   }
   static async findAll(): Promise<ResponsePicKebutuhanDokumentasiType[]> {
     // call db

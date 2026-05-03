@@ -33,55 +33,99 @@ export class KebutuhanDokumentasiPicServices {
       kriteria_id,
       pendekatan_id,
       nama_dokumentasi_id,
-      pic_id,
       tipe_dokumentasi,
       keterangan,
+      pic,
     } = data;
 
-    const result = await prisma.kebutuhanDokumentasi.create({
-      data: {
-        kriteria_id,
-        pendekatan_id,
-        nama_kebutuhan_dokumentasi_id: nama_dokumentasi_id,
-        pic_id,
-        tipe_dokumentasi,
-        keterangan,
-      },
-      select: {
-        id: true,
-        kriteria: {
-          select: {
-            id: true,
+    const result = await prisma.$transaction(async (tx) => {
+      // pic result
+      const picResult: number[] = [];
+
+      // pic looping
+      for (const item of pic) {
+        if (item.pic_old) {
+          // push to pic result
+          picResult.push(item.pic_old);
+
+          // continue
+          continue;
+        } else if (item.pic_new) {
+          // create pic
+          const picCreated = await tx.pic.create({
+            data: {
+              nama: item.pic_new,
+            },
+            select: {
+              id: true,
+            },
+          });
+
+          // check
+          if (!picCreated) throw new Error("Failed to create pic");
+
+          // push
+          picResult.push(picCreated.id);
+        }
+      }
+
+      // create kebutuhan dokumentasi
+      const kebutuhanDokumentasiCreated = await tx.kebutuhanDokumentasi.create({
+        data: {
+          kriteria_id,
+          pendekatan_id,
+          nama_kebutuhan_dokumentasi_id: nama_dokumentasi_id,
+          tipe_dokumentasi,
+          keterangan,
+          kebutuhan_dokumentasi_pic: {
+            create: picResult.map((item) => ({
+              pic_id: item,
+            })),
           },
         },
-        pendekatan: {
-          select: {
-            id: true,
+        select: {
+          id: true,
+          kriteria: {
+            select: {
+              id: true,
+            },
           },
-        },
-        nama_kebutuhan_dokumentasi: {
-          select: {
-            id: true,
+          pendekatan: {
+            select: {
+              id: true,
+            },
           },
-        },
-        tipe_dokumentasi: true,
-        pic: {
-          select: {
-            id: true,
+          nama_kebutuhan_dokumentasi: {
+            select: {
+              id: true,
+            },
           },
+          tipe_dokumentasi: true,
+          kebutuhan_dokumentasi_pic: {
+            select: {
+              pic: {
+                select: {
+                  id: true,
+                  nama: true,
+                },
+              },
+            },
+          },
+          keterangan: true,
+          created_at: true,
+          updated_at: true,
+          status: true,
         },
-        keterangan: true,
-        created_at: true,
-        updated_at: true,
-        status: true,
-      },
+      });
+
+      return kebutuhanDokumentasiCreated;
     });
 
     return toResponseCreateUpdateKebutuhanDokumentasiPicType({
       id: result.id,
       kriteria_id: result.kriteria.id,
       pendekatan_id: result.pendekatan.id,
-      pic_id: result.pic.id,
+      pic_id: result.kebutuhan_dokumentasi_pic.map((item) => item.pic.id),
       nama_dokumentasi_id: result.nama_kebutuhan_dokumentasi.id,
       tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
       keterangan: result.keterangan,
@@ -287,9 +331,13 @@ export class KebutuhanDokumentasiPicServices {
             },
           },
           {
-            pic: {
-              nama: {
-                contains: search,
+            kebutuhan_dokumentasi_pic: {
+              some: {
+                pic: {
+                  nama: {
+                    contains: search,
+                  },
+                },
               },
             },
           },
@@ -324,7 +372,11 @@ export class KebutuhanDokumentasiPicServices {
           },
         },
         tipe_dokumentasi: true,
-        pic: true,
+        kebutuhan_dokumentasi_pic: {
+          select: {
+            pic: true,
+          },
+        },
         keterangan: true,
         status: true,
         created_at: true,
@@ -340,7 +392,7 @@ export class KebutuhanDokumentasiPicServices {
             item.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
           tipe_dokumentasi: item.tipe_dokumentasi as TipeDokumentasi,
           keterangan: item.keterangan,
-          pic: item.pic.nama,
+          pic: item.kebutuhan_dokumentasi_pic.map((item) => item.pic.nama),
           status: item.status as Status,
           created_at: item.created_at,
           updated_at: item.updated_at,
@@ -407,9 +459,13 @@ export class KebutuhanDokumentasiPicServices {
           },
         },
         tipe_dokumentasi: true,
-        pic: {
+        kebutuhan_dokumentasi_pic: {
           select: {
-            nama: true,
+            pic: {
+              select: {
+                nama: true,
+              },
+            },
           },
         },
         keterangan: true,
@@ -466,7 +522,7 @@ export class KebutuhanDokumentasiPicServices {
       kriteria_pic: kriteriaPic,
       pendekatan: result.pendekatan,
       tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
-      pic: result.pic.nama,
+      pic: result.kebutuhan_dokumentasi_pic.map((item) => item.pic.nama),
       nama_kebutuhan_dokumentasi:
         result.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
       keterangan: result.keterangan,
@@ -513,59 +569,106 @@ export class KebutuhanDokumentasiPicServices {
       kriteria_id,
       pendekatan_id,
       nama_dokumentasi_id,
-      pic_id,
+      pic,
       tipe_dokumentasi,
       keterangan,
     } = data;
 
-    const result = await prisma.kebutuhanDokumentasi.update({
-      where: {
-        id: kebutuhan_dokumentasi_id,
-      },
-      data: {
-        kriteria_id: kriteria_id ?? undefined,
-        pendekatan_id: pendekatan_id ?? undefined,
-        nama_kebutuhan_dokumentasi_id: nama_dokumentasi_id ?? undefined,
-        pic_id: pic_id ?? undefined,
-        tipe_dokumentasi,
-        keterangan,
-        status: Status.PENDING,
-      },
-      select: {
-        id: true,
-        kriteria: {
-          select: {
-            id: true,
-          },
+    const result = await prisma.$transaction(async (tx) => {
+      const picResult: number[] = [];
+
+      // 1. Selalu hapus semua relasi PIC lama
+      await tx.kebutuhanDokumentasiPic.deleteMany({
+        where: {
+          kebutuhan_dokumentasi_id,
         },
-        pendekatan: {
-          select: {
-            id: true,
-          },
+      });
+
+      // 2. Proses PIC baru jika ada
+      for (const item of pic ?? []) {
+        if (item.pic_old) {
+          picResult.push(item.pic_old);
+          continue;
+        }
+
+        if (item.pic_new) {
+          const picCreated = await tx.pic.create({
+            data: {
+              nama: item.pic_new,
+            },
+            select: {
+              id: true,
+            },
+          });
+
+          picResult.push(picCreated.id);
+        }
+      }
+
+      // 3. Update kebutuhan dokumentasi
+      const kebutuhanDokumentasiUpdated = await tx.kebutuhanDokumentasi.update({
+        where: {
+          id: kebutuhan_dokumentasi_id,
         },
-        nama_kebutuhan_dokumentasi: {
-          select: {
-            id: true,
-          },
+        data: {
+          kriteria_id,
+          pendekatan_id,
+          nama_kebutuhan_dokumentasi_id: nama_dokumentasi_id,
+          tipe_dokumentasi,
+          keterangan,
+
+          // 4. Buat relasi PIC baru jika ada
+          ...(picResult.length > 0 && {
+            kebutuhan_dokumentasi_pic: {
+              create: picResult.map((picId) => ({
+                pic_id: picId,
+              })),
+            },
+          }),
         },
-        tipe_dokumentasi: true,
-        pic: {
-          select: {
-            id: true,
+        select: {
+          id: true,
+          kriteria: {
+            select: {
+              id: true,
+            },
           },
+          pendekatan: {
+            select: {
+              id: true,
+            },
+          },
+          nama_kebutuhan_dokumentasi: {
+            select: {
+              id: true,
+            },
+          },
+          tipe_dokumentasi: true,
+          kebutuhan_dokumentasi_pic: {
+            select: {
+              pic: {
+                select: {
+                  id: true,
+                  nama: true,
+                },
+              },
+            },
+          },
+          keterangan: true,
+          created_at: true,
+          updated_at: true,
+          status: true,
         },
-        keterangan: true,
-        created_at: true,
-        updated_at: true,
-        status: true,
-      },
+      });
+
+      return kebutuhanDokumentasiUpdated;
     });
 
     return toResponseCreateUpdateKebutuhanDokumentasiPicType({
       id: result.id,
       kriteria_id: result.kriteria.id,
       pendekatan_id: result.pendekatan.id,
-      pic_id: result.pic.id,
+      pic_id: result.kebutuhan_dokumentasi_pic.map((item) => item.pic.id),
       nama_dokumentasi_id: result.nama_kebutuhan_dokumentasi.id,
       tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
       keterangan: result.keterangan,

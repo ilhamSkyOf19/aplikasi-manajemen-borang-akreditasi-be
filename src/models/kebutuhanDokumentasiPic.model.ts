@@ -15,11 +15,16 @@ export interface IKebutuhanDokumentsiPic {
   pendekatan: IPendekatan;
   nama_kebutuhan_dokumentasi: string;
   tipe_dokumentasi: TipeDokumentasi;
-  pic: string;
+  pic: string[];
   keterangan: string;
   created_at: Date;
   updated_at: Date;
   status: Status;
+}
+
+export interface PicRequestType {
+  pic_old?: number;
+  pic_new?: string;
 }
 
 // create
@@ -27,7 +32,7 @@ export interface CreateKebutuhanDokumentasiPic {
   kriteria_id: number;
   pendekatan_id: number;
   nama_dokumentasi_id: number;
-  pic_id: number;
+  pic: PicRequestType[];
   tipe_dokumentasi: TipeDokumentasi;
   keterangan: string;
 }
@@ -40,10 +45,9 @@ export interface CreateKebutuhanDokumentasiPicRequestType {
   kriteria_id: number;
   pendekatan_id: number;
   nama_dokumentasi_id?: number;
-  pic_id?: number;
+  pic: PicRequestType[];
 
   nama_dokumentasi_new?: string;
-  pic_new?: string;
 
   tipe_dokumentasi: TipeDokumentasi;
   keterangan: string;
@@ -60,7 +64,7 @@ export interface ResponseCreateUpdateKebutuhanDokumentasiPicType {
   kriteria_id: number;
   pendekatan_id: number;
   nama_dokumentasi_id: number;
-  pic_id: number;
+  pic_id: number[];
   tipe_dokumentasi: TipeDokumentasi;
   status: Status;
   keterangan: string;
