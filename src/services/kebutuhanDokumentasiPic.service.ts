@@ -360,9 +360,7 @@ export class KebutuhanDokumentasiPicServices {
       skip: (currentPage - 1) * limit,
       take: limit,
       orderBy: {
-        kriteria: {
-          kode_kriteria: sort ? (sort as SortOrder) : "asc",
-        },
+        updated_at: sort ? (sort as SortOrder) : "asc",
       },
       select: {
         id: true,

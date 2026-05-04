@@ -1,22 +1,34 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { ResponsePicKebutuhanDokumentasiType } from "../models/picKebutuhanDokumentasi.model";
+import { ResponsePicKebutuhanDokumentasiWithPaginationType } from "../models/picKebutuhanDokumentasi.model";
 import { PicKebutuhanDokumentasiServices } from "../services/picKebutuhanDokumentasi.service";
+import { PaginationType } from "../types/pagination";
 
 export class PicKebutuhanDokumentasiController {
   // find all
   static async findAll(
     _req: Request,
     res: Response<
-      ResponseStructure<ResponsePicKebutuhanDokumentasiType[] | null>
+      ResponseStructure<ResponsePicKebutuhanDokumentasiWithPaginationType | null>,
+      { validatedQuery: PaginationType }
     >,
     next: NextFunction,
   ) {
     try {
-      // call service
-      const service = await PicKebutuhanDokumentasiServices.findAll();
+      // get query
+      const { limit, page, search, sort } = res.locals.validatedQuery;
 
-      return ResponseResult.success<ResponsePicKebutuhanDokumentasiType[]>(
+      // call service
+      const service = await PicKebutuhanDokumentasiServices.findAll({
+        query: {
+          limit,
+          page,
+          search,
+          sort,
+        },
+      });
+
+      return ResponseResult.success<ResponsePicKebutuhanDokumentasiWithPaginationType>(
         service,
         res,
         200,
