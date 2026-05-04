@@ -141,152 +141,111 @@ export class KebutuhanDokumentasiPicServices {
       status?: Status;
     },
   ): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
-    // get query
     const { status, limit = 8, page = 1, search, sort } = query;
 
-    // get page
     const currentPage = page < 1 ? 1 : page;
 
-    // conditional
-    const conditional: Prisma.KebutuhanDokumentasiWhereInput = {
+    const conditional: Prisma.KriteriaWhereInput = {
       ...(search && {
-        kriteria: {
-          kriteriaPic: {
-            some: {
-              dosen: {
-                OR: [
-                  { nama: { contains: search } },
-                  { email: { contains: search } },
-                  { nidn: { contains: search } },
-                ],
-              },
+        kriteriaPic: {
+          some: {
+            dosen: {
+              OR: [
+                { nama: { contains: search } },
+                { email: { contains: search } },
+                { nidn: { contains: search } },
+              ],
             },
           },
         },
       }),
-      ...((status && { status }) || {}),
+
+      ...(status && {
+        kebutuhan_dokumentasi: {
+          some: {
+            status,
+          },
+        },
+      }),
     };
 
-    // get count data
-    const totalData = await prisma.kebutuhanDokumentasi.count({
+    const totalData = await prisma.kriteria.count({
       where: conditional,
     });
 
-    // get total page
     const totalPage = Math.ceil(totalData / limit);
 
-    // call db
-    const result = await prisma.kebutuhanDokumentasi.findMany({
+    const result = await prisma.kriteria.findMany({
       where: conditional,
       skip: (currentPage - 1) * limit,
       take: limit,
       orderBy: {
-        kriteria: {
-          kode_kriteria: sort ? (sort as SortOrder) : "asc",
-        },
+        kode_kriteria: sort ? (sort as SortOrder) : "asc",
       },
       select: {
-        kriteria: {
+        id: true,
+        kode_kriteria: true,
+        nama_kriteria: true,
+
+        kriteriaPic: {
           select: {
-            kriteriaPic: {
+            dosen: {
               select: {
-                kriteria: {
+                id: true,
+                nama: true,
+                email: true,
+                nidn: true,
+                dosenRole: {
                   select: {
-                    id: true,
-                    kode_kriteria: true,
-                    nama_kriteria: true,
-                  },
-                },
-                dosen: {
-                  select: {
-                    id: true,
-                    nama: true,
-                    email: true,
-                    nidn: true,
-                    dosenRole: {
-                      select: {
-                        role: true,
-                      },
-                    },
+                    role: true,
                   },
                 },
               },
             },
           },
         },
-        status: true,
+
+        kebutuhan_dokumentasi: {
+          select: {
+            status: true,
+          },
+        },
       },
     });
 
-    const groupedMap = new Map<
-      number,
-      Omit<ResponseKriteriaPicType, "created_at" | "updated_at"> & {
-        status: Status;
-      }
-    >();
+    const mappedData = result.map((item) => {
+      const dosen = item.kriteriaPic.map((itemChild) => ({
+        id: itemChild.dosen.id,
+        email: itemChild.dosen.email,
+        nidn: itemChild.dosen.nidn,
+        nama: itemChild.dosen.nama,
+        roles: itemChild.dosen.dosenRole.map(
+          (roleItem) => roleItem.role,
+        ) as DosenRole[],
+      }));
 
-    for (const item of result) {
-      for (const itemChild of item.kriteria.kriteriaPic) {
-        const kriteriaId = itemChild.kriteria.id;
+      const statusKebutuhan =
+        item.kebutuhan_dokumentasi.length > 0
+          ? item.kebutuhan_dokumentasi
+              .map((itemChild) => itemChild.status as Status)
+              .reduce((prev, current) => getPriorityStatus(prev, current))
+          : null;
 
-        // dosen
-        const dosen = {
-          id: itemChild.dosen.id,
-          email: itemChild.dosen.email,
-          nidn: itemChild.dosen.nidn,
-          nama: itemChild.dosen.nama,
-          roles: itemChild.dosen.dosenRole.map(
-            (item) => item.role,
-          ) as DosenRole[],
-        };
-
-        // get exis data by kriteria id
-        const existingData = groupedMap.get(kriteriaId);
-
-        // set dosen
-        if (existingData) {
-          // check status
-          existingData.status = getPriorityStatus(
-            existingData.status,
-            item.status as Status,
-          );
-
-          // check dosen exist
-          const dosenExist = existingData?.dosen.find(
-            (item) => item.id === dosen.id,
-          );
-
-          if (!dosenExist) {
-            existingData.dosen.push(dosen);
-          }
-
-          continue;
-        }
-
-        groupedMap.set(kriteriaId, {
-          kriteria: {
-            id: itemChild.kriteria.id,
-            kode_kriteria: itemChild.kriteria.kode_kriteria,
-            nama_kriteria: itemChild.kriteria.nama_kriteria,
-          },
-          dosen: [dosen],
-          status: item.status as Status,
-        });
-      }
-    }
-
-    // grouped
-    const finalGrouped = Array.from(groupedMap.values());
-
-    // return
-    return toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType({
-      data: finalGrouped.map((item) => ({
+      return {
         kriteria_pic: {
-          kriteria: item.kriteria,
-          dosen: item.dosen,
+          kriteria: {
+            id: item.id,
+            kode_kriteria: item.kode_kriteria,
+            nama_kriteria: item.nama_kriteria,
+          },
+          dosen,
         },
-        status: item.status,
-      })),
+        status: statusKebutuhan,
+      };
+    });
+
+    return toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType({
+      data: mappedData,
       meta: {
         currentPage,
         limit,
@@ -294,8 +253,6 @@ export class KebutuhanDokumentasiPicServices {
         totalPage,
       },
     });
-
-    // return result;
   }
 
   // find all by kriteria & pendekatan

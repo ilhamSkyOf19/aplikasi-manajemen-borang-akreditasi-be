@@ -6,7 +6,7 @@ import { VerifikasiKebutuhanDokumentasiPicType } from "../models/kebutuhanDokume
 import { ResponseRiwayatType } from "../models/riwayat.model";
 import { VerifikasiDokumentasiBorangType } from "../models/dokumentasiBorang.model";
 
-export class verifikasiController {
+export class VerifikasiController {
   // verifikasi kebutuhan dokumentasi pic
   static async verifikasiKebutuhanDokumentasiPic(
     req: Request<{}, {}, VerifikasiKebutuhanDokumentasiPicType>,

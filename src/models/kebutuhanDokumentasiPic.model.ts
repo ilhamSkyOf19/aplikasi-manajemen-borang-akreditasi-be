@@ -120,7 +120,7 @@ export interface ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType {
   meta: MetaType;
   data: {
     kriteria_pic: Omit<ResponseKriteriaPicType, "created_at" | "updated_at">;
-    status: Status;
+    status: Status | null;
   }[];
 }
 

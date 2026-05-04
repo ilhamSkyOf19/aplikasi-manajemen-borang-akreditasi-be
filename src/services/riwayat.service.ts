@@ -110,6 +110,9 @@ export class RiwayatService {
         created_at: true,
         updated_at: true,
       },
+      orderBy: {
+        created_at: "desc",
+      },
     });
 
     return result.map((item) =>
