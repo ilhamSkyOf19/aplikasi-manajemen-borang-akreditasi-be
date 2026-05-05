@@ -2,12 +2,6 @@ import { MetaType, Status, TipeDokumentasi } from "../utils/contstanst";
 import { IPendekatan } from "./pendekatan.model";
 import { ResponseKriteriaPicType } from "./kriteriaPic.model";
 
-export interface VerifikasiKebutuhanDokumentasiPicType {
-  kebutuhan_dokumentasi_pic_id: number;
-  status: Status;
-  keterangan_verifikasi: string;
-}
-
 // type
 export interface IKebutuhanDokumentsiPic {
   id: number;

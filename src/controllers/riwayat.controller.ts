@@ -35,4 +35,30 @@ export class RiwayatController {
       next(error);
     }
   }
+
+  // find by id
+  static async findById(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseRiwayatType | null>,
+      { validatedParams: { id: number; tipe_riwayat: TipeRiwayat } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { id, tipe_riwayat } = res.locals.validatedParams;
+
+      // call db
+      const result = await RiwayatService.findById({ id, tipe_riwayat });
+
+      // check result
+      if (!result) return ResponseResult.error(res, 404, "riwayat not found");
+
+      // return result
+      return ResponseResult.success<ResponseRiwayatType | null>(result, res);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

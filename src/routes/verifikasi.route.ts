@@ -5,29 +5,30 @@ import { DosenRole } from "../utils/contstanst";
 import { zodValidation } from "../middlewares/validation.middleware";
 import { VerifikasiValidation } from "../validations/verifikasi.validation";
 import { VerifikasiController } from "../controllers/verifikasi.controller";
-import { VerifikasiKebutuhanDokumentasiPicType } from "../models/kebutuhanDokumentasiPic.model";
 import { VerifikasiDokumentasiBorangType } from "../models/dokumentasiBorang.model";
+import {
+  VerifikasiType,
+  VerifikasiUpdateType,
+} from "../models/verifikasi.model";
+import { zodValidationParams } from "../middlewares/validationParams.middleware";
 
 const verifikasiRoute: Router = Router();
 
 // verifikasi kebutuhan dokumentasi pic
 verifikasiRoute.post(
-  "/kebutuhan-dokumentasi-pic",
+  "/",
   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
-  zodValidation<VerifikasiKebutuhanDokumentasiPicType>(
-    VerifikasiValidation.VERIFIKASI_KEBUTUHAN_DOKUMENTASI_PIC,
-  ),
-  VerifikasiController.verifikasiKebutuhanDokumentasiPic,
+  zodValidation<VerifikasiType>(VerifikasiValidation.VERIFIKASI),
+  VerifikasiController.verifikasi,
 );
 
-// verifikasi dokumentasi borang
-verifikasiRoute.post(
-  "/dokumentasi-borang",
+// update verifikasi kebutuhan dokumentasi pic
+verifikasiRoute.patch(
+  "/:id",
   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
-  zodValidation<VerifikasiDokumentasiBorangType>(
-    VerifikasiValidation.VERIFIKASI_DOKUMENTASI_BORANG,
-  ),
-  VerifikasiController.verifikasiDokumentasiBorang,
+  zodValidationParams<{ id: number }>(VerifikasiValidation.PARAMS_ID),
+  zodValidation<VerifikasiUpdateType>(VerifikasiValidation.UPDATE_VERIFIKASI),
+  VerifikasiController.updateVerifikasi,
 );
 
 export default verifikasiRoute;

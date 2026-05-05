@@ -5,6 +5,8 @@ import {
   CreateRiwayatKebutuhanDokumentasiPicType,
   ResponseRiwayatType,
   toResponseRiwayatType,
+  UpdateRiwayatDokumentasiBorangType,
+  UpdateRiwayatKebutuhanDokumentasiPicType,
 } from "../models/riwayat.model";
 import {
   TipeDokumentasi,
@@ -38,6 +40,67 @@ export class RiwayatService {
           tipe_riwayat,
           keterangan,
           kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_pic_id,
+          status,
+        },
+        select: {
+          id: true,
+          kebutuhan_dokumentasi_pic: {
+            select: {
+              id: true,
+            },
+          },
+          status: true,
+          tipe_riwayat: true,
+          keterangan: true,
+          created_at: true,
+          updated_at: true,
+        },
+      });
+
+      return riwayat;
+    });
+
+    return toResponseRiwayatType({
+      id: result.id,
+      kebutuhan_dokumentasi_pic_id: result.kebutuhan_dokumentasi_pic?.id,
+      status: result.status as Status,
+      tipe_riwayat: result.tipe_riwayat as TipeRiwayat,
+      keterangan: result.keterangan,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
+    });
+  }
+
+  // update riwayat
+  static async updateForKebutuhanDokumentasiPic(params: {
+    riwayat_id: number;
+    data: UpdateRiwayatKebutuhanDokumentasiPicType;
+  }): Promise<ResponseRiwayatType | null> {
+    const { riwayat_id, data } = params;
+    const { keterangan, kebutuhan_dokumentasi_pic_id, status } = data;
+
+    // call db
+    const result = await prisma.$transaction(async (tx) => {
+      // update status
+      if (status) {
+        await tx.kebutuhanDokumentasi.update({
+          where: {
+            id: kebutuhan_dokumentasi_pic_id,
+          },
+          data: {
+            status,
+          },
+        });
+      }
+
+      // create riwayat
+      const riwayat = await tx.riwayat.update({
+        where: {
+          id: riwayat_id,
+          kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_pic_id,
+        },
+        data: {
+          keterangan,
           status,
         },
         select: {
@@ -174,6 +237,113 @@ export class RiwayatService {
 
     return toResponseRiwayatType({
       id: result.id,
+      dokumentasi_borang_id: result.dokumentasi_borang?.id,
+      status: result.status as Status,
+      tipe_riwayat: result.tipe_riwayat as TipeRiwayat,
+      keterangan: result.keterangan,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
+    });
+  }
+
+  static async updateForDokumentasiBorang(params: {
+    riwayat_id: number;
+    data: UpdateRiwayatDokumentasiBorangType;
+  }): Promise<ResponseRiwayatType | null> {
+    const { riwayat_id, data } = params;
+    const { dokumentasi_borang_id, keterangan, status } = data;
+
+    // call db
+    const result = await prisma.$transaction(async (tx) => {
+      // update status
+      if (dokumentasi_borang_id) {
+        await tx.dokumentasiBorang.update({
+          where: {
+            id: dokumentasi_borang_id,
+          },
+          data: {
+            status,
+          },
+        });
+      }
+
+      // create riwayat
+      const riwayat = await tx.riwayat.update({
+        where: {
+          id: riwayat_id,
+          dokumentasi_borang_id,
+        },
+        data: {
+          keterangan,
+          status,
+        },
+        select: {
+          id: true,
+          dokumentasi_borang: {
+            select: {
+              id: true,
+            },
+          },
+          status: true,
+          tipe_riwayat: true,
+          keterangan: true,
+          created_at: true,
+          updated_at: true,
+        },
+      });
+
+      return riwayat;
+    });
+
+    return toResponseRiwayatType({
+      id: result.id,
+      dokumentasi_borang_id: result.dokumentasi_borang?.id,
+      status: result.status as Status,
+      tipe_riwayat: result.tipe_riwayat as TipeRiwayat,
+      keterangan: result.keterangan,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
+    });
+  }
+
+  // find by id riwayat and tipe riwayat
+  static async findById(params: {
+    id: number;
+    tipe_riwayat: TipeRiwayat;
+  }): Promise<ResponseRiwayatType | null> {
+    // get params
+    const { id, tipe_riwayat } = params;
+
+    const result = await prisma.riwayat.findUnique({
+      where: {
+        id,
+        tipe_riwayat,
+      },
+      select: {
+        id: true,
+        kebutuhan_dokumentasi_pic: {
+          select: {
+            id: true,
+          },
+        },
+        dokumentasi_borang: {
+          select: {
+            id: true,
+          },
+        },
+        status: true,
+        tipe_riwayat: true,
+        keterangan: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    if (!result) return null;
+
+    return toResponseRiwayatType({
+      id: result.id,
+      kebutuhan_dokumentasi_pic_id: result.kebutuhan_dokumentasi_pic?.id,
       dokumentasi_borang_id: result.dokumentasi_borang?.id,
       status: result.status as Status,
       tipe_riwayat: result.tipe_riwayat as TipeRiwayat,

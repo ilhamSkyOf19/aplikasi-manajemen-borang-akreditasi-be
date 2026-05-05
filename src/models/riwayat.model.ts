@@ -18,6 +18,14 @@ export interface CreateRiwayatKebutuhanDokumentasiPicType {
   kebutuhan_dokumentasi_pic_id: number;
   keterangan: string;
 }
+export interface UpdateRiwayatKebutuhanDokumentasiPicType extends Partial<
+  Omit<
+    CreateRiwayatKebutuhanDokumentasiPicType,
+    "kebutuhan_dokumentasi_pic_id" | "tipe_riwayat"
+  >
+> {
+  kebutuhan_dokumentasi_pic_id: number;
+}
 
 // create riwayat dokumentasi borang
 export interface CreateRiwayatDokumentasiBorangType {
@@ -28,10 +36,14 @@ export interface CreateRiwayatDokumentasiBorangType {
 }
 
 // update
-// export interface UpdateRiwayatType extends Partial<
-//   Omit<CreateRiwayatType, "picId">
-// > {}
-
+export interface UpdateRiwayatDokumentasiBorangType extends Partial<
+  Omit<
+    CreateRiwayatDokumentasiBorangType,
+    "tipe_riwayat" | "dokumentasi_borang_id"
+  >
+> {
+  dokumentasi_borang_id: number;
+}
 // response
 export interface ResponseRiwayatType extends IRiwayat {}
 

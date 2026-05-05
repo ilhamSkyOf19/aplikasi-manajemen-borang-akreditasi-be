@@ -1,24 +1,113 @@
 import z from "zod";
 import { Status } from "../utils/contstanst";
-import { VerifikasiKebutuhanDokumentasiPicType } from "../models/kebutuhanDokumentasiPic.model";
-import { VerifikasiDokumentasiBorangType } from "../models/dokumentasiBorang.model";
+import {
+  VerifikasiType,
+  VerifikasiUpdateType,
+} from "../models/verifikasi.model";
 
 export class VerifikasiValidation {
   // verifikasi kebutuhan dokumentasi pic
-  static readonly VERIFIKASI_KEBUTUHAN_DOKUMENTASI_PIC = z
+  static readonly VERIFIKASI = z
     .object({
-      kebutuhan_dokumentasi_pic_id: z.number().int().positive().max(2147483647),
+      dokumentasi_borang_id: z
+        .number()
+        .int()
+        .positive()
+        .max(2147483647)
+        .optional(),
+      kebutuhan_dokumentasi_pic_id: z
+        .number()
+        .int()
+        .positive()
+        .max(2147483647)
+        .optional(),
       keterangan_verifikasi: z.string().trim().min(1).max(1000),
-      status: z.enum(["PENDING", "REVISION", "APPROVED"] as Status[]),
+      status: z.enum([Status.APPROVED, Status.REVISION] as Exclude<
+        Status,
+        "PENDING"
+      >[]),
     })
-    .strict() satisfies z.ZodType<VerifikasiKebutuhanDokumentasiPicType>;
+    .superRefine((data, ctx) => {
+      // dokumentasi borang id
+      const hasDokumentasiBorangId =
+        data.dokumentasi_borang_id !== undefined &&
+        data.dokumentasi_borang_id !== null;
+      const hasKebutuhanDokumentasiPicId =
+        data.kebutuhan_dokumentasi_pic_id !== undefined &&
+        data.kebutuhan_dokumentasi_pic_id !== null;
 
-  // verifikasi dokumentasi borang
-  static readonly VERIFIKASI_DOKUMENTASI_BORANG = z
-    .object({
-      dokumentasi_borang_id: z.number().int().positive().max(2147483647),
-      keterangan_verifikasi: z.string().trim().min(1).max(1000),
-      status: z.enum(["PENDING", "REVISION", "APPROVED"] as Status[]),
+      // check exist dokumentasi borang id or kebutuhan dokumentasi pic id
+      if (!hasDokumentasiBorangId && !hasKebutuhanDokumentasiPicId)
+        ctx.addIssue({
+          code: "custom",
+          message:
+            "dokumentasi borang id or kebutuhan dokumentasi pic id is required",
+        });
+
+      // check dokumentasi borang id or kebutuhan dokumentasi pic id
+      if (hasDokumentasiBorangId && hasKebutuhanDokumentasiPicId)
+        ctx.addIssue({
+          code: "custom",
+          message:
+            "dokumentasi borang id or kebutuhan dokumentasi pic id is required",
+        });
     })
-    .strict() satisfies z.ZodType<VerifikasiDokumentasiBorangType>;
+    .strict() satisfies z.ZodType<VerifikasiType>;
+
+  // update
+  static readonly UPDATE_VERIFIKASI = z
+    .object({
+      dokumentasi_borang_id: z
+        .number()
+        .int()
+        .positive()
+        .max(2147483647)
+        .optional(),
+      kebutuhan_dokumentasi_pic_id: z
+        .number()
+        .int()
+        .positive()
+        .max(2147483647)
+        .optional(),
+      keterangan_verifikasi: z.string().trim().min(1).max(1000).optional(),
+      status: z
+        .enum([Status.APPROVED, Status.REVISION] as Exclude<
+          Status,
+          "PENDING"
+        >[])
+        .optional(),
+    })
+    .superRefine((data, ctx) => {
+      // dokumentasi borang id
+      const hasDokumentasiBorangId =
+        data.dokumentasi_borang_id !== undefined &&
+        data.dokumentasi_borang_id !== null;
+      const hasKebutuhanDokumentasiPicId =
+        data.kebutuhan_dokumentasi_pic_id !== undefined &&
+        data.kebutuhan_dokumentasi_pic_id !== null;
+
+      // check exist dokumentasi borang id or kebutuhan dokumentasi pic id
+      if (!hasDokumentasiBorangId && !hasKebutuhanDokumentasiPicId)
+        ctx.addIssue({
+          code: "custom",
+          message:
+            "dokumentasi borang id or kebutuhan dokumentasi pic id is required",
+        });
+
+      // check dokumentasi borang id or kebutuhan dokumentasi pic id
+      if (hasDokumentasiBorangId && hasKebutuhanDokumentasiPicId)
+        ctx.addIssue({
+          code: "custom",
+          message:
+            "dokumentasi borang id or kebutuhan dokumentasi pic id is required",
+        });
+    })
+    .strict() satisfies z.ZodType<VerifikasiUpdateType>;
+
+  // params id
+  static readonly PARAMS_ID = z
+    .object({
+      id: z.coerce.number().int().positive().max(2147483647),
+    })
+    .strict() satisfies z.ZodType<{ id: number }>;
 }

@@ -20,4 +20,15 @@ riwayatRouter.get(
   RiwayatController.findAllRiwayatByKebutuhanDokumentasiOrDokumentasiBorang,
 );
 
+// find by id
+riwayatRouter.get(
+  "/:id/tipe-riwayat/:tipe_riwayat",
+  authMiddleware,
+  [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
+  zodValidationParams<{ id: number; tipe_riwayat: TipeRiwayat }>(
+    RiwayatValidation.PARAMS_ID,
+  ),
+  RiwayatController.findById,
+);
+
 export default riwayatRouter;
