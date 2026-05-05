@@ -386,6 +386,9 @@ export class KebutuhanDokumentasiPicServices {
         id: true,
         kriteria: {
           select: {
+            id: true,
+            nama_kriteria: true,
+            kode_kriteria: true,
             kriteriaPic: {
               select: {
                 kriteria: {
@@ -447,9 +450,9 @@ export class KebutuhanDokumentasiPicServices {
     if (!result) return null;
 
     // kriteria pic grouped
-    const groupedKriteriaPic = new Map<
+    const groupedPicKriteria = new Map<
       number,
-      Omit<ResponseKriteriaPicType, "created_at" | "updated_at">
+      Omit<ResponseKriteriaPicType, "created_at" | "updated_at" | "kriteria">
     >();
 
     for (const item of result.kriteria.kriteriaPic) {
@@ -465,7 +468,7 @@ export class KebutuhanDokumentasiPicServices {
       };
 
       // get exis data by kriteria id
-      const existingData = groupedKriteriaPic.get(kriteriaId);
+      const existingData = groupedPicKriteria.get(kriteriaId);
 
       // set dosen
       if (existingData) {
@@ -473,21 +476,23 @@ export class KebutuhanDokumentasiPicServices {
         continue;
       }
 
-      groupedKriteriaPic.set(kriteriaId, {
-        kriteria: {
-          id: item.kriteria.id,
-          kode_kriteria: item.kriteria.kode_kriteria,
-          nama_kriteria: item.kriteria.nama_kriteria,
-        },
+      groupedPicKriteria.set(kriteriaId, {
         dosen: [dosen],
       });
     }
 
-    const kriteriaPic = Array.from(groupedKriteriaPic.values())[0];
+    const finalGroupedPicKriteria = Array.from(groupedPicKriteria.values())[0];
 
     return toResponseKebutuhanDokumentasiPicType({
       id: result.id,
-      kriteria_pic: kriteriaPic,
+      kriteria_pic: {
+        dosen: finalGroupedPicKriteria ? finalGroupedPicKriteria.dosen : [],
+        kriteria: {
+          id: result.kriteria.id,
+          nama_kriteria: result.kriteria.nama_kriteria,
+          kode_kriteria: result.kriteria.kode_kriteria,
+        },
+      },
       pendekatan: result.pendekatan,
       tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
       pic: result.kebutuhan_dokumentasi_pic.map((item) => ({
