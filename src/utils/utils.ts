@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { SortOrder } from "../../generated/prisma/internal/prismaNamespace";
-import { Status } from "./contstanst";
+import { DosenRole, Status } from "./contstanst";
 
 // check exist same data
 const isFilled = (value: unknown): boolean => {
@@ -32,7 +32,7 @@ export const checkBothFilled = (
   return null;
 };
 
-export const getPriorityStatus = (
+export const getPriorityStatusKaprodi = (
   oldStatus: Status,
   newStatus: Status,
 ): Status => {
@@ -42,6 +42,21 @@ export const getPriorityStatus = (
 
   if (oldStatus === Status.PENDING || newStatus === Status.PENDING) {
     return Status.PENDING;
+  }
+
+  return Status.APPROVED;
+};
+
+export const getPriorityStatusWakilDekan = (
+  oldStatus: Status,
+  newStatus: Status,
+): Status => {
+  if (oldStatus === Status.PENDING || newStatus === Status.PENDING) {
+    return Status.PENDING;
+  }
+
+  if (oldStatus === Status.REVISION || newStatus === Status.REVISION) {
+    return Status.REVISION;
   }
 
   return Status.APPROVED;

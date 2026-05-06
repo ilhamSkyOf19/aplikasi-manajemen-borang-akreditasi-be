@@ -115,6 +115,9 @@ export interface ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType {
   data: {
     kriteria_pic: Omit<ResponseKriteriaPicType, "created_at" | "updated_at">;
     status: Status | null;
+    status_detail: (Pick<IPendekatan, "id" | "keterangan"> & {
+      status: Status;
+    })[];
   }[];
 }
 

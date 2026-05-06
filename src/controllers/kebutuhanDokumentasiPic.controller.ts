@@ -11,9 +11,10 @@ import { ResponseResult, ResponseStructure } from "../types/response";
 import { NamaDokumentasiServices } from "../services/namaDokumentasi.service";
 import { KebutuhanDokumentasiPicServices } from "../services/kebutuhanDokumentasiPic.service";
 import { PaginationType } from "../types/pagination";
-import { Status, TipeRiwayat } from "../utils/contstanst";
+import { DosenRole, Status, TipeRiwayat } from "../utils/contstanst";
 import { RiwayatService } from "../services/riwayat.service";
 import { PicKebutuhanDokumentasiServices } from "../services/picKebutuhanDokumentasi.service";
+import { AuthRequest } from "../types/authRequest";
 
 export class KebutuhanDokumentasiPicController {
   // create
@@ -123,7 +124,7 @@ export class KebutuhanDokumentasiPicController {
 
   // find all by kriteria pic
   static async findAllByKriteriaPic(
-    _req: Request,
+    req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
       { validatedQuery: PaginationType & { status?: Status } }
@@ -134,9 +135,13 @@ export class KebutuhanDokumentasiPicController {
       // get query
       const { limit, page, search, sort, status } = res.locals.validatedQuery;
 
+      // get role from req data
+      const { role } = req.data as { role: DosenRole };
+
       // call service
       const service =
         await KebutuhanDokumentasiPicServices.findAllByKriteriaPic({
+          role,
           limit,
           page,
           search,
@@ -154,7 +159,7 @@ export class KebutuhanDokumentasiPicController {
       }
 
       // return success
-      return ResponseResult.success<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>(
+      return ResponseResult.success<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType>(
         service,
         res,
         200,

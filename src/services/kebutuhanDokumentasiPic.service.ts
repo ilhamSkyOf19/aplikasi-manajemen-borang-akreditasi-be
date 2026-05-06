@@ -14,6 +14,7 @@ import {
   UpdateKebutuhanDokumentasiPicType,
 } from "../models/kebutuhanDokumentasiPic.model";
 import { ResponseKriteriaPicType } from "../models/kriteriaPic.model";
+import { IPendekatan } from "../models/pendekatan.model";
 import { PaginationType } from "../types/pagination";
 import {
   DosenRole,
@@ -21,7 +22,10 @@ import {
   Status,
   TipeDokumentasi,
 } from "../utils/contstanst";
-import { getPriorityStatus } from "../utils/utils";
+import {
+  getPriorityStatusKaprodi,
+  getPriorityStatusWakilDekan,
+} from "../utils/utils";
 
 export class KebutuhanDokumentasiPicServices {
   // create
@@ -139,9 +143,10 @@ export class KebutuhanDokumentasiPicServices {
   static async findAllByKriteriaPic(
     query: PaginationType & {
       status?: Status;
+      role: DosenRole;
     },
   ): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
-    const { status, limit = 8, page = 1, search, sort } = query;
+    const { status, limit = 8, page = 1, search, sort, role } = query;
 
     const currentPage = page < 1 ? 1 : page;
 
@@ -207,6 +212,12 @@ export class KebutuhanDokumentasiPicServices {
 
         kebutuhan_dokumentasi: {
           select: {
+            pendekatan: {
+              select: {
+                id: true,
+                keterangan: true,
+              },
+            },
             status: true,
           },
         },
@@ -214,6 +225,7 @@ export class KebutuhanDokumentasiPicServices {
     });
 
     const mappedData = result.map((item) => {
+      // dosen
       const dosen = item.kriteriaPic.map((itemChild) => ({
         id: itemChild.dosen.id,
         email: itemChild.dosen.email,
@@ -224,12 +236,57 @@ export class KebutuhanDokumentasiPicServices {
         ) as DosenRole[],
       }));
 
+      // status
       const statusKebutuhan =
         item.kebutuhan_dokumentasi.length > 0
           ? item.kebutuhan_dokumentasi
               .map((itemChild) => itemChild.status as Status)
-              .reduce((prev, current) => getPriorityStatus(prev, current))
+              .reduce((prev, current) =>
+                role === DosenRole.kaprodi
+                  ? getPriorityStatusKaprodi(prev, current)
+                  : getPriorityStatusWakilDekan(prev, current),
+              )
           : null;
+
+      // status detail
+      const groupedStatusDetail = new Map<
+        number,
+        Pick<IPendekatan, "id" | "keterangan"> & { status: Status }
+      >();
+
+      for (const data of item.kebutuhan_dokumentasi) {
+        const pendekatanId = data.pendekatan.id;
+
+        const currentStatus = data.status as Status;
+
+        const existPendekatan = groupedStatusDetail.get(pendekatanId);
+
+        if (existPendekatan) {
+          groupedStatusDetail.set(pendekatanId, {
+            ...existPendekatan,
+            status:
+              role === DosenRole.kaprodi
+                ? getPriorityStatusKaprodi(
+                    existPendekatan.status,
+                    currentStatus,
+                  )
+                : getPriorityStatusWakilDekan(
+                    existPendekatan.status,
+                    currentStatus,
+                  ),
+          });
+
+          continue;
+        }
+
+        groupedStatusDetail.set(pendekatanId, {
+          id: data.pendekatan.id,
+          keterangan: data.pendekatan.keterangan,
+          status: currentStatus,
+        });
+      }
+
+      const status_detail = Array.from(groupedStatusDetail.values());
 
       return {
         kriteria_pic: {
@@ -241,17 +298,18 @@ export class KebutuhanDokumentasiPicServices {
           dosen,
         },
         status: statusKebutuhan,
+        status_detail,
       };
     });
 
     return toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType({
-      data: mappedData,
       meta: {
         currentPage,
+        totalPage,
         limit,
         totalData,
-        totalPage,
       },
+      data: mappedData,
     });
   }
 
