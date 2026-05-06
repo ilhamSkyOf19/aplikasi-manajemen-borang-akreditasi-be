@@ -33,9 +33,13 @@ export const checkBothFilled = (
 };
 
 export const getPriorityStatusKaprodi = (
-  oldStatus: Status,
-  newStatus: Status,
-): Status => {
+  oldStatus: Status | null,
+  newStatus: Status | null,
+): Status | null => {
+  if (!oldStatus && !newStatus) return null;
+  if (oldStatus && !newStatus) return oldStatus;
+  if (!oldStatus && newStatus) return newStatus;
+
   if (oldStatus === Status.REVISION || newStatus === Status.REVISION) {
     return Status.REVISION;
   }
@@ -48,9 +52,13 @@ export const getPriorityStatusKaprodi = (
 };
 
 export const getPriorityStatusWakilDekan = (
-  oldStatus: Status,
-  newStatus: Status,
-): Status => {
+  oldStatus: Status | null,
+  newStatus: Status | null,
+): Status | null => {
+  if (!oldStatus && !newStatus) return null;
+  if (oldStatus && !newStatus) return oldStatus;
+  if (!oldStatus && newStatus) return newStatus;
+
   if (oldStatus === Status.PENDING || newStatus === Status.PENDING) {
     return Status.PENDING;
   }

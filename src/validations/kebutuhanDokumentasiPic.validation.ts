@@ -128,6 +128,18 @@ export class KebutuhanDokumentasiPicValidation {
     })
     .strict() satisfies z.ZodType<PaginationType & { status?: Status }>;
 
+  static readonly QUERY_NON_STATUS = z
+    .object({
+      page: z.coerce.number().min(1).max(2147483647).catch(1),
+
+      limit: z.coerce.number().min(1).max(2147483647).catch(8),
+
+      search: z.string().min(1).max(1000).optional(),
+
+      sort: z.enum(["asc", "desc"]).catch("desc"),
+    })
+    .strict() satisfies z.ZodType<PaginationType>;
+
   // params
   static readonly PARAMS = z
     .object({

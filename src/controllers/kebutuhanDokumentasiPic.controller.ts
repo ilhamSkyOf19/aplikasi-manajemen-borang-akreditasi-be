@@ -127,13 +127,13 @@ export class KebutuhanDokumentasiPicController {
     req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
-      { validatedQuery: PaginationType & { status?: Status } }
+      { validatedQuery: PaginationType }
     >,
     next: NextFunction,
   ) {
     try {
       // get query
-      const { limit, page, search, sort, status } = res.locals.validatedQuery;
+      const { limit, page, search, sort } = res.locals.validatedQuery;
 
       // get role from req data
       const { role } = req.data as { role: DosenRole };
@@ -146,7 +146,6 @@ export class KebutuhanDokumentasiPicController {
           page,
           search,
           sort,
-          status: status as Status,
         });
 
       // check service
@@ -256,6 +255,118 @@ export class KebutuhanDokumentasiPicController {
         res,
         200,
         "success read kebutuhan dokumentasi pic by id",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find all by dosen id
+  static async findAllForDokumentasiBorangByDosen(
+    req: AuthRequest,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
+      { validatedQuery: PaginationType }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get query
+      const { limit, page, search, sort } = res.locals.validatedQuery;
+
+      // get role from req data
+      const { role, id } = req.data as { role: DosenRole; id: number };
+
+      // call service
+      const service =
+        await KebutuhanDokumentasiPicServices.findAllForDokumentasiBorangByDosen(
+          {
+            dosen_id: id,
+            query: {
+              role,
+              limit,
+              page,
+              search,
+              sort,
+            },
+          },
+        );
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(
+          res,
+          400,
+          "kebutuhan dokumentasi not found",
+        );
+      }
+
+      // return success
+      return ResponseResult.success<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>(
+        service,
+        res,
+        200,
+        "success read all kebutuhan dokumentasi pic",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find all by kriteria pic
+  static async findAllForDokumentasiBorangByKriteriaPendekatan(
+    req: AuthRequest,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
+      {
+        validatedQuery: PaginationType & { status?: Status };
+        validatedParams: { kriteria_id: number; pendekatan_id: number };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get query
+      const { limit, page, search, sort, status } = res.locals.validatedQuery;
+
+      // get params
+      const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
+
+      // get dosen id
+      const { id } = req?.data as { id: number };
+
+      // call service
+      const service =
+        await KebutuhanDokumentasiPicServices.findAllforDokumentasiBorangByKriteriaAndPendekatan(
+          {
+            dosen_id: id,
+            kriteria_id,
+            pendekatan_id,
+            query: {
+              limit,
+              page,
+              search,
+              sort,
+              status: status as Status,
+            },
+          },
+        );
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(
+          res,
+          400,
+          "kebutuhan dokumentasi pic not found",
+        );
+      }
+
+      // return success
+      return ResponseResult.success<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>(
+        service,
+        res,
+        200,
+        "success read all kebutuhan dokumentasi pic",
       );
     } catch (error) {
       next(error);

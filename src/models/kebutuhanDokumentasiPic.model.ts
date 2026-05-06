@@ -19,7 +19,7 @@ export interface IKebutuhanDokumentsiPic {
   keterangan: string;
   created_at: Date;
   updated_at: Date;
-  status: Status;
+  status: Status | null;
 }
 
 export interface PicRequestType {
@@ -116,7 +116,7 @@ export interface ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType {
     kriteria_pic: Omit<ResponseKriteriaPicType, "created_at" | "updated_at">;
     status: Status | null;
     status_detail: (Pick<IPendekatan, "id" | "keterangan"> & {
-      status: Status;
+      status: Status | null;
     })[];
   }[];
 }

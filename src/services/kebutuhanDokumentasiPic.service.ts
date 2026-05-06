@@ -10,7 +10,6 @@ import {
   toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType,
   toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
   toResponseKebutuhanDokumentasiPicType,
-  toResponseKebutuhanDokumentasiPicWithMetaType,
   UpdateKebutuhanDokumentasiPicType,
 } from "../models/kebutuhanDokumentasiPic.model";
 import { ResponseKriteriaPicType } from "../models/kriteriaPic.model";
@@ -142,11 +141,10 @@ export class KebutuhanDokumentasiPicServices {
   // find all by kriteria pic
   static async findAllByKriteriaPic(
     query: PaginationType & {
-      status?: Status;
       role: DosenRole;
     },
   ): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
-    const { status, limit = 8, page = 1, search, sort, role } = query;
+    const { limit = 8, page = 1, search, sort, role } = query;
 
     const currentPage = page < 1 ? 1 : page;
 
@@ -161,14 +159,6 @@ export class KebutuhanDokumentasiPicServices {
                 { nidn: { contains: search } },
               ],
             },
-          },
-        },
-      }),
-
-      ...(status && {
-        kebutuhan_dokumentasi: {
-          some: {
-            status,
           },
         },
       }),
@@ -240,7 +230,7 @@ export class KebutuhanDokumentasiPicServices {
       const statusKebutuhan =
         item.kebutuhan_dokumentasi.length > 0
           ? item.kebutuhan_dokumentasi
-              .map((itemChild) => itemChild.status as Status)
+              .map((itemChild) => itemChild.status as Status | null)
               .reduce((prev, current) =>
                 role === DosenRole.kaprodi
                   ? getPriorityStatusKaprodi(prev, current)
@@ -251,7 +241,7 @@ export class KebutuhanDokumentasiPicServices {
       // status detail
       const groupedStatusDetail = new Map<
         number,
-        Pick<IPendekatan, "id" | "keterangan"> & { status: Status }
+        Pick<IPendekatan, "id" | "keterangan"> & { status: Status | null }
       >();
 
       for (const data of item.kebutuhan_dokumentasi) {
@@ -593,6 +583,311 @@ export class KebutuhanDokumentasiPicServices {
       tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
       status: result.status as Status,
     };
+  }
+
+  // get kriteria by dosen
+  static async findAllForDokumentasiBorangByDosen(params: {
+    query: PaginationType & {
+      role: DosenRole;
+    };
+    dosen_id: number;
+  }): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
+    const { dosen_id, query } = params;
+    const { limit = 8, page = 1, search, sort, role } = query;
+
+    const currentPage = page < 1 ? 1 : page;
+
+    const conditional: Prisma.KriteriaWhereInput = {
+      kriteriaPic: {
+        some: {
+          dosen_id,
+        },
+      },
+    };
+
+    const totalData = await prisma.kriteria.count({
+      where: conditional,
+    });
+
+    const totalPage = Math.ceil(totalData / limit);
+
+    const result = await prisma.kriteria.findMany({
+      where: conditional,
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: {
+        kode_kriteria: sort ? (sort as SortOrder) : "asc",
+      },
+      select: {
+        id: true,
+        kode_kriteria: true,
+        nama_kriteria: true,
+
+        kriteriaPic: {
+          select: {
+            dosen: {
+              select: {
+                id: true,
+                nama: true,
+                email: true,
+                nidn: true,
+                dosenRole: {
+                  select: {
+                    role: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        kebutuhan_dokumentasi: {
+          select: {
+            id: true,
+            pendekatan: {
+              select: {
+                id: true,
+                tahap: true,
+                keterangan: true,
+              },
+            },
+            dokumentasi_borang: {
+              select: {
+                status: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const mappedData = result.map((item) => {
+      // dosen
+      const dosen = item.kriteriaPic.map((itemChild) => ({
+        id: itemChild.dosen.id,
+        email: itemChild.dosen.email,
+        nidn: itemChild.dosen.nidn,
+        nama: itemChild.dosen.nama,
+        roles: itemChild.dosen.dosenRole.map(
+          (roleItem) => roleItem.role,
+        ) as DosenRole[],
+      }));
+
+      // status
+      const statusKebutuhan =
+        item.kebutuhan_dokumentasi.length > 0
+          ? item.kebutuhan_dokumentasi
+              .map(
+                (itemChild) =>
+                  itemChild.dokumentasi_borang?.status as Status | null,
+              )
+              .reduce((prev, current) =>
+                role === DosenRole.kaprodi
+                  ? getPriorityStatusKaprodi(prev, current)
+                  : getPriorityStatusWakilDekan(prev, current),
+              )
+          : null;
+
+      // status detail
+      const groupedStatusDetail = new Map<
+        number,
+        Pick<IPendekatan, "id" | "keterangan"> & { status: Status | null }
+      >();
+
+      for (const data of item.kebutuhan_dokumentasi) {
+        const pendekatanId = data.pendekatan.id;
+
+        const currentStatus = data.dokumentasi_borang?.status as Status;
+
+        const existPendekatan = groupedStatusDetail.get(pendekatanId);
+
+        if (existPendekatan) {
+          groupedStatusDetail.set(pendekatanId, {
+            ...existPendekatan,
+            status:
+              role === DosenRole.kaprodi
+                ? getPriorityStatusKaprodi(
+                    existPendekatan.status,
+                    currentStatus,
+                  )
+                : getPriorityStatusWakilDekan(
+                    existPendekatan.status,
+                    currentStatus,
+                  ),
+          });
+
+          continue;
+        }
+
+        groupedStatusDetail.set(pendekatanId, {
+          id: data.pendekatan.id,
+          keterangan: data.pendekatan.keterangan,
+          status: currentStatus,
+        });
+      }
+
+      const status_detail = Array.from(groupedStatusDetail.values());
+
+      return {
+        kriteria_pic: {
+          kriteria: {
+            id: item.id,
+            kode_kriteria: item.kode_kriteria,
+            nama_kriteria: item.nama_kriteria,
+          },
+          dosen,
+        },
+        status: statusKebutuhan,
+        status_detail,
+      };
+    });
+
+    return toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType({
+      meta: {
+        currentPage,
+        totalPage,
+        limit,
+        totalData,
+      },
+      data: mappedData,
+    });
+  }
+
+  // find all for dokumentasi borang by kriteria & pendekatan
+  static async findAllforDokumentasiBorangByKriteriaAndPendekatan(data: {
+    dosen_id: number;
+    kriteria_id: number;
+    pendekatan_id: number;
+    query: PaginationType & {
+      status?: Status;
+    };
+  }): Promise<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null> {
+    // get data
+
+    const {
+      kriteria_id,
+      pendekatan_id,
+      query: { status, limit = 8, page = 1, search, sort },
+    } = data;
+
+    // get page
+    const currentPage = page < 1 ? 1 : page;
+
+    // conditional
+    const conditional: Prisma.KebutuhanDokumentasiWhereInput = {
+      kriteria: {
+        kriteriaPic: {
+          some: {
+            dosen_id: data.dosen_id,
+          },
+        },
+      },
+      status: Status.APPROVED,
+      kriteria_id,
+      pendekatan_id,
+      ...(search && {
+        OR: [
+          {
+            nama_kebutuhan_dokumentasi: {
+              nama_kebutuhan_dokumentasi: {
+                contains: search,
+              },
+            },
+          },
+          {
+            kebutuhan_dokumentasi_pic: {
+              some: {
+                pic: {
+                  nama: {
+                    contains: search,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      }),
+      ...((status && {
+        dokumentasi_borang: {
+          status,
+        },
+      }) ||
+        {}),
+    };
+
+    // get count data
+    const totalData = await prisma.kebutuhanDokumentasi.count({
+      where: conditional,
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
+
+    // call db
+    const result = await prisma.kebutuhanDokumentasi.findMany({
+      where: conditional,
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: {
+        updated_at: sort ? (sort as SortOrder) : "asc",
+      },
+      select: {
+        id: true,
+        nama_kebutuhan_dokumentasi: {
+          select: {
+            id: true,
+            nama_kebutuhan_dokumentasi: true,
+          },
+        },
+        tipe_dokumentasi: true,
+        kebutuhan_dokumentasi_pic: {
+          select: {
+            pic: {
+              select: {
+                id: true,
+                nama: true,
+              },
+            },
+          },
+        },
+        dokumentasi_borang: {
+          select: {
+            status: true,
+          },
+        },
+        keterangan: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    return toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType(
+      {
+        data: result.map((item) => ({
+          id: item.id,
+          nama_kebutuhan_dokumentasi: {
+            id: item.nama_kebutuhan_dokumentasi.id,
+            nama: item.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
+          },
+          tipe_dokumentasi: item.tipe_dokumentasi as TipeDokumentasi,
+          keterangan: item.keterangan,
+          pic: item.kebutuhan_dokumentasi_pic.map((item) => ({
+            id: item.pic.id,
+            nama: item.pic.nama,
+          })),
+          status: item.dokumentasi_borang?.status
+            ? (item.dokumentasi_borang.status as Status)
+            : null,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+        })),
+        meta: {
+          currentPage,
+          limit,
+          totalData,
+          totalPage,
+        },
+      },
+    );
   }
 
   // update
