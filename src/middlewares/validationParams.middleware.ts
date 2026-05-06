@@ -16,6 +16,7 @@ export const zodValidationParams = <T>(schema: ZodType<T>) => {
       return next();
     } catch (error) {
       if (error instanceof ZodError) {
+        console.log(error);
         const message = error.issues[0]?.message ?? "Validation error";
         const path = error.issues[0]?.path.join(".") ?? "";
 

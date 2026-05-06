@@ -185,7 +185,7 @@ export class DokumentasiBorangValidation {
   >;
 
   // params kebutuhan dokumentasi by id
-  static readonly PARAMS_KEBUTUHAN_DOKUMENTASI_PIC_ID = z
+  static readonly PARAMS_KEBUTUHAN_DOKUMENTASI_ID = z
     .object({
       kebutuhan_dokumentasi_id: z.coerce
         .number()

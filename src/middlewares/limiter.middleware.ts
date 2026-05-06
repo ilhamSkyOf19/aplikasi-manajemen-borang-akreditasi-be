@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { type AugmentedRequest } from "express-rate-limit";
 import { ResponseResult, ResponseStructure } from "../types/response";
 
 export default class LimiterMiddleware {
@@ -12,7 +12,7 @@ export default class LimiterMiddleware {
       standardHeaders: true,
       legacyHeaders: false,
       handler: (req: Request, res: Response<ResponseStructure<null>>) => {
-        const resetTime = req.rateLimit?.resetTime;
+        const resetTime = (req as AugmentedRequest).rateLimit?.resetTime;
 
         if (resetTime) {
           const minutesLeft = Math.ceil(

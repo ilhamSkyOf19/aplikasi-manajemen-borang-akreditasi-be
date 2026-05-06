@@ -5,7 +5,10 @@ import { ResponseKriteriaPicType } from "./kriteriaPic.model";
 // type
 export interface IKebutuhanDokumentsiPic {
   id: number;
-  kriteria_pic: Omit<ResponseKriteriaPicType, "created_at" | "updated_at">;
+  kriteria: Omit<
+    ResponseKriteriaPicType,
+    "created_at" | "updated_at" | "dosen"
+  >;
   pendekatan: IPendekatan;
   nama_kebutuhan_dokumentasi: {
     id: number;
@@ -79,7 +82,7 @@ export const toResponseCreateUpdateKebutuhanDokumentasiPicType = (
 
 // response
 export interface ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType {
-  data: Omit<IKebutuhanDokumentsiPic, "kriteria_pic" | "pendekatan">[];
+  data: Omit<IKebutuhanDokumentsiPic, "kriteria" | "pendekatan">[];
   meta: MetaType;
 }
 

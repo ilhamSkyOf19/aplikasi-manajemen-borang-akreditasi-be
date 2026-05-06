@@ -1,4 +1,5 @@
 import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
+import { IKebutuhanDokumentsiPic } from "./kebutuhanDokumentasiPic.model";
 
 // verifikasi request
 export interface VerifikasiDokumentasiBorangType {
@@ -119,3 +120,29 @@ export interface ResponseFoldersAndFilesType extends IFolderDokumentasiBorang {}
 export const toResponseFoldersAndFilesType = (
   data: ResponseFoldersAndFilesType,
 ): ResponseFoldersAndFilesType => data;
+
+// response dokumnetasi borang with kebutuhan dokumentasi
+export interface ResponseDokumentasiBorangWithKebutuhanDokumentasiType {
+  kebutuhan_dokumentasi_pic: Pick<
+    IKebutuhanDokumentsiPic,
+    | "kriteria"
+    | "pendekatan"
+    | "tipe_dokumentasi"
+    | "pic"
+    | "keterangan"
+    | "nama_kebutuhan_dokumentasi"
+  >;
+  files: {
+    id: number;
+    nama_file: string;
+  }[];
+  folders: {
+    id: number;
+    nama_folder: string;
+    files: {
+      id: number;
+      nama_file: string;
+    }[];
+  }[];
+  status: Status | null;
+}

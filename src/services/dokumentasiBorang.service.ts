@@ -6,6 +6,7 @@ import {
   IFolderDokumentasiBorang,
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
+  ResponseDokumentasiBorangWithKebutuhanDokumentasiType,
   ResponseFoldersAndFilesType,
   toResponseCreateUpdateDokumentasiBorangType,
   toResponseDokumentasiBorangType,
@@ -231,6 +232,172 @@ export class DokumentasiBorangServices {
     const finalGroupedResult = Array.from(groupedResult.values())[0];
 
     return toResponseCreateUpdateDokumentasiBorangType(finalGroupedResult);
+  }
+
+  // find by id with kebutuhan dokumentasi
+  static async findByKebutuhanDokumentasiId(params: {
+    kebutuhan_dokumentasi_id: number;
+  }): Promise<ResponseDokumentasiBorangWithKebutuhanDokumentasiType | null> {
+    // get params
+    const { kebutuhan_dokumentasi_id } = params;
+
+    // call db
+    const result = await prisma.kebutuhanDokumentasi.findUnique({
+      where: {
+        id: kebutuhan_dokumentasi_id,
+      },
+      select: {
+        id: true,
+        keterangan: true,
+        nama_kebutuhan_dokumentasi: {
+          select: {
+            id: true,
+            nama_kebutuhan_dokumentasi: true,
+          },
+        },
+        kebutuhan_dokumentasi_pic: {
+          select: {
+            pic: {
+              select: {
+                id: true,
+                nama: true,
+              },
+            },
+          },
+        },
+        kriteria: {
+          select: {
+            id: true,
+            kode_kriteria: true,
+            nama_kriteria: true,
+          },
+        },
+        pendekatan: {
+          select: {
+            id: true,
+            tahap: true,
+            keterangan: true,
+          },
+        },
+        tipe_dokumentasi: true,
+        dokumentasi_borang: {
+          select: {
+            status: true,
+            files: {
+              select: {
+                file_dokumen: {
+                  select: {
+                    id: true,
+                    nama_file: true,
+                  },
+                },
+                folder_dokumen: {
+                  select: {
+                    id: true,
+                    nama_folder: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!result) return null;
+
+    // grouped folders
+    const groupedFolders = new Map<
+      number,
+      {
+        id: number;
+        nama_folder: string;
+        files: {
+          id: number;
+          nama_file: string;
+        }[];
+      }
+    >();
+
+    // grouped files not have folder
+    const groupedFiles = new Map<
+      number,
+      {
+        id: number;
+        nama_file: string;
+      }
+    >();
+
+    if (result.dokumentasi_borang) {
+      // grouped folders
+      for (const item of result.dokumentasi_borang.files) {
+        // check folder
+        if (!item.folder_dokumen) {
+          groupedFiles.set(item.file_dokumen.id, {
+            id: item.file_dokumen.id,
+            nama_file: item.file_dokumen.nama_file,
+          });
+
+          continue;
+        }
+
+        // folder id
+        const folderId = item.folder_dokumen.id;
+
+        // existing folder
+        const existingFolder = groupedFolders.get(folderId);
+
+        // file
+        const file = {
+          id: item.file_dokumen.id,
+          nama_file: item.file_dokumen.nama_file,
+        };
+
+        // check
+        if (existingFolder) {
+          existingFolder.files.push(file);
+
+          continue;
+        }
+
+        // set
+        groupedFolders.set(folderId, {
+          id: item.folder_dokumen.id,
+          nama_folder: item.folder_dokumen.nama_folder,
+          files: [file],
+        });
+      }
+    }
+
+    // final grouped
+    const finalGroupedFolders = Array.from(groupedFolders.values());
+
+    // final grouped
+    const finalGroupedFiles = Array.from(groupedFiles.values());
+
+    return {
+      kebutuhan_dokumentasi_pic: {
+        nama_kebutuhan_dokumentasi: {
+          id: result.nama_kebutuhan_dokumentasi.id,
+          nama: result.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
+        },
+        kriteria: {
+          kriteria: result.kriteria,
+        },
+        pendekatan: result.pendekatan,
+        keterangan: result.keterangan,
+        tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
+        pic: result.kebutuhan_dokumentasi_pic.map((item) => ({
+          id: item.pic.id,
+          nama: item.pic.nama,
+        })),
+      },
+      folders: finalGroupedFolders,
+      files: finalGroupedFiles,
+      status: result.dokumentasi_borang?.status
+        ? (result.dokumentasi_borang.status as Status)
+        : null,
+    };
   }
 
   // find all by kebutuhan dokumentasi id

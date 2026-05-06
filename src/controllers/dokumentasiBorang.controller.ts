@@ -4,6 +4,7 @@ import {
   FilesRequest,
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
+  ResponseDokumentasiBorangWithKebutuhanDokumentasiType,
   ResponseFoldersAndFilesType,
   UpdateDokumentasiBorangDefaultRequestType,
   UpdateDokumentasiBorangDefaultType,
@@ -213,6 +214,40 @@ export class DokumentasiBorangController {
 
       // return
       return ResponseResult.success<ResponseCreateUpdateDokumentasiBorangType | null>(
+        service,
+        res,
+        200,
+        "success",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find by id with kebutuhan dokumentasi
+  static async findByKebutuhanDokumentasiId(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseDokumentasiBorangWithKebutuhanDokumentasiType | null>,
+      {
+        validatedParams: {
+          kebutuhan_dokumentasi_id: number;
+        };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { kebutuhan_dokumentasi_id } = res.locals.validatedParams;
+
+      // call service
+      const service =
+        await DokumentasiBorangServices.findByKebutuhanDokumentasiId({
+          kebutuhan_dokumentasi_id,
+        });
+
+      return ResponseResult.success<ResponseDokumentasiBorangWithKebutuhanDokumentasiType | null>(
         service,
         res,
         200,

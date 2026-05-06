@@ -7,9 +7,7 @@ const uploadIfNeeded = (req: Request, res: Response, next: NextFunction) => {
   const hasNewFile = files.some((f) => f.useOldFile === false);
 
   if (hasNewFile) {
-    const upload = FileService.uploadFile({
-      uploadPaths: { filename: "public/uploads/dokumen-borang" },
-    });
+    const upload = FileService.uploadFile();
     return upload.array("filename", 4)(req, res, next); // jalankan multer
   }
 

@@ -446,19 +446,6 @@ export class KebutuhanDokumentasiPicServices {
                     kode_kriteria: true,
                   },
                 },
-                dosen: {
-                  select: {
-                    id: true,
-                    nama: true,
-                    email: true,
-                    nidn: true,
-                    dosenRole: {
-                      select: {
-                        role: true,
-                      },
-                    },
-                  },
-                },
               },
             },
           },
@@ -497,44 +484,9 @@ export class KebutuhanDokumentasiPicServices {
     // check
     if (!result) return null;
 
-    // kriteria pic grouped
-    const groupedPicKriteria = new Map<
-      number,
-      Omit<ResponseKriteriaPicType, "created_at" | "updated_at" | "kriteria">
-    >();
-
-    for (const item of result.kriteria.kriteriaPic) {
-      const kriteriaId = item.kriteria.id;
-
-      // dosen
-      const dosen = {
-        id: item.dosen.id,
-        nama: item.dosen.nama,
-        email: item.dosen.email,
-        nidn: item.dosen.nidn,
-        roles: item.dosen.dosenRole.map((item) => item.role) as DosenRole[],
-      };
-
-      // get exis data by kriteria id
-      const existingData = groupedPicKriteria.get(kriteriaId);
-
-      // set dosen
-      if (existingData) {
-        existingData.dosen.push(dosen);
-        continue;
-      }
-
-      groupedPicKriteria.set(kriteriaId, {
-        dosen: [dosen],
-      });
-    }
-
-    const finalGroupedPicKriteria = Array.from(groupedPicKriteria.values())[0];
-
     return toResponseKebutuhanDokumentasiPicType({
       id: result.id,
-      kriteria_pic: {
-        dosen: finalGroupedPicKriteria ? finalGroupedPicKriteria.dosen : [],
+      kriteria: {
         kriteria: {
           id: result.kriteria.id,
           nama_kriteria: result.kriteria.nama_kriteria,

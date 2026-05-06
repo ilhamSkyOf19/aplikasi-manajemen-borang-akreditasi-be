@@ -22,6 +22,16 @@ dokumentasiBorangRoute.post(
   DokumentasiBorangController.createDokumentasiBorangDefatult,
 );
 
+// find
+dokumentasiBorangRoute.get(
+  "/by-kebutuhan-dokumentasi/:kebutuhan_dokumentasi_id",
+  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  zodValidationParams<{
+    kebutuhan_dokumentasi_id: number;
+  }>(DokumentasiBorangValidation.PARAMS_KEBUTUHAN_DOKUMENTASI_ID),
+  DokumentasiBorangController.findByKebutuhanDokumentasiId,
+);
+
 // update
 dokumentasiBorangRoute.patch(
   "/by-dokumentasi-borang/:dokumentasi_borang_id/file-id/:file_id",
@@ -38,7 +48,7 @@ dokumentasiBorangRoute.get(
   "/by-kebutuhan-dokumentasi/:kebutuhan_dokumentasi_id",
   [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
   zodValidationParams<{ kebutuhan_dokumentasi_id: number }>(
-    DokumentasiBorangValidation.PARAMS_KEBUTUHAN_DOKUMENTASI_PIC_ID,
+    DokumentasiBorangValidation.PARAMS_KEBUTUHAN_DOKUMENTASI_ID,
   ),
   DokumentasiBorangController.findAllByKebutuhanDokumentasiPicId,
 );
