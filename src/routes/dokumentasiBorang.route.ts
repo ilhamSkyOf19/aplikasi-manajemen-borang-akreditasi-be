@@ -16,10 +16,10 @@ const upload = FileService.uploadFile({
 
 // create
 dokumentasiBorangRoute.post(
-  "/upload-dokumentasi-default",
+  "/default",
   [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
-  upload.array("dokumentasi", 4),
-  DokumentasiBorangController.createDokumentasiBorangDefatult,
+  upload.single("dokumentasi"),
+  DokumentasiBorangController.createDokumentasiBorangDefault,
 );
 
 // find

@@ -51,10 +51,31 @@ export type FilesRequest = {
 
 // create kebutuhan dokumentasi borang
 export interface CreateDokumentasiBorangDefaultRequestType {
-  kebutuhan_dokumentasi_pic_id: number;
-  new_folder?: string;
-  old_folder?: number;
-  files: string;
+  kebutuhan_dokumentasi_id: number;
+  dokumentasi_borang_id?: number;
+  old_file?: number;
+  new_file?: string;
+  storage_provider?: StorageProvider;
+  nomor_dokumen?: string;
+  keterangan?: string;
+  folder?: number;
+}
+
+// create kebutuhan dokumentasi borang
+export interface CreateDokumentasiBorangDefaultType {
+  uploaded_by_id: number;
+  kebutuhan_dokumentasi_id: number;
+  dokumentasi_borang_id?: number;
+  folder?: number;
+  old_file?: number;
+  file?: {
+    tipe_dokumentasi: TipeDokumentasi;
+    storage_provider: StorageProvider;
+    provider_file_id?: string;
+    nama_file: string;
+    nomor_dokumen?: string;
+    keterangan: string;
+  };
 }
 
 export interface UpdateDokumentasiBorangDefaultRequestType {
@@ -64,17 +85,6 @@ export interface UpdateDokumentasiBorangDefaultRequestType {
   new_folder?: string;
   old_folder?: number;
   file?: string;
-}
-
-// create kebutuhan dokumentasi borang
-export interface CreateDokumentasiBorangDefaultType {
-  uploaded_by_id: number;
-  kebutuhan_dokumentasi_pic_id: number;
-  new_folder?: string;
-  old_folder?: number;
-  files: (FilesRequest & {
-    provider_id?: string;
-  })[];
 }
 
 export interface UpdateDokumentasiBorangDefaultType {
@@ -94,9 +104,8 @@ export interface UpdateDokumentasiBorangDefaultType {
 export interface ResponseCreateUpdateDokumentasiBorangType {
   id: number;
   dokumentasi_borang_id: number;
-  file_dokumen_id: number[];
-  folder_dokumen_id: number;
-  status: Status;
+  file_dokumen_id: number;
+  folder_dokumen_id: number | null;
   created_at: Date;
   updated_at: Date;
 }

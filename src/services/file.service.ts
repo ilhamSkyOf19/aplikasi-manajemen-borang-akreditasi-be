@@ -1,5 +1,5 @@
 import { Request } from "express";
-import multer, { FileFilterCallback } from "multer";
+import multer, { FileFilterCallback, Multer } from "multer";
 import fs from "fs";
 import path from "path";
 import fsAsync from "fs/promises";
@@ -237,6 +237,82 @@ export class FileService {
       );
 
       uploadedSistemPaths.forEach((p) => FileService.deleteFile(p));
+
+      return null;
+    }
+  }
+
+  // upload file from request
+  static async uploadFileFromRequest(data: {
+    fileRequest: {
+      nama_file: string;
+      storage_provider: StorageProvider;
+    };
+    uploadedFile: Express.Multer.File;
+  }): Promise<{ nama_file: string; provider_id?: string } | null> {
+    const { fileRequest, uploadedFile } = data;
+
+    let uploadedGDriveId: string | null = null;
+    let uploadedSistemPath: string | null = null;
+
+    let uploadIndex = 0;
+
+    let result: { nama_file: string; provider_id?: string } | null;
+
+    try {
+      const ext = path.extname(uploadedFile.originalname);
+      const finalName = `${fileRequest.nama_file}${ext}`;
+
+      if (fileRequest.storage_provider === StorageProvider.GDRIVE) {
+        const gdrive = await DriveApiService.upload({
+          fileBuffer: uploadedFile.buffer,
+          filename: finalName,
+          mimeType: uploadedFile.mimetype,
+          allowMimeType: ["application/pdf"],
+        });
+
+        if (!gdrive.success || !gdrive.fileId) {
+          throw new Error("Gagal upload file ke Google Drive");
+        }
+
+        // set id
+        uploadedGDriveId = gdrive.fileId;
+
+        // set result
+        result = {
+          nama_file: finalName,
+          provider_id: gdrive.fileId,
+        };
+      } else {
+        if (!fs.existsSync(FOLDER_GLOBAL_UPLOAD)) {
+          fs.mkdirSync(FOLDER_GLOBAL_UPLOAD, {
+            recursive: true,
+          });
+        }
+
+        const filePath = path.join(FOLDER_GLOBAL_UPLOAD, finalName);
+
+        fs.writeFileSync(filePath, uploadedFile.buffer);
+
+        // set file path
+        uploadedSistemPath = filePath;
+
+        // set result
+        result = {
+          nama_file: finalName,
+        };
+      }
+
+      return result;
+    } catch (error) {
+      // delete file
+      if (uploadedGDriveId) {
+        await DriveApiService.deleteFile(uploadedGDriveId);
+      }
+
+      if (uploadedSistemPath) {
+        await FileService.deleteFile(uploadedSistemPath);
+      }
 
       return null;
     }
