@@ -12,7 +12,14 @@ const riwayatRouter: Router = Router();
 riwayatRouter.get(
   "/by-kebutuhan-dokumentasi-pic-or-dokumentasi-borang/:id/tipe-riwayat/:tipe_riwayat",
   authMiddleware,
-  [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
+  [
+    authMiddleware,
+    aclMiddleware([
+      DosenRole.kaprodi,
+      DosenRole.wakil_dekan_1,
+      DosenRole.tim_akreditasi,
+    ]),
+  ],
   zodValidationParams<{
     id: number;
     tipe_riwayat: TipeRiwayat;
@@ -24,7 +31,14 @@ riwayatRouter.get(
 riwayatRouter.get(
   "/:id/tipe-riwayat/:tipe_riwayat",
   authMiddleware,
-  [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
+  [
+    authMiddleware,
+    aclMiddleware([
+      DosenRole.kaprodi,
+      DosenRole.wakil_dekan_1,
+      DosenRole.tim_akreditasi,
+    ]),
+  ],
   zodValidationParams<{ id: number; tipe_riwayat: TipeRiwayat }>(
     RiwayatValidation.PARAMS_ID,
   ),

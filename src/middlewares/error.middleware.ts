@@ -31,6 +31,14 @@ export const errorMiddleware = (
       case "P2025":
         return ResponseResult.error(res, 404, `Record not found`, [modelName]);
 
+      case "P2003":
+        return ResponseResult.error(
+          res,
+          400,
+          `Relationship constraint failed `,
+          [constraintName || modelName],
+        );
+
       default:
         return ResponseResult.error(res, 500, "Internal server error", [
           "prisma",

@@ -123,6 +123,7 @@ export const toResponseFoldersAndFilesType = (
 
 // response dokumnetasi borang with kebutuhan dokumentasi
 export interface ResponseDokumentasiBorangWithKebutuhanDokumentasiType {
+  dokumentasi_borang_id: number | null;
   kebutuhan_dokumentasi_pic: Pick<
     IKebutuhanDokumentsiPic,
     | "kriteria"

@@ -282,7 +282,14 @@ export class DokumentasiBorangServices {
         tipe_dokumentasi: true,
         dokumentasi_borang: {
           select: {
+            id: true,
             status: true,
+            folders: {
+              select: {
+                id: true,
+                nama_folder: true,
+              },
+            },
             files: {
               select: {
                 file_dokumen: {
@@ -330,6 +337,15 @@ export class DokumentasiBorangServices {
 
     if (result.dokumentasi_borang) {
       // grouped folders
+
+      for (const item of result.dokumentasi_borang.folders) {
+        groupedFolders.set(item.id, {
+          id: item.id,
+          nama_folder: item.nama_folder,
+          files: [],
+        });
+      }
+
       for (const item of result.dokumentasi_borang.files) {
         // check folder
         if (!item.folder_dokumen) {
@@ -359,13 +375,6 @@ export class DokumentasiBorangServices {
 
           continue;
         }
-
-        // set
-        groupedFolders.set(folderId, {
-          id: item.folder_dokumen.id,
-          nama_folder: item.folder_dokumen.nama_folder,
-          files: [file],
-        });
       }
     }
 
@@ -376,6 +385,7 @@ export class DokumentasiBorangServices {
     const finalGroupedFiles = Array.from(groupedFiles.values());
 
     return {
+      dokumentasi_borang_id: result.dokumentasi_borang?.id || null,
       kebutuhan_dokumentasi_pic: {
         nama_kebutuhan_dokumentasi: {
           id: result.nama_kebutuhan_dokumentasi.id,

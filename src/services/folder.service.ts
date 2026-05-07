@@ -1,6 +1,43 @@
 import prisma from "../libs/prisma";
+import {
+  CreateFolderType,
+  ResponseFolderType,
+  toResponseFolderType,
+} from "../models/folder.model";
 
 export class FolderService {
+  // create many
+  static async createMany(data: CreateFolderType): Promise<number> {
+    // get data
+    const { nama_folder, dokumentasi_borang_id, kebutuhan_dokumentasi_id } =
+      data;
+
+    // dokumentasi id
+    let finalDokumentasiBorangId: number | null = dokumentasi_borang_id ?? null;
+
+    // check dokumentasi borang
+    if (!finalDokumentasiBorangId) {
+      const createDokumentasiBorang = await prisma.dokumentasiBorang.create({
+        data: {
+          kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_id,
+        },
+      });
+
+      finalDokumentasiBorangId = createDokumentasiBorang.id;
+    }
+
+    if (!finalDokumentasiBorangId) return 0;
+
+    // call db
+    const result = await prisma.folderDokumen.createMany({
+      data: nama_folder.map((folder) => ({
+        nama_folder: folder,
+        dokumentasi_borang_id: finalDokumentasiBorangId,
+      })),
+    });
+
+    return result.count;
+  }
   // find uniqe by nama and by kebutuhan dokumentasi borang
   static async findUniqeByNama(data: {
     folder: string;
