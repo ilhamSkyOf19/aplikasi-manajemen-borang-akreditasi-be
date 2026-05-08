@@ -1,8 +1,8 @@
 import z from "zod";
 import { PaginationType } from "../types/pagination";
 
-export class FileDokumenValidation {
-  static readonly QUERY_PARAMS = z
+export class GlobalValidation {
+  static readonly QUERY = z
     .object({
       page: z
         .string()
@@ -16,4 +16,11 @@ export class FileDokumenValidation {
       sort: z.enum(["asc", "desc"]).optional(),
     })
     .strict() satisfies z.ZodType<PaginationType>;
+
+  // params id
+  static readonly PARAMS_ID = z
+    .object({
+      id: z.coerce.number().int().positive().max(2147483647),
+    })
+    .strict() satisfies z.ZodType<{ id: number }>;
 }
