@@ -3,6 +3,7 @@ import {
   CreateFolderType,
   ResponseFolderType,
   toResponseFolderType,
+  UpdateNameFolderType,
 } from "../models/folder.model";
 
 export class FolderService {
@@ -37,6 +38,36 @@ export class FolderService {
     });
 
     return result.count;
+  }
+
+  // update
+  static async updateName(params: {
+    id: number;
+    data: UpdateNameFolderType;
+  }): Promise<ResponseFolderType | null> {
+    // get params
+    const { data, id } = params;
+
+    // get data
+    const { nama_folder } = data;
+
+    // call db
+    const result = await prisma.folderDokumen.update({
+      where: {
+        id,
+      },
+      data: {
+        nama_folder,
+      },
+      select: {
+        id: true,
+        nama_folder: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    return toResponseFolderType(result);
   }
   // find uniqe by nama and by kebutuhan dokumentasi borang
   static async findUniqeByNama(data: {

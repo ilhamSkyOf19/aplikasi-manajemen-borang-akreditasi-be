@@ -1,5 +1,5 @@
 import z from "zod";
-import { CreateFolderType } from "../models/folder.model";
+import { CreateFolderType, UpdateNameFolderType } from "../models/folder.model";
 
 export class FolderValidation {
   // create
@@ -15,4 +15,18 @@ export class FolderValidation {
       nama_folder: z.array(z.string().trim().min(1).max(100)).nonempty(),
     })
     .strict() satisfies z.ZodType<CreateFolderType>;
+
+  // update nama
+  static readonly UPDATE_NAMA_FOLDER = z
+    .object({
+      nama_folder: z.string().trim().min(1).max(100),
+    })
+    .strict() satisfies z.ZodType<UpdateNameFolderType>;
+
+  // update
+  static readonly PARAMS_ID = z
+    .object({
+      id: z.coerce.number().int().positive().max(2147483647),
+    })
+    .strict() satisfies z.ZodType<{ id: number }>;
 }

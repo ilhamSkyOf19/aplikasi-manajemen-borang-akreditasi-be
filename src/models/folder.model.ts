@@ -4,6 +4,11 @@ export interface CreateFolderType {
   dokumentasi_borang_id?: number;
 }
 
+// update name folder
+export interface UpdateNameFolderType {
+  nama_folder: string;
+}
+
 // response folder
 export interface ResponseFolderType {
   id: number;
