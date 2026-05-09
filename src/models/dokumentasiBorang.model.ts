@@ -11,7 +11,7 @@ export interface VerifikasiDokumentasiBorangType {
 // type dokumentasi default
 export interface IDokumentasiBorangDefault {
   id: number;
-  provider_file_id?: string;
+  file_id: string;
   nama_file: string;
   nomor_dokumen?: string;
   uploaded_by: {
@@ -40,15 +40,6 @@ export interface IDokumentasiBorang {
   files_dokumentasi_default?: IDokumentasiBorangDefault[];
   folders?: IFolderDokumentasiBorang[];
 }
-
-export type FilesRequest = {
-  old_file?: number;
-  nomor_dokumen?: string;
-  storage_provider?: StorageProvider;
-  nama_file?: string;
-  keterangan?: string;
-};
-
 // create kebutuhan dokumentasi borang
 export interface CreateDokumentasiBorangDefaultRequestType {
   kebutuhan_dokumentasi_id: number;
@@ -71,33 +62,10 @@ export interface CreateDokumentasiBorangDefaultType {
   file?: {
     tipe_dokumentasi: TipeDokumentasi;
     storage_provider: StorageProvider;
-    provider_file_id?: string;
+    file_id: string;
     nama_file: string;
     nomor_dokumen?: string;
     keterangan: string;
-  };
-}
-
-export interface UpdateDokumentasiBorangDefaultRequestType {
-  // dokumentasi_borang_id: number;
-  // file_id: number;
-  nomor_dokumen?: string;
-  new_folder?: string;
-  old_folder?: number;
-  file?: string;
-}
-
-export interface UpdateDokumentasiBorangDefaultType {
-  dokumentasi_borang_id: number;
-  file_id: number;
-  default_detail?: {
-    nomor_dokumen: string;
-  };
-  uploaded_by_id: number;
-  new_folder?: string;
-  old_folder?: number;
-  file?: FilesRequest & {
-    provider_id?: string;
   };
 }
 

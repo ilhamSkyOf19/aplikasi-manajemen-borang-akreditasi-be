@@ -1,5 +1,6 @@
 import { Readable } from "stream";
 import driveApi from "../configs/driveapi.config";
+import { drive_v3 } from "googleapis";
 
 export class DriveApiService {
   static async upload(req: {
@@ -87,5 +88,45 @@ export class DriveApiService {
     } catch (error) {
       throw error;
     }
+  }
+
+  static async getFileMetadata(
+    providerFileId: string,
+  ): Promise<drive_v3.Schema$File> {
+    const metadata = await driveApi.files.get({
+      fileId: providerFileId,
+      fields: "id, name, mimeType, size",
+      supportsAllDrives: true,
+    });
+
+    return metadata.data;
+  }
+
+  static async getFileStream(providerFileId: string): Promise<Readable> {
+    const response = await driveApi.files.get(
+      {
+        fileId: providerFileId,
+        alt: "media",
+        supportsAllDrives: true,
+      },
+      {
+        responseType: "stream",
+      },
+    );
+
+    return response.data as unknown as Readable;
+  }
+
+  static async getFileForPreview(providerFileId: string): Promise<{
+    metadata: drive_v3.Schema$File;
+    stream: Readable;
+  }> {
+    const metadata = await this.getFileMetadata(providerFileId);
+    const stream = await this.getFileStream(providerFileId);
+
+    return {
+      metadata,
+      stream,
+    };
   }
 }

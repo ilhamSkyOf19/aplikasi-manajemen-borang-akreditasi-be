@@ -13,8 +13,16 @@ export interface ResponseFileDokumenForChooseWithMetaType {
 export interface ResponseFileDokumenForDetailType {
   id: number;
   nama_file: string;
+  kriteria: {
+    kode_kriteria: number;
+    nama_kriteria: string;
+  };
+  pendekatan: {
+    tahap: string;
+    keterangan: string;
+  };
   storage_provider: StorageProvider;
-  provider_file_id: string | null;
+  file_id: string;
   uploaded_by: {
     id: number;
     nama: string;
@@ -28,4 +36,22 @@ export interface ResponseFileDokumenForDetailType {
   dokumentasi_default: {
     nomor_dokumentasi: string | null;
   } | null;
+}
+
+// update file default
+export interface UpdateFileDefaultType {
+  nama_file?: string;
+  keterangan?: string;
+  nomor_dokumen?: string;
+}
+
+// response update file
+export interface ResponseUpdateFileType {
+  id: number;
+  nama_file: string;
+  keterangan: string;
+  dokumentasi_default?: {
+    nomor_dokumentasi: string | null;
+  } | null;
+  updated_at: Date;
 }

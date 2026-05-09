@@ -24,6 +24,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// static
+app.use(express.static("public"));
+
 // routes
 app.use("/", appRoute);
 

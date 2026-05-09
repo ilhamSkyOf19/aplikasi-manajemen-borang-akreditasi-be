@@ -3,7 +3,9 @@ import prisma from "../libs/prisma";
 import {
   ResponseFileDokumenForChooseWithMetaType,
   ResponseFileDokumenForDetailType,
-} from "../models/fileDokumen.mode";
+  ResponseUpdateFileType,
+  UpdateFileDefaultType,
+} from "../models/fileDokumen.model";
 import { PaginationType } from "../types/pagination";
 import {
   SortOrder,
@@ -116,7 +118,7 @@ export class FileDokumenService {
     id: number;
     is_active: boolean;
     storage_provider: StorageProvider;
-    provider_file_id?: string;
+    file_id: string;
     nama_file: string;
     uploaded_by_id: number;
   } | null> {
@@ -128,7 +130,7 @@ export class FileDokumenService {
         id: true,
         is_active: true,
         storage_provider: true,
-        provider_file_id: true,
+        file_id: true,
         nama_file: true,
         uploaded_by_id: true,
       },
@@ -142,7 +144,7 @@ export class FileDokumenService {
       is_active: result.is_active,
       nama_file: result.nama_file,
       storage_provider: result.storage_provider as StorageProvider,
-      provider_file_id: result.provider_file_id ?? undefined,
+      file_id: result.file_id ?? undefined,
       uploaded_by_id: result.uploaded_by_id,
     };
   }
@@ -160,13 +162,37 @@ export class FileDokumenService {
         id: true,
         nama_file: true,
         storage_provider: true,
-        provider_file_id: true,
+        file_id: true,
         uploaded_by: {
           select: {
             id: true,
             nama: true,
             email: true,
             nidn: true,
+          },
+        },
+        dokumentasi_borang_files: {
+          select: {
+            dokumentasi_borang: {
+              select: {
+                kebutuhan_dokumentasi: {
+                  select: {
+                    kriteria: {
+                      select: {
+                        kode_kriteria: true,
+                        nama_kriteria: true,
+                      },
+                    },
+                    pendekatan: {
+                      select: {
+                        tahap: true,
+                        keterangan: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         keterangan: true,
@@ -187,14 +213,71 @@ export class FileDokumenService {
     return {
       id: result.id,
       nama_file: result.nama_file,
+      kriteria:
+        result.dokumentasi_borang_files[0].dokumentasi_borang
+          .kebutuhan_dokumentasi.kriteria,
+      pendekatan:
+        result.dokumentasi_borang_files[0].dokumentasi_borang
+          .kebutuhan_dokumentasi.pendekatan,
       storage_provider: result.storage_provider as StorageProvider,
-      provider_file_id: result.provider_file_id ?? null,
+      file_id: result.file_id,
       uploaded_by: result.uploaded_by,
       keterangan: result.keterangan,
       tipe_file: result.tipe_file as TipeDokumentasi,
       created_at: result.created_at,
       updated_at: result.updated_at,
       dokumentasi_default: result.default_detail?.nomor_dokumen
+        ? {
+            nomor_dokumentasi: result.default_detail.nomor_dokumen,
+          }
+        : null,
+    };
+  }
+
+  // update file default
+  static async updateFileDefault(params: {
+    id: number;
+    data: UpdateFileDefaultType;
+  }): Promise<ResponseUpdateFileType | null> {
+    // get params
+    const {
+      data: { keterangan, nama_file, nomor_dokumen },
+      id,
+    } = params;
+
+    // call db
+    const result = await prisma.fileDokumen.update({
+      where: {
+        id,
+      },
+      data: {
+        nama_file,
+        keterangan,
+        default_detail: {
+          update: {
+            nomor_dokumen,
+          },
+        },
+      },
+      select: {
+        id: true,
+        nama_file: true,
+        keterangan: true,
+        default_detail: {
+          select: {
+            nomor_dokumen: true,
+          },
+        },
+        updated_at: true,
+      },
+    });
+
+    return {
+      id: result.id,
+      keterangan: result.keterangan,
+      nama_file: result.nama_file,
+      updated_at: result.updated_at,
+      dokumentasi_default: result.default_detail
         ? {
             nomor_dokumentasi: result.default_detail.nomor_dokumen,
           }

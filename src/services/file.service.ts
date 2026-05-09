@@ -4,9 +4,9 @@ import fs from "fs";
 import path from "path";
 import fsAsync from "fs/promises";
 import driveApi from "../configs/driveapi.config";
-import { FilesRequest } from "../models/dokumentasiBorang.model";
 import { FOLDER_GLOBAL_UPLOAD, StorageProvider } from "../utils/contstanst";
 import { DriveApiService } from "./driveapi.service";
+import { randomUUID } from "crypto";
 
 type FileConfig = {
   allowedMimeTypes?: RegExp;
@@ -156,112 +156,109 @@ export class FileService {
   }
 
   // upload files from request
-  static async uploadFilesFromRequest(data: {
-    fileRequest: FilesRequest[];
-    uploadedFiles: Express.Multer.File[];
-  }): Promise<(FilesRequest & { provider_id?: string })[] | null> {
-    const { fileRequest, uploadedFiles } = data;
+  // static async uploadFilesFromRequest(data: {
+  //   fileRequest: FilesRequest[];
+  //   uploadedFiles: Express.Multer.File[];
+  // }): Promise<(FilesRequest & { provider_id?: string })[] | null> {
+  //   const { fileRequest, uploadedFiles } = data;
 
-    const uploadedGDriveIds: string[] = [];
-    const uploadedSistemPaths: string[] = [];
+  //   const uploadedGDriveIds: string[] = [];
+  //   const uploadedSistemPaths: string[] = [];
 
-    let uploadIndex = 0;
+  //   let uploadIndex = 0;
 
-    const result: (FilesRequest & {
-      provider_id?: string;
-    })[] = [];
+  //   const result: (FilesRequest & {
+  //     provider_id?: string;
+  //   })[] = [];
 
-    try {
-      for (const file of fileRequest) {
-        if (file.old_file) {
-          result.push({
-            ...file,
-          });
+  //   try {
+  //     for (const file of fileRequest) {
+  //       if (file.old_file) {
+  //         result.push({
+  //           ...file,
+  //         });
 
-          continue;
-        }
+  //         continue;
+  //       }
 
-        const multerFile = uploadedFiles[uploadIndex++];
+  //       const multerFile = uploadedFiles[uploadIndex++];
 
-        if (!multerFile) {
-          throw new Error("File upload tidak ditemukan");
-        }
+  //       if (!multerFile) {
+  //         throw new Error("File upload tidak ditemukan");
+  //       }
 
-        const ext = path.extname(multerFile.originalname);
-        const finalName = `${file.nama_file}${ext}`;
+  //       const ext = path.extname(multerFile.originalname);
+  //       const finalName = `${file.nama_file}${ext}`;
 
-        if (file.storage_provider === StorageProvider.GDRIVE) {
-          const gdrive = await DriveApiService.upload({
-            fileBuffer: multerFile.buffer,
-            filename: finalName,
-            mimeType: multerFile.mimetype,
-            allowMimeType: ["application/pdf"],
-          });
+  //       if (file.storage_provider === StorageProvider.GDRIVE) {
+  //         const gdrive = await DriveApiService.upload({
+  //           fileBuffer: multerFile.buffer,
+  //           filename: finalName,
+  //           mimeType: multerFile.mimetype,
+  //           allowMimeType: ["application/pdf"],
+  //         });
 
-          if (!gdrive.success || !gdrive.fileId) {
-            throw new Error("Gagal upload file ke Google Drive");
-          }
+  //         if (!gdrive.success || !gdrive.fileId) {
+  //           throw new Error("Gagal upload file ke Google Drive");
+  //         }
 
-          uploadedGDriveIds.push(gdrive.fileId);
+  //         uploadedGDriveIds.push(gdrive.fileId);
 
-          result.push({
-            ...file,
-            nama_file: finalName,
-            provider_id: gdrive.fileId,
-          });
-        } else {
-          if (!fs.existsSync(FOLDER_GLOBAL_UPLOAD)) {
-            fs.mkdirSync(FOLDER_GLOBAL_UPLOAD, {
-              recursive: true,
-            });
-          }
+  //         result.push({
+  //           ...file,
+  //           nama_file: finalName,
+  //           provider_id: gdrive.fileId,
+  //         });
+  //       } else {
+  //         if (!fs.existsSync(FOLDER_GLOBAL_UPLOAD)) {
+  //           fs.mkdirSync(FOLDER_GLOBAL_UPLOAD, {
+  //             recursive: true,
+  //           });
+  //         }
 
-          const filePath = path.join(FOLDER_GLOBAL_UPLOAD, finalName);
+  //         const filePath = path.join(FOLDER_GLOBAL_UPLOAD, finalName);
 
-          fs.writeFileSync(filePath, multerFile.buffer);
+  //         fs.writeFileSync(filePath, multerFile.buffer);
 
-          uploadedSistemPaths.push(filePath);
+  //         uploadedSistemPaths.push(filePath);
 
-          result.push({
-            ...file,
-            nama_file: finalName,
-          });
-        }
-      }
+  //         result.push({
+  //           ...file,
+  //           nama_file: finalName,
+  //         });
+  //       }
+  //     }
 
-      return result;
-    } catch (error) {
-      // delete file
-      await Promise.all(
-        uploadedGDriveIds.map((id) => DriveApiService.deleteFile(id)),
-      );
+  //     return result;
+  //   } catch (error) {
+  //     // delete file
+  //     await Promise.all(
+  //       uploadedGDriveIds.map((id) => DriveApiService.deleteFile(id)),
+  //     );
 
-      uploadedSistemPaths.forEach((p) => FileService.deleteFile(p));
+  //     uploadedSistemPaths.forEach((p) => FileService.deleteFile(p));
 
-      return null;
-    }
-  }
+  //     return null;
+  //   }
+  // }
 
   // upload file from request
   static async uploadFileFromRequest(data: {
     fileRequest: {
-      nama_file: string;
       storage_provider: StorageProvider;
     };
     uploadedFile: Express.Multer.File;
-  }): Promise<{ nama_file: string; provider_id?: string } | null> {
+  }): Promise<{ file_id: string } | null> {
     const { fileRequest, uploadedFile } = data;
 
     let uploadedGDriveId: string | null = null;
     let uploadedSistemPath: string | null = null;
 
-    let uploadIndex = 0;
-
-    let result: { nama_file: string; provider_id?: string } | null;
+    let result: { file_id: string } | null;
 
     try {
-      const ext = path.extname(uploadedFile.originalname);
-      const finalName = `${fileRequest.nama_file}${ext}`;
+      // final name
+      const finalName = `${randomUUID()}.pdf`;
 
       if (fileRequest.storage_provider === StorageProvider.GDRIVE) {
         const gdrive = await DriveApiService.upload({
@@ -280,8 +277,7 @@ export class FileService {
 
         // set result
         result = {
-          nama_file: finalName,
-          provider_id: gdrive.fileId,
+          file_id: gdrive.fileId,
         };
       } else {
         if (!fs.existsSync(FOLDER_GLOBAL_UPLOAD)) {
@@ -299,7 +295,7 @@ export class FileService {
 
         // set result
         result = {
-          nama_file: finalName,
+          file_id: finalName,
         };
       }
 

@@ -103,7 +103,7 @@ export class DokumentasiBorangServices {
           data: {
             nama_file: file.nama_file,
             storage_provider: file.storage_provider,
-            provider_file_id: file.provider_file_id,
+            file_id: file.file_id,
             uploaded_by_id: uploaded_by_id,
             keterangan: file.keterangan!,
             tipe_file: file.tipe_dokumentasi,
@@ -362,7 +362,7 @@ export class DokumentasiBorangServices {
             file_dokumen: {
               select: {
                 id: true,
-                provider_file_id: true,
+                file_id: true,
                 nama_file: true,
                 keterangan: true,
                 uploaded_by: {
@@ -410,7 +410,7 @@ export class DokumentasiBorangServices {
               item.file_dokumen.default_detail?.nomor_dokumen ?? undefined,
             created_at: item.file_dokumen.created_at,
             updated_at: item.file_dokumen.updated_at,
-            provider_file_id: item.file_dokumen.provider_file_id ?? undefined,
+            file_id: item.file_dokumen.file_id,
           };
 
           // const folder id
@@ -493,7 +493,7 @@ export class DokumentasiBorangServices {
         file_dokumen: {
           select: {
             id: true,
-            provider_file_id: true,
+            file_id: true,
             nama_file: true,
             keterangan: true,
             uploaded_by: {
@@ -542,7 +542,7 @@ export class DokumentasiBorangServices {
               item.file_dokumen.default_detail?.nomor_dokumen ?? undefined,
             created_at: item.file_dokumen.created_at,
             updated_at: item.file_dokumen.updated_at,
-            provider_file_id: item.file_dokumen.provider_file_id ?? undefined,
+            file_id: item.file_dokumen.file_id ?? undefined,
           };
 
           // check existing data
@@ -606,6 +606,8 @@ export class DokumentasiBorangServices {
   }
 
   // update
+
+  // perbaiki !!
   static async updateDefault(
     data: UpdateDokumentasiBorangDefaultType,
   ): Promise<ResponseCreateUpdateDokumentasiBorangType | null> {
@@ -631,7 +633,7 @@ export class DokumentasiBorangServices {
         id: number;
         nama_file: string;
         storage_provider: StorageProvider;
-        provider_file_id?: string;
+        file_id?: string;
       } | null = null;
 
       // find dokumentasi borang by id
@@ -697,7 +699,7 @@ export class DokumentasiBorangServices {
             data: {
               nama_file: file.nama_file!,
               storage_provider: file.storage_provider!,
-              provider_file_id: file.provider_id!,
+              file_id: file.provider_id!,
               uploaded_by_id: uploaded_by_id,
               keterangan: file.keterangan!,
               tipe_file: dokumentasiBorang.kebutuhan_dokumentasi
@@ -727,7 +729,7 @@ export class DokumentasiBorangServices {
               nama_file: findFileDokumen.nama_file,
               storage_provider:
                 findFileDokumen.storage_provider as StorageProvider,
-              provider_file_id: findFileDokumen.provider_file_id ?? undefined,
+              file_id: findFileDokumen.file_id ?? undefined,
             };
           }
         }
@@ -805,10 +807,7 @@ export class DokumentasiBorangServices {
       "result storage provider",
       result.fileToDeleteAfterTransaction?.storage_provider,
     );
-    console.log(
-      "result",
-      result.fileToDeleteAfterTransaction?.provider_file_id,
-    );
+    console.log("result", result.fileToDeleteAfterTransaction?.file_id);
 
     if (result.fileToDeleteAfterTransaction) {
       if (
@@ -828,10 +827,10 @@ export class DokumentasiBorangServices {
       if (
         result.fileToDeleteAfterTransaction.storage_provider ===
           StorageProvider.GDRIVE &&
-        result.fileToDeleteAfterTransaction.provider_file_id
+        result.fileToDeleteAfterTransaction.file_id
       ) {
         const deleteFile = await FileService.deleteFileFormGDrive(
-          result.fileToDeleteAfterTransaction.provider_file_id,
+          result.fileToDeleteAfterTransaction.file_id,
         );
 
         console.log("delete file gdrive", deleteFile);

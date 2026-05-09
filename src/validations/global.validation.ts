@@ -23,4 +23,12 @@ export class GlobalValidation {
       id: z.coerce.number().int().positive().max(2147483647),
     })
     .strict() satisfies z.ZodType<{ id: number }>;
+
+  // params id
+  static readonly PARAMS_PREVIEW_FILE = z
+    .object({
+      id: z.coerce.number().int().positive().max(2147483647),
+      nama_file: z.string().trim().min(1).max(100),
+    })
+    .strict() satisfies z.ZodType<{ id: number; nama_file: string }>;
 }
