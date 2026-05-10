@@ -69,3 +69,27 @@ export const getPriorityStatusWakilDekan = (
 
   return Status.APPROVED;
 };
+
+// tim akreditasi
+export const getPriorityStatusTimAkreditasi = (
+  oldStatus: Status | null | undefined,
+  newStatus: Status | null | undefined,
+): Status | null => {
+  // 1. Prioritas pertama: revisi
+  if (oldStatus === Status.REVISION || newStatus === Status.REVISION) {
+    return Status.REVISION;
+  }
+
+  // 2. Prioritas kedua: null atau undefined
+  if (oldStatus == null || newStatus == null) {
+    return null;
+  }
+
+  // 3. Prioritas ketiga: pending
+  if (oldStatus === Status.PENDING || newStatus === Status.PENDING) {
+    return Status.PENDING;
+  }
+
+  // 4. Terakhir: approved
+  return Status.APPROVED;
+};

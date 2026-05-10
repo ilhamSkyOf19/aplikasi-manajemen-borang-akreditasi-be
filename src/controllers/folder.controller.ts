@@ -20,7 +20,7 @@ export class FolderController {
         req.body;
 
       // call service
-      const service = await FolderService.createMany({
+      const service = await FolderService.create({
         dokumentasi_borang_id,
         nama_folder,
         kebutuhan_dokumentasi_id,

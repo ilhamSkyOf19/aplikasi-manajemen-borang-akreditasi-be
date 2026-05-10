@@ -313,6 +313,53 @@ export class KebutuhanDokumentasiPicController {
     }
   }
 
+  // find all by kaprodi
+  static async findAllForDokumentasiBorangByKaprodi(
+    req: AuthRequest,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
+      { validatedQuery: PaginationType }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get query
+      const { limit, page, search, sort } = res.locals.validatedQuery;
+
+      // call service
+      const service =
+        await KebutuhanDokumentasiPicServices.findAllForDokumentasiBorangByKaprodi(
+          {
+            query: {
+              limit,
+              page,
+              search,
+              sort,
+            },
+          },
+        );
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(
+          res,
+          400,
+          "kebutuhan dokumentasi not found",
+        );
+      }
+
+      // return success
+      return ResponseResult.success<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>(
+        service,
+        res,
+        200,
+        "success read all kebutuhan dokumentasi pic",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // find all by kriteria pic
   static async findAllForDokumentasiBorangByKriteriaPendekatan(
     req: AuthRequest,

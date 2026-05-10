@@ -167,7 +167,7 @@ model NamaKebutuhanDokumentasi {
 model DokumentasiBorang {
   id                       Int      @id @default(autoincrement())
   kebutuhan_dokumentasi_id Int
-  status                   Status   @default(PENDING)
+  status                   Status?
   created_at               DateTime @default(now())
   updated_at               DateTime @updatedAt
 

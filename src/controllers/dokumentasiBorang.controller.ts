@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import {
+  AjukanRequestType,
   CreateDokumentasiBorangDefaultRequestType,
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
@@ -15,7 +16,14 @@ import { validation } from "../validations/validation";
 import { DokumentasiBorangValidation } from "../validations/dokumentasiBorang.validationn";
 import { KebutuhanDokumentasiPicServices } from "../services/kebutuhanDokumentasiPic.service";
 import { FolderService } from "../services/folder.service";
-import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
+import {
+  Status,
+  StorageProvider,
+  TipeDokumentasi,
+  TipeRiwayat,
+} from "../utils/contstanst";
+import { ResponseRiwayatType } from "../models/riwayat.model";
+import { RiwayatService } from "../services/riwayat.service";
 
 export class DokumentasiBorangController {
   // create
@@ -278,263 +286,36 @@ export class DokumentasiBorangController {
     }
   }
 
-  // find all by kebutuhan dokumentasi pic id and folder id
-  static async findFilesByFolderIdAndDokumentasiBorangId(
-    req: Request,
+  static async ajukan(
+    req: Request<{}, {}, AjukanRequestType>,
     res: Response<
-      ResponseStructure<ResponseFoldersAndFilesType | null>,
-      {
-        validatedParams: {
-          dokumentasi_borang_id: number;
-          folder_id: number;
-        };
-      }
+      ResponseStructure<ResponseRiwayatType | null>,
+      { validatedParams: { dokumentasi_borang_id: number } }
     >,
     next: NextFunction,
   ) {
     try {
       // get params
-      const { dokumentasi_borang_id, folder_id } = res.locals.validatedParams;
+      const { dokumentasi_borang_id } = res.locals.validatedParams;
 
-      // call service
-      const service =
-        await DokumentasiBorangServices.findFilesByFolderIdAndDokumentasiBorangId(
-          {
-            folder_id,
-            dokumentasi_borang_id,
-          },
-        );
+      const { keterangan } = req.body;
 
-      // check service
-      if (!service)
-        return ResponseResult.error(res, 400, "Data tidak ditemukan");
+      // create riwayat
+      const service = await RiwayatService.createForDokumentasiBorang({
+        dokumentasi_borang_id,
+        keterangan,
+        tipe_riwayat: TipeRiwayat.DOKUMENTASI_BORANG,
+        status: Status.PENDING,
+      });
 
-      return ResponseResult.success<ResponseFoldersAndFilesType | null>(
-        service,
-        res,
-        200,
-        "success",
-      );
+      // check
+      if (!service) {
+        return ResponseResult.error(res, 400, "gagal ajukan");
+      }
+
+      return ResponseResult.success<ResponseRiwayatType | null>(service, res);
     } catch (error) {
       next(error);
     }
   }
-
-  // update
-  // static async updateDokumentasiBorangDefatult(
-  //   req: AuthRequest<{}, {}, UpdateDokumentasiBorangDefaultRequestType>,
-  //   res: Response<
-  //     ResponseStructure<ResponseCreateUpdateDokumentasiBorangType | null>,
-  //     { validatedParams: { dokumentasi_borang_id: number; file_id: number } }
-  //   >,
-  //   next: NextFunction,
-  // ) {
-  //   try {
-  //     // validasi
-  //     const body = validation<
-  //       Omit<UpdateDokumentasiBorangDefaultRequestType, "file"> & {
-  //         file?: FilesRequest;
-  //       }
-  //     >(DokumentasiBorangValidation.UPDATE_DEFAULT, {
-  //       ...req.body,
-  //       old_folder: req.body.old_folder
-  //         ? Number(req.body.old_folder)
-  //         : undefined,
-  //       file: req.body.file ? JSON.parse(req.body.file) : undefined,
-  //     });
-
-  //     // check body
-  //     if (body.meta.statusCode !== 200) {
-  //       // return
-  //       return ResponseResult.error(
-  //         res,
-  //         body.meta.statusCode,
-  //         body.meta.message,
-  //         body.meta.customField,
-  //       );
-  //     }
-
-  //     // get body
-  //     const { file, new_folder, old_folder, nomor_dokumen } = body.data!;
-
-  //     // get params
-  //     const { dokumentasi_borang_id, file_id } = res.locals.validatedParams;
-
-  //     // check kebutuhan dokumentasi id
-  //     const checkDokumentasiBorang =
-  //       await DokumentasiBorangServices.findDokumentasiBorangGetIdStatusTipeDokumentasi(
-  //         dokumentasi_borang_id,
-  //       );
-
-  //     // check
-  //     if (!checkDokumentasiBorang)
-  //       return ResponseResult.error(
-  //         res,
-  //         404,
-  //         "dokumentasi borang tidak di temukan",
-  //       );
-
-  //     // check file id
-  //     const checkFileDokumen = await FileDokumenService.findById(file_id);
-
-  //     if (!checkFileDokumen)
-  //       return ResponseResult.error(res, 404, "file dokumen tidak ada");
-
-  //     // check pivot
-  //     const checkPivot =
-  //       await DokumentasiBorangServices.findPivotByDokumentasiBorangAndFileId({
-  //         dokumentasi_borang_id: checkDokumentasiBorang.id,
-  //         file_id: checkFileDokumen.id,
-  //       });
-
-  //     if (!checkPivot)
-  //       return ResponseResult.error(res, 404, "relasi pivot tidak ditemukan");
-
-  //     // check status
-  //     if (checkDokumentasiBorang.status !== Status.REVISION)
-  //       return ResponseResult.error(
-  //         res,
-  //         404,
-  //         "status dokumentasi borang belum revisi",
-  //       );
-
-  //     // check tipe dokumentasi
-  //     if (checkDokumentasiBorang.tipe_dokumentasi !== TipeDokumentasi.DEFAULT)
-  //       return ResponseResult.error(
-  //         res,
-  //         404,
-  //         "tipe kebutuhan dokumentasi tidak sesuai",
-  //       );
-
-  //     // check new folder
-  //     if (new_folder) {
-  //       const findFolder = await FolderService.findUniqeByNama({
-  //         folder: new_folder,
-  //         dokumentasi_borang_id: checkDokumentasiBorang.id,
-  //       });
-  //       // check
-  //       if (findFolder) {
-  //         return ResponseResult.error(res, 400, "folder name already exist");
-  //       }
-  //     }
-
-  //     // check old folder
-  //     if (old_folder) {
-  //       const findFolder = await FolderService.findUniqeById({
-  //         id: old_folder,
-  //         dokumentasi_borang_id: checkDokumentasiBorang.id,
-  //       });
-
-  //       if (!findFolder) {
-  //         return ResponseResult.error(res, 400, "folder not found");
-  //       }
-  //     }
-
-  //     // result uploaded file
-  //     let resultAfterUploaded:
-  //       | (FilesRequest & { provider_id?: string })
-  //       | null = null;
-  //     // check nama file if exist
-  //     if (file) {
-  //       if (file.nama_file) {
-  //         const findNamaFile = await FileDokumenService.findByName(
-  //           file.nama_file,
-  //         );
-
-  //         // check
-  //         if (findNamaFile) {
-  //           return ResponseResult.error(res, 400, "nama file already exist");
-  //         }
-  //       }
-
-  //       // check
-  //       if (file.old_file) {
-  //         const findFiles =
-  //           await FileDokumenService.findByIdAndGetTipeAndActive(file.old_file);
-
-  //         // check
-  //         if (!findFiles)
-  //           return ResponseResult.error(res, 404, "file not found");
-
-  //         // check tipe
-  //         if (
-  //           findFiles.is_active === false ||
-  //           findFiles.tipe_file !== TipeDokumentasi.DEFAULT
-  //         )
-  //           return ResponseResult.error(
-  //             res,
-  //             404,
-  //             "tipe file tidak sesuai atau file belum active",
-  //           );
-
-  //         // check duplicat pivot
-  //         const checkDuplicatPivotOldFile =
-  //           await DokumentasiBorangServices.findPivotByDokumentasiBorangAndFileId(
-  //             {
-  //               dokumentasi_borang_id: checkDokumentasiBorang.id,
-  //               file_id: file.old_file,
-  //             },
-  //           );
-
-  //         if (checkDuplicatPivotOldFile)
-  //           return ResponseResult.error(
-  //             res,
-  //             404,
-  //             "File sudah digunakan pada dokumentasi yang sama",
-  //           );
-  //       }
-
-  //       if (!req.file) {
-  //         return ResponseResult.error(res, 400, "file harus diupload");
-  //       }
-
-  //       //   upload file
-  //       const uploadFile = await FileService.uploadFilesFromRequest({
-  //         fileRequest: [file],
-  //         uploadedFiles: [req.file],
-  //       });
-
-  //       //   check upload files
-  //       if (!uploadFile) {
-  //         return ResponseResult.error(res, 400, "gagal upload file");
-  //       }
-
-  //       // set
-  //       resultAfterUploaded = uploadFile[0];
-  //     }
-
-  //     // get user id
-  //     const dosen_id = req.data?.id!;
-
-  //     //   call service
-  //     const service = await DokumentasiBorangServices.updateDefault({
-  //       file: resultAfterUploaded ?? undefined,
-  //       dokumentasi_borang_id: checkDokumentasiBorang.id,
-  //       new_folder,
-  //       old_folder,
-  //       uploaded_by_id: Number(dosen_id),
-  //       file_id: checkFileDokumen.id,
-  //       default_detail: nomor_dokumen
-  //         ? {
-  //             nomor_dokumen: nomor_dokumen,
-  //           }
-  //         : undefined,
-  //     });
-
-  //     //   check
-  //     if (!service) {
-  //       return ResponseResult.error(res, 400, "gagal upload file");
-  //     }
-
-  //     // return
-  //     return ResponseResult.success<ResponseCreateUpdateDokumentasiBorangType | null>(
-  //       service,
-  //       res,
-  //       200,
-  //       "success",
-  //     );
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
 }

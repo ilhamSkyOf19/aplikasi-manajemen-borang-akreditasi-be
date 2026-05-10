@@ -124,3 +124,8 @@ export interface ResponseDokumentasiBorangWithKebutuhanDokumentasiType {
   }[];
   status: Status | null;
 }
+
+// ajukan type
+export interface AjukanRequestType {
+  keterangan: string;
+}

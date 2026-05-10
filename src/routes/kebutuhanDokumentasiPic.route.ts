@@ -58,6 +58,16 @@ kebutuhanDokumentasiPicRoute.get(
   KebutuhanDokumentasiPicController.findAllForDokumentasiBorangByDosen,
 );
 
+// find all by kaprodi
+kebutuhanDokumentasiPicRoute.get(
+  "/for-dokumentasi-borang/by-kaprodi",
+  [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
+  zodValidationQuery<PaginationType>(
+    KebutuhanDokumentasiPicValidation.QUERY_NON_STATUS,
+  ),
+  KebutuhanDokumentasiPicController.findAllForDokumentasiBorangByKaprodi,
+);
+
 // find all
 kebutuhanDokumentasiPicRoute.get(
   "/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
@@ -74,7 +84,10 @@ kebutuhanDokumentasiPicRoute.get(
 // find all
 kebutuhanDokumentasiPicRoute.get(
   "/for-dokumentasi-borang/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
-  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
+  ],
   zodValidationParams<{ kriteria_id: number; pendekatan_id: number }>(
     KebutuhanDokumentasiPicValidation.PARAMS,
   ),

@@ -8,7 +8,7 @@ import {
 
 export class FolderService {
   // create many
-  static async createMany(data: CreateFolderType): Promise<number> {
+  static async create(data: CreateFolderType): Promise<number> {
     // get data
     const { nama_folder, dokumentasi_borang_id, kebutuhan_dokumentasi_id } =
       data;
@@ -21,6 +21,7 @@ export class FolderService {
       const createDokumentasiBorang = await prisma.dokumentasiBorang.create({
         data: {
           kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_id,
+          status: null,
         },
       });
 
