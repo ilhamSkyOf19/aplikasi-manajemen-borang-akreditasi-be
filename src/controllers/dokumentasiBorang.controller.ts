@@ -124,7 +124,9 @@ export class DokumentasiBorangController {
 
         // check
         if (findNamaFile) {
-          return ResponseResult.error(res, 400, "file name already exist");
+          return ResponseResult.error(res, 409, "file name already exist", [
+            "file_name_already_exist",
+          ]);
         }
 
         //   upload file

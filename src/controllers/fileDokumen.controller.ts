@@ -274,4 +274,38 @@ export class FileDokumenController {
       next(error);
     }
   }
+
+  // delete file
+  static async deleteFromDokumentasiBorang(
+    req: AuthRequest,
+    res: Response<
+      ResponseStructure<null>,
+      { validatedParams: { file_id: number; dokumentasi_borang_id: number } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get dosen id
+      const dosenId = req?.data?.id;
+
+      // get params id
+      const { file_id, dokumentasi_borang_id } = res.locals.validatedParams;
+
+      // call service
+      const service = await FileDokumenService.deleteFromDokumentasiBorang({
+        dokumentasi_borang_id,
+        file_id,
+      });
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(res, 400, "data not found");
+      }
+
+      // return response
+      return ResponseResult.successNoContent(res, "success delete file");
+    } catch (error) {
+      next(error);
+    }
+  }
 }

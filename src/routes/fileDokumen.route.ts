@@ -57,4 +57,14 @@ fileDokumenRouter.get(
   FileDokumenController.previewFileGoogleDrive,
 );
 
+// delete from dokumentasi borang
+fileDokumenRouter.delete(
+  "/:file_id/for-dokumentasi-borang/:dokumentasi_borang_id",
+  authMiddleware,
+  zodValidationParams<{ file_id: number; dokumentasi_borang_id: number }>(
+    FileDokumenValidation.PARAMS_FILE_ID_AND_DOKUMENTASI_BORANG_ID,
+  ),
+  FileDokumenController.deleteFromDokumentasiBorang,
+);
+
 export default fileDokumenRouter;

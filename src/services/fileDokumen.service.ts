@@ -314,4 +314,21 @@ export class FileDokumenService {
 
     return result.id;
   }
+
+  // delete from dokumentasi borang
+  static async deleteFromDokumentasiBorang(params: {
+    file_id: number;
+    dokumentasi_borang_id: number;
+  }): Promise<boolean> {
+    const result = await prisma.dokumentasiBorangFile.delete({
+      where: {
+        dokumentasi_borang_id_file_dokumen_id: {
+          file_dokumen_id: params.file_id,
+          dokumentasi_borang_id: params.dokumentasi_borang_id,
+        },
+      },
+    });
+
+    return !!result;
+  }
 }
