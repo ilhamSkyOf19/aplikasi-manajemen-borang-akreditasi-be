@@ -4,3 +4,8 @@
 - [✅] Membuat API Service file dokumen detail
 - [✅] Membuat API Service update data file default
 - [✅] Membuat API Service preview file sistem and google drive
+
+# Rencana kerja
+
+- [] Membuat service untuk schema distribusi kebutuhan dokumentasi
+- [] membuat service untuk file dokumen penelitian
