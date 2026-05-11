@@ -7,16 +7,20 @@ import {
 import { ResponseRiwayatType } from "../models/riwayat.model";
 import { VerifikasiDokumentasiBorangType } from "../models/dokumentasiBorang.model";
 import { RiwayatService } from "../services/riwayat.service";
-import { TipeRiwayat } from "../utils/contstanst";
+import { DosenRole, TipeRiwayat } from "../utils/contstanst";
+import { AuthRequest } from "../types/authRequest";
 
 export class VerifikasiController {
   // verifikasi kebutuhan dokumentasi pic
   static async verifikasi(
-    req: Request<{}, {}, VerifikasiType>,
+    req: AuthRequest<{}, {}, VerifikasiType>,
     res: Response<ResponseStructure<ResponseRiwayatType | null>>,
     next: NextFunction,
   ) {
     try {
+      // get role
+      const { role } = req.data as { role: DosenRole };
+
       // get body
       const {
         kebutuhan_dokumentasi_pic_id,
@@ -28,7 +32,7 @@ export class VerifikasiController {
       let result: ResponseRiwayatType | null = null;
 
       // call service
-      if (kebutuhan_dokumentasi_pic_id) {
+      if (kebutuhan_dokumentasi_pic_id && role === DosenRole.wakil_dekan_1) {
         result = await RiwayatService.createForKebutuhanDokumentasiPic({
           tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
           kebutuhan_dokumentasi_pic_id,
@@ -37,7 +41,7 @@ export class VerifikasiController {
         });
       }
 
-      if (dokumentasi_borang_id) {
+      if (dokumentasi_borang_id && role === DosenRole.kaprodi) {
         result = await RiwayatService.createForDokumentasiBorang({
           tipe_riwayat: TipeRiwayat.DOKUMENTASI_BORANG,
           dokumentasi_borang_id,

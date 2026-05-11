@@ -12,6 +12,7 @@ export interface ResponseFileDokumenForChooseWithMetaType {
 // response detail
 export interface ResponseFileDokumenForDetailType {
   id: number;
+  dokumentasi_borang_id: number;
   nama_file: string;
   kriteria: {
     kode_kriteria: number;

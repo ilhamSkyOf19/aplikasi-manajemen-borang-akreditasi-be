@@ -181,6 +181,7 @@ export class FileDokumenService {
           select: {
             dokumentasi_borang: {
               select: {
+                id: true,
                 kebutuhan_dokumentasi: {
                   select: {
                     kriteria: {
@@ -218,6 +219,8 @@ export class FileDokumenService {
 
     return {
       id: result.id,
+      dokumentasi_borang_id:
+        result.dokumentasi_borang_files[0].dokumentasi_borang.id,
       nama_file: result.nama_file,
       kriteria:
         result.dokumentasi_borang_files[0].dokumentasi_borang
@@ -323,16 +326,43 @@ export class FileDokumenService {
 
   // delete from dokumentasi borang
   static async deleteFromDokumentasiBorang(params: {
-    file_id: number;
+    id: number;
     dokumentasi_borang_id: number;
   }): Promise<boolean> {
-    const result = await prisma.dokumentasiBorangFile.delete({
-      where: {
-        dokumentasi_borang_id_file_dokumen_id: {
-          file_dokumen_id: params.file_id,
-          dokumentasi_borang_id: params.dokumentasi_borang_id,
+    console.log(params);
+    const result = await prisma.$transaction(async (tx) => {
+      // delete from dokumentasi borang files
+      const deleteFromDokumentasiBorang =
+        await tx.dokumentasiBorangFile.deleteMany({
+          where: {
+            dokumentasi_borang_id: params.dokumentasi_borang_id,
+            file_dokumen_id: params.id,
+          },
+        });
+
+      // check
+      if (!deleteFromDokumentasiBorang.count)
+        throw new Error("Data pivot not found");
+
+      const checkActivatedFalse = await tx.fileDokumen.findFirst({
+        where: {
+          id: params.id,
+          is_active: false,
         },
-      },
+      });
+
+      if (checkActivatedFalse) {
+        // delete from file dokumentasi
+        const deleteFromFileDokumentasi = await tx.fileDokumen.delete({
+          where: {
+            id: params.id,
+          },
+        });
+        // check
+        if (!deleteFromFileDokumentasi) throw new Error("Data not found");
+      }
+
+      return true;
     });
 
     return !!result;

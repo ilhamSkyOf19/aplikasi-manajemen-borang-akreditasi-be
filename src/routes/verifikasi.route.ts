@@ -16,15 +16,8 @@ const verifikasiRoute: Router = Router();
 
 // verifikasi kebutuhan dokumentasi pic
 verifikasiRoute.post(
-  "/kebutuhan-dokumentasi-pic",
-  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
-  zodValidation<VerifikasiType>(VerifikasiValidation.VERIFIKASI),
-  VerifikasiController.verifikasi,
-);
-
-verifikasiRoute.post(
-  "/dokumentasi-borang",
-  [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
+  "/",
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi])],
   zodValidation<VerifikasiType>(VerifikasiValidation.VERIFIKASI),
   VerifikasiController.verifikasi,
 );

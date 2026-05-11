@@ -13,7 +13,8 @@ import path from "node:path";
 import fsSync from "fs";
 import { DriveApiService } from "../services/driveapi.service";
 import { meta } from "zod/v4/core";
-import { TipeDokumentasi } from "../utils/contstanst";
+import { StorageProvider, TipeDokumentasi } from "../utils/contstanst";
+import { FileService } from "../services/file.service";
 
 export class FileDokumenController {
   // find all for choose
@@ -299,17 +300,39 @@ export class FileDokumenController {
       const dosenId = req?.data?.id;
 
       // get params id
-      const { file_id, dokumentasi_borang_id } = res.locals.validatedParams;
+      const { file_id: id, dokumentasi_borang_id } = res.locals.validatedParams;
+
+      // get activated
+      const activatedFile = await FileDokumenService.findById(id);
+
+      // check
+      if (!activatedFile) {
+        return ResponseResult.error(res, 400, "data not found");
+      }
 
       // call service
       const service = await FileDokumenService.deleteFromDokumentasiBorang({
         dokumentasi_borang_id,
-        file_id,
+        id,
       });
 
       // check service
       if (!service) {
         return ResponseResult.error(res, 400, "data not found");
+      }
+
+      console.log(activatedFile);
+
+      // check activated and uploaded
+      if (
+        activatedFile.is_active === false &&
+        activatedFile.uploaded_by_id === dosenId
+      ) {
+        if (activatedFile.storage_provider === StorageProvider.SISTEM) {
+          await FileService.deleteFormPath(activatedFile.file_id);
+        } else if (activatedFile.storage_provider === StorageProvider.GDRIVE) {
+          await FileService.deleteFileFormGDrive(activatedFile.file_id);
+        }
       }
 
       // return response
