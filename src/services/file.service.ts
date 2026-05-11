@@ -4,7 +4,11 @@ import fs from "fs";
 import path from "path";
 import fsAsync from "fs/promises";
 import driveApi from "../configs/driveapi.config";
-import { FOLDER_GLOBAL_UPLOAD, StorageProvider } from "../utils/contstanst";
+import {
+  FOLDER_GLOBAL_UPLOAD,
+  StorageProvider,
+  TipeDokumentasi,
+} from "../utils/contstanst";
 import { DriveApiService } from "./driveapi.service";
 import { randomUUID } from "crypto";
 
@@ -81,16 +85,19 @@ export class FileService {
   }
 
   // delete form path
-  static async deleteFormPath(
-    fileName: string,
-  ): Promise<{ success: boolean; message: string }> {
+  static async deleteFormPath(params: {
+    tipe_file: TipeDokumentasi;
+    fileName: string;
+  }): Promise<{ success: boolean; message: string }> {
+    const { fileName, tipe_file } = params;
+
     if (!fileName) {
       throw new Error(`Invalid path or filename: ${fileName}`);
     }
 
     const filePathFull = path.join(
       process.cwd(),
-      `${FOLDER_GLOBAL_UPLOAD}/${fileName}`,
+      `${FOLDER_GLOBAL_UPLOAD}${tipe_file.toLowerCase()}/${fileName}`,
     );
 
     await fsAsync.access(filePathFull);
@@ -103,35 +110,35 @@ export class FileService {
   }
 
   // delete multiple
-  static async deleteMultipleFilesFormPath(
-    files: { fileName: string }[],
-  ): Promise<{ success: boolean; message: string; file: string }[]> {
-    // delete
-    const results = await Promise.allSettled(
-      files.map(({ fileName }) => this.deleteFormPath(fileName)),
-    );
+  // static async deleteMultipleFilesFormPath(
+  //   files: { fileName: string }[],
+  // ): Promise<{ success: boolean; message: string; file: string }[]> {
+  //   // delete
+  //   const results = await Promise.allSettled(
+  //     files.map(({ fileName }) => this.deleteFormPath(fileName)),
+  //   );
 
-    // result
-    return results.map((result, index) => {
-      const file = files[index].fileName;
+  //   // result
+  //   return results.map((result, index) => {
+  //     const file = files[index].fileName;
 
-      // check
-      if (result.status === "fulfilled") {
-        return {
-          success: true,
-          message: result.value.message,
-          file,
-        };
-      }
+  //     // check
+  //     if (result.status === "fulfilled") {
+  //       return {
+  //         success: true,
+  //         message: result.value.message,
+  //         file,
+  //       };
+  //     }
 
-      // error
-      return {
-        success: false,
-        message: result.reason?.message ?? "Failed to delete",
-        file,
-      };
-    });
-  }
+  //     // error
+  //     return {
+  //       success: false,
+  //       message: result.reason?.message ?? "Failed to delete",
+  //       file,
+  //     };
+  //   });
+  // }
 
   // delete form gdrive
   static async deleteFileFormGDrive(
@@ -245,11 +252,15 @@ export class FileService {
   // upload file from request
   static async uploadFileFromRequest(data: {
     fileRequest: {
+      tipe_file: TipeDokumentasi;
       storage_provider: StorageProvider;
     };
     uploadedFile: Express.Multer.File;
   }): Promise<{ file_id: string } | null> {
-    const { fileRequest, uploadedFile } = data;
+    const {
+      fileRequest: { storage_provider, tipe_file },
+      uploadedFile,
+    } = data;
 
     let uploadedGDriveId: string | null = null;
     let uploadedSistemPath: string | null = null;
@@ -260,12 +271,19 @@ export class FileService {
       // final name
       const finalName = `${randomUUID()}.pdf`;
 
-      if (fileRequest.storage_provider === StorageProvider.GDRIVE) {
+      // folder path
+      const folderPath = path.join(
+        FOLDER_GLOBAL_UPLOAD,
+        tipe_file.toLowerCase(),
+      );
+
+      if (storage_provider === StorageProvider.GDRIVE) {
         const gdrive = await DriveApiService.upload({
           fileBuffer: uploadedFile.buffer,
           filename: finalName,
           mimeType: uploadedFile.mimetype,
           allowMimeType: ["application/pdf"],
+          tipeFile: tipe_file,
         });
 
         if (!gdrive.success || !gdrive.fileId) {
@@ -280,13 +298,13 @@ export class FileService {
           file_id: gdrive.fileId,
         };
       } else {
-        if (!fs.existsSync(FOLDER_GLOBAL_UPLOAD)) {
-          fs.mkdirSync(FOLDER_GLOBAL_UPLOAD, {
+        if (!fs.existsSync(folderPath)) {
+          fs.mkdirSync(folderPath, {
             recursive: true,
           });
         }
 
-        const filePath = path.join(FOLDER_GLOBAL_UPLOAD, finalName);
+        const filePath = path.join(folderPath, finalName);
 
         fs.writeFileSync(filePath, uploadedFile.buffer);
 

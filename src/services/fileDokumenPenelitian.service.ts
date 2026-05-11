@@ -6,6 +6,11 @@ import {
   ResponseUpdateFileDefaultType,
   UpdateFileDefaultType,
 } from "../models/fileDokumenDefault.model";
+import {
+  ResponseFileDokumenPenelitianForDetailType,
+  ResponseUpdateFilePenelitanType,
+  UpdateFilePenelitianType,
+} from "../models/fileDokumenPenelitian.model";
 import { PaginationType } from "../types/pagination";
 import {
   SortOrder,
@@ -14,16 +19,16 @@ import {
   TipeDokumentasi,
 } from "../utils/contstanst";
 
-export class FileDokumenDefaultService {
+export class FileDokumenPenelitianService {
   // find by id
   static async findByIdForDetail(
     id: number,
-  ): Promise<ResponseFileDokumenDefaultForDetailType | null> {
+  ): Promise<ResponseFileDokumenPenelitianForDetailType | null> {
     // call db
     const result = await prisma.fileDokumen.findUnique({
       where: {
         id,
-        tipe_file: TipeDokumentasi.DEFAULT,
+        tipe_file: TipeDokumentasi.PENELITIAN,
       },
       select: {
         id: true,
@@ -68,9 +73,11 @@ export class FileDokumenDefaultService {
         tipe_file: true,
         created_at: true,
         updated_at: true,
-        default_detail: {
+        penelitian_detail: {
           select: {
-            nomor_dokumen: true,
+            judul_penelitian: true,
+            tahun: true,
+            link_publikasi: true,
           },
         },
       },
@@ -97,24 +104,24 @@ export class FileDokumenDefaultService {
       tipe_file: result.tipe_file as TipeDokumentasi,
       created_at: result.created_at,
       updated_at: result.updated_at,
-      dokumentasi_default: result.default_detail?.nomor_dokumen
-        ? {
-            nomor_dokumentasi: result.default_detail.nomor_dokumen,
-          }
-        : null,
+      dokumentasi_penelitian: {
+        judul_penelitian: result.penelitian_detail?.judul_penelitian!,
+        link_publikasi: result.penelitian_detail?.link_publikasi!,
+        tahun: result.penelitian_detail?.tahun!,
+      },
       status: result.dokumentasi_borang_files[0].dokumentasi_borang
         .status as Status,
     };
   }
 
   // update file default
-  static async updateFileDefault(params: {
+  static async updateFilePenelitian(params: {
     id: number;
-    data: UpdateFileDefaultType;
-  }): Promise<ResponseUpdateFileDefaultType | null> {
+    data: UpdateFilePenelitianType;
+  }): Promise<ResponseUpdateFilePenelitanType | null> {
     // get params
     const {
-      data: { keterangan, nama_file, nomor_dokumen },
+      data: { keterangan, nama_file, judul_penelitian, link_publikasi, tahun },
       id,
     } = params;
 
@@ -122,14 +129,16 @@ export class FileDokumenDefaultService {
     const result = await prisma.fileDokumen.update({
       where: {
         id,
-        tipe_file: TipeDokumentasi.DEFAULT,
+        tipe_file: TipeDokumentasi.PENELITIAN,
       },
       data: {
         nama_file,
         keterangan,
-        default_detail: {
+        penelitian_detail: {
           update: {
-            nomor_dokumen,
+            judul_penelitian,
+            link_publikasi,
+            tahun,
           },
         },
       },
@@ -137,9 +146,11 @@ export class FileDokumenDefaultService {
         id: true,
         nama_file: true,
         keterangan: true,
-        default_detail: {
+        penelitian_detail: {
           select: {
-            nomor_dokumen: true,
+            judul_penelitian: true,
+            link_publikasi: true,
+            tahun: true,
           },
         },
         updated_at: true,
@@ -151,11 +162,11 @@ export class FileDokumenDefaultService {
       keterangan: result.keterangan,
       nama_file: result.nama_file,
       updated_at: result.updated_at,
-      dokumentasi_default: result.default_detail
-        ? {
-            nomor_dokumentasi: result.default_detail.nomor_dokumen,
-          }
-        : null,
+      dokumentasi_penelitian: {
+        judul_penelitian: result.penelitian_detail?.judul_penelitian!,
+        link_publikasi: result.penelitian_detail?.link_publikasi!,
+        tahun: result.penelitian_detail?.tahun!,
+      },
     };
   }
 }

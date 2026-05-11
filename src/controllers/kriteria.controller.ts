@@ -10,6 +10,7 @@ import {
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { KriteriaServices } from "../services/kriteria.service";
 import { PaginationType } from "../types/pagination";
+import { DistribusiKebutuhanDokumentasiService } from "../services/distribusiKebutuhanDokumentasi.service";
 
 export class KriteriaController {
   // create
@@ -21,6 +22,9 @@ export class KriteriaController {
     try {
       // get body
       const { kode_kriteria, nama_kriteria } = req.body;
+
+      // create distribusi untuk kebutuhan dokumentasi
+      await DistribusiKebutuhanDokumentasiService.create();
 
       // call service
       const service = await KriteriaServices.create({

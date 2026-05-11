@@ -9,8 +9,10 @@ import { GlobalValidation } from "../validations/global.validation";
 import { zodValidationParams } from "../middlewares/validationParams.middleware";
 import { zodValidation } from "../middlewares/validation.middleware";
 import { FileDokumenValidation } from "../validations/fileDokumen.validation";
-import { UpdateFileDefaultType } from "../models/fileDokumenDefault";
 import { FileDokumenDefaultValidation } from "../validations/fileDokumenDefault.validation";
+import { UpdateFileDefaultType } from "../models/fileDokumenDefault.model";
+import { UpdateFilePenelitianType } from "../models/fileDokumenPenelitian.model";
+import { FileDokumenPenelitianValidation } from "../validations/fileDokumenPenelitian.validation";
 
 const fileDokumenRouter: Router = Router();
 
@@ -25,7 +27,7 @@ fileDokumenRouter.get(
   FileDokumenController.findAllForChoose,
 );
 
-// find for detail
+// find for default
 fileDokumenRouter.get(
   "/default/:id",
   [
@@ -45,6 +47,28 @@ fileDokumenRouter.patch(
     FileDokumenDefaultValidation.UPDATE_DEFAULT,
   ),
   FileDokumenController.updateFileDefault,
+);
+
+// find for penelitian
+fileDokumenRouter.get(
+  "/penelitian/:id",
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
+  ],
+  zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_ID),
+  FileDokumenController.findFilePenelitianForDetail,
+);
+
+// update file penelitian
+fileDokumenRouter.patch(
+  "/penelitian/:id",
+  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_ID),
+  zodValidation<UpdateFilePenelitianType>(
+    FileDokumenPenelitianValidation.UPDATE_PENELITIAN,
+  ),
+  FileDokumenController.updateFilePenelitian,
 );
 
 // preview

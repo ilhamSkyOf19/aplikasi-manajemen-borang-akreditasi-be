@@ -5,4 +5,6 @@ export const ENV = {
   CLIENT_SECRET: process.env.CLIENT_SECRET!,
   REDIRECT_URI: process.env.REDIRECT_URI!,
   REFRESH_TOKEN: process.env.REFRESH_TOKEN!,
+  GOOGLE_DRIVE_FOLDER_MIME_TYPE: process.env.GOOGLE_DRIVE_FOLDER_MIME_TYPE!,
+  ROOT_FOLDER_ID: process.env.ROOT_FOLDER_ID!,
 };

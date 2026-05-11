@@ -14,6 +14,7 @@ import {
   CreateDokumentasiBorangDefaultType,
   IDokumentasiBorangDefault,
 } from "../models/fileDokumenDefault.model";
+import { CreateDokumentasiBorangPenelitianType } from "../models/fileDokumenPenelitian.model";
 import { ResponseResult } from "../types/response";
 import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 import { FileService } from "./file.service";
@@ -76,6 +77,111 @@ export class DokumentasiBorangServices {
             default_detail: {
               create: {
                 nomor_dokumen: file.nomor_dokumen,
+              },
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        fileId = newFile.id;
+      }
+
+      // check file id
+      if (!fileId) throw new Error("File tidak ada");
+
+      // create pivot table
+      const pivot = await tx.dokumentasiBorangFile.create({
+        data: {
+          dokumentasi_borang_id: dokumentasiBorangId,
+          file_dokumen_id: fileId,
+          folder_dokumen_id: folder,
+        },
+        select: {
+          id: true,
+          dokumentasi_borang_id: true,
+          file_dokumen_id: true,
+          folder_dokumen_id: true,
+          created_at: true,
+          updated_at: true,
+        },
+      });
+
+      return pivot;
+    });
+
+    // check result
+    if (!result) return null;
+
+    return toResponseCreateUpdateDokumentasiBorangType({
+      id: result.id,
+      dokumentasi_borang_id: result.dokumentasi_borang_id,
+      file_dokumen_id: result.file_dokumen_id,
+      folder_dokumen_id: result.folder_dokumen_id,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
+    });
+  }
+
+  // create
+  static async createPenelitian(
+    data: CreateDokumentasiBorangPenelitianType,
+  ): Promise<ResponseCreateUpdateDokumentasiBorangType | null> {
+    // get data
+    const {
+      kebutuhan_dokumentasi_id,
+      uploaded_by_id,
+      dokumentasi_borang_id,
+      folder,
+      old_file,
+      file,
+    } = data;
+
+    // transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // dokumentasi borang id
+      let dokumentasiBorangId: number | null = dokumentasi_borang_id ?? null;
+
+      // check
+      if (!dokumentasi_borang_id) {
+        //   create dokumentasi
+        const dokumentasiBorang = await tx.dokumentasiBorang.create({
+          data: {
+            kebutuhan_dokumentasi_id,
+          },
+          select: {
+            id: true,
+            kebutuhan_dokumentasi_id: true,
+            status: true,
+          },
+        });
+
+        dokumentasiBorangId = dokumentasiBorang.id;
+      }
+
+      // check
+      if (!dokumentasiBorangId) throw new Error("Dokumentasi borang tidak ada");
+
+      // file id
+      let fileId: number | null = old_file ?? null;
+
+      // check file
+      if (file) {
+        // create file
+        const newFile = await tx.fileDokumen.create({
+          data: {
+            nama_file: file.nama_file,
+            storage_provider: file.storage_provider,
+            file_id: file.file_id,
+            uploaded_by_id: uploaded_by_id,
+            keterangan: file.keterangan!,
+            tipe_file: file.tipe_dokumentasi,
+            penelitian_detail: {
+              create: {
+                judul_penelitian: file.judul_penelitian,
+                tahun: file.tahun,
+                link_publikasi: file.link_publikasi,
               },
             },
           },

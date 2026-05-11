@@ -1,4 +1,5 @@
 import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
+import { IDataFileGlobalType } from "./fileDokumen.model";
 
 // type dokumentasi default
 export interface IDokumentasiBorangDefault {
@@ -17,30 +18,8 @@ export interface IDokumentasiBorangDefault {
 }
 
 // response detail
-export interface ResponseFileDokumenDefaultForDetailType {
+export interface ResponseFileDokumenDefaultForDetailType extends IDataFileGlobalType {
   id: number;
-  dokumentasi_borang_id: number;
-  nama_file: string;
-  kriteria: {
-    kode_kriteria: number;
-    nama_kriteria: string;
-  };
-  pendekatan: {
-    tahap: string;
-    keterangan: string;
-  };
-  storage_provider: StorageProvider;
-  file_id: string;
-  uploaded_by: {
-    id: number;
-    nama: string;
-    email: string;
-    nidn: string;
-  };
-  keterangan: string;
-  tipe_file: TipeDokumentasi;
-  created_at: Date;
-  updated_at: Date;
   dokumentasi_default: {
     nomor_dokumentasi: string | null;
   } | null;
@@ -65,7 +44,7 @@ export interface ResponseUpdateFileDefaultType {
   updated_at: Date;
 }
 
-// create kebutuhan dokumentasi borang
+// create
 export interface CreateDokumentasiBorangDefaultRequestType {
   kebutuhan_dokumentasi_id: number;
   dokumentasi_borang_id?: number;

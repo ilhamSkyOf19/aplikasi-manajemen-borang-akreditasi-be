@@ -138,18 +138,34 @@ export class DosenController {
       // get body
       const body = req.body;
 
+      // find dosen
+      const findDosen = await DosenServices.findById(id);
+
+      if (!findDosen) {
+        return ResponseResult.error(res, 400, "dosen not found");
+      }
+
       // check body role
       // if (body.roles?.includes(DosenRole.wakil_dekan_1)) {
       //   // check count wd 1
-      //   const countWd1 = await DosenServices.findCountRole(
-      //     DosenRole.wakil_dekan_1,
-      //   );
+      const countWd1 = await DosenServices.findCountRole(
+        DosenRole.wakil_dekan_1,
+      );
 
-      //   // check count === 2
-      //   if (countWd1 === 2) {
-      //     return ResponseResult.error(res, 400, "max record wd 1 is 2");
-      //   }
-      // }
+      if (countWd1) {
+        // check count === 2
+        if (countWd1 === 2) {
+          return ResponseResult.error(res, 400, "max record wd 1 is 2");
+        }
+
+        if (
+          countWd1 === 1 &&
+          findDosen.roles.includes(DosenRole.wakil_dekan_1) &&
+          !body.roles?.includes(DosenRole.wakil_dekan_1)
+        ) {
+          return ResponseResult.error(res, 400, "min record wd 1 is 1");
+        }
+      }
 
       // update user
       const service = await DosenServices.update(id, body);

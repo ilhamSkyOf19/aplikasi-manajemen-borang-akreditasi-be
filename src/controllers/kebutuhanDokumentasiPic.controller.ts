@@ -15,7 +15,6 @@ import { DosenRole, Status, TipeRiwayat } from "../utils/contstanst";
 import { RiwayatService } from "../services/riwayat.service";
 import { PicKebutuhanDokumentasiServices } from "../services/picKebutuhanDokumentasi.service";
 import { AuthRequest } from "../types/authRequest";
-import { PayloadDosenType } from "../models/dosen.model";
 
 export class KebutuhanDokumentasiPicController {
   // create

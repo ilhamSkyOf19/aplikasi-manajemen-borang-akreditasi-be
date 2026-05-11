@@ -292,6 +292,8 @@ model DistribusiKebutuhanDokumentasi {
   is_active  Boolean
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("distribusi_kebutuhan_dokumentasi")
 }
 
 // model KebutuhanDokumentasiDokumentasiBorang {

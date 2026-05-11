@@ -5,7 +5,7 @@ import {
   ResponseFileDokumenDefaultForDetailType,
   ResponseUpdateFileDefaultType,
   UpdateFileDefaultType,
-} from "../models/fileDokumenDefault";
+} from "../models/fileDokumenDefault.model";
 import { PaginationType } from "../types/pagination";
 import { FileDokumenService } from "../services/fileDokumen.service";
 import { AuthRequest } from "../types/authRequest";
@@ -16,6 +16,12 @@ import { meta } from "zod/v4/core";
 import { StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 import { FileService } from "../services/file.service";
 import { FileDokumenDefaultService } from "../services/fileDokumenDefault.service";
+import {
+  ResponseFileDokumenPenelitianForDetailType,
+  ResponseUpdateFilePenelitanType,
+  UpdateFilePenelitianType,
+} from "../models/fileDokumenPenelitian.model";
+import { FileDokumenPenelitianService } from "../services/fileDokumenPenelitian.service";
 
 export class FileDokumenController {
   // find all for choose
@@ -90,6 +96,7 @@ export class FileDokumenController {
         "public",
         "uploads",
         "dokumentasi-borang",
+        file.tipe_file.toLowerCase(),
         fileName,
       );
 
@@ -206,7 +213,7 @@ export class FileDokumenController {
     }
   }
 
-  // find for detail
+  // find for default detail
   static async findFileDefaultForDetail(
     _req: Request,
     res: Response<
@@ -287,6 +294,94 @@ export class FileDokumenController {
     }
   }
 
+  // find for penelitian detail
+  static async findFilePenelitianForDetail(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseFileDokumenPenelitianForDetailType | null>,
+      { validatedParams: { id: number } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get id
+      const { id } = res.locals.validatedParams;
+
+      // call service
+      const service = await FileDokumenPenelitianService.findByIdForDetail(id);
+
+      // check
+      if (!service) {
+        return ResponseResult.error(res, 400, "data not found");
+      }
+
+      // return
+      return ResponseResult.success<ResponseFileDokumenPenelitianForDetailType | null>(
+        service,
+        res,
+        200,
+        "berhasil mendapatkan data file dokumen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // update file default
+  static async updateFilePenelitian(
+    req: AuthRequest<{}, {}, UpdateFilePenelitianType>,
+    res: Response<
+      ResponseStructure<ResponseUpdateFilePenelitanType | null>,
+      { validatedParams: { id: number } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get id
+      const { id } = res.locals.validatedParams;
+
+      // get body
+      const { judul_penelitian, keterangan, link_publikasi, nama_file, tahun } =
+        req.body;
+
+      // get dosen id
+      const { id: dosenId } = req?.data as { id: number };
+
+      // find file
+      const findFile = await FileDokumenService.findById(id);
+
+      // check
+      if (!findFile) {
+        return ResponseResult.error(res, 400, "data not found");
+      }
+
+      // check uploaded
+      if (findFile.uploaded_by_id !== dosenId)
+        return ResponseResult.forbidden(res, "Forbidden");
+
+      // call service
+      const service = await FileDokumenPenelitianService.updateFilePenelitian({
+        id,
+        data: {
+          judul_penelitian,
+          keterangan,
+          link_publikasi,
+          nama_file,
+          tahun,
+        },
+      });
+
+      return ResponseResult.success<ResponseUpdateFilePenelitanType | null>(
+        service,
+        res,
+        200,
+        "berhasil update file penelitian",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // delete file
   static async deleteFromDokumentasiBorang(
     req: AuthRequest,
@@ -322,15 +417,16 @@ export class FileDokumenController {
         return ResponseResult.error(res, 400, "data not found");
       }
 
-      console.log(activatedFile);
-
       // check activated and uploaded
       if (
         activatedFile.is_active === false &&
         activatedFile.uploaded_by_id === dosenId
       ) {
         if (activatedFile.storage_provider === StorageProvider.SISTEM) {
-          await FileService.deleteFormPath(activatedFile.file_id);
+          await FileService.deleteFormPath({
+            fileName: activatedFile.file_id,
+            tipe_file: activatedFile.tipe_file,
+          });
         } else if (activatedFile.storage_provider === StorageProvider.GDRIVE) {
           await FileService.deleteFileFormGDrive(activatedFile.file_id);
         }

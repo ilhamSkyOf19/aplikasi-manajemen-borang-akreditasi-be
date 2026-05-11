@@ -1,17 +1,96 @@
 import { Readable } from "stream";
 import driveApi from "../configs/driveapi.config";
 import { drive_v3 } from "googleapis";
+import { TipeDokumentasi } from "../utils/contstanst";
+import { ENV } from "../utils/env";
 
 export class DriveApiService {
+  // check nama folder
+  private static escapeDriveQuery(value: string): string {
+    return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  }
+
+  // get nama folder by tipe
+  private static getFolderNameByTipe(tipe: TipeDokumentasi): string {
+    switch (tipe) {
+      case TipeDokumentasi.PENELITIAN:
+        return "penelitian";
+
+      case TipeDokumentasi.DEFAULT:
+      default:
+        return "default";
+    }
+  }
+
+  // find folder by nama di google drive
+  static async findFolderByName(params: {
+    folderName: string;
+    parentFolderId: string;
+  }): Promise<string | null> {
+    const { folderName, parentFolderId } = params;
+
+    const safeFolderName = this.escapeDriveQuery(folderName);
+
+    const result = await driveApi.files.list({
+      q: [
+        `name = '${safeFolderName}'`,
+        `mimeType = '${ENV.GOOGLE_DRIVE_FOLDER_MIME_TYPE}'`,
+        `'${parentFolderId}' in parents`,
+        `trashed = false`,
+      ].join(" and "),
+      fields: "files(id, name)",
+      pageSize: 1,
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+    });
+
+    return result.data.files?.[0]?.id ?? null;
+  }
+
+  // fungsi create folder
+  static async createFolder(params: {
+    folderName: string;
+    parentFolderId: string;
+  }): Promise<string> {
+    const { folderName, parentFolderId } = params;
+
+    const result = await driveApi.files.create({
+      requestBody: {
+        name: folderName,
+        mimeType: ENV.GOOGLE_DRIVE_FOLDER_MIME_TYPE,
+        parents: [parentFolderId],
+      },
+      fields: "id",
+      supportsAllDrives: true,
+    });
+
+    return result.data.id!;
+  }
+
+  // fungsi check folder ada atau tidak, jika tidak ada buat folder
+  static async ensureFolder(params: {
+    folderName: string;
+    parentFolderId: string;
+  }): Promise<string> {
+    const existingFolderId = await this.findFolderByName(params);
+
+    if (existingFolderId) {
+      return existingFolderId;
+    }
+
+    return this.createFolder(params);
+  }
+
+  // upload ke google drive
   static async upload(req: {
     filename: string;
     fileBuffer: Buffer;
     mimeType: string;
     allowMimeType: string[];
+    tipeFile: TipeDokumentasi;
   }): Promise<{ success: boolean; message: string; fileId?: string }> {
-    // request
-    const { allowMimeType, fileBuffer, filename, mimeType } = req;
-    // check mime type
+    const { allowMimeType, fileBuffer, filename, mimeType, tipeFile } = req;
+
     if (!allowMimeType.includes(mimeType)) {
       return {
         success: false,
@@ -19,23 +98,31 @@ export class DriveApiService {
       };
     }
 
-    // create stream
+    // buat folder jika belum ada
+    const folderName = this.getFolderNameByTipe(tipeFile);
+
+    // check folder dalam google drive
+    const targetFolderId = await this.ensureFolder({
+      folderName,
+      parentFolderId: ENV.ROOT_FOLDER_ID,
+    });
+
     const bufferStream = new Readable();
     bufferStream.push(fileBuffer);
     bufferStream.push(null);
 
-    // upload
     const result = await driveApi.files.create({
       requestBody: {
         name: filename,
         mimeType,
-        parents: ["1cEKV2IlrHP1aBDW0cfsy_aoZW7kgt9za"],
+        parents: [targetFolderId],
       },
       media: {
         mimeType,
         body: bufferStream,
       },
       fields: "id",
+      supportsAllDrives: true,
     });
 
     return {

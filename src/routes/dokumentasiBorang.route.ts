@@ -24,6 +24,14 @@ dokumentasiBorangRoute.post(
   DokumentasiBorangController.createDokumentasiBorangDefault,
 );
 
+// penelitian
+dokumentasiBorangRoute.post(
+  "/penelitian",
+  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  upload.single("dokumentasi"),
+  DokumentasiBorangController.createDokumentasiBorangPenelitian,
+);
+
 // find
 dokumentasiBorangRoute.get(
   "/by-kebutuhan-dokumentasi/:kebutuhan_dokumentasi_id",
@@ -35,19 +43,6 @@ dokumentasiBorangRoute.get(
     kebutuhan_dokumentasi_id: number;
   }>(DokumentasiBorangValidation.PARAMS_KEBUTUHAN_DOKUMENTASI_ID),
   DokumentasiBorangController.findByKebutuhanDokumentasiId,
-);
-
-// find
-dokumentasiBorangRoute.get(
-  "/by-kebutuhan-dokumentasi/:kebutuhan_dokumentasi_id",
-  [
-    authMiddleware,
-    aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
-  ],
-  zodValidationParams<{ kebutuhan_dokumentasi_id: number }>(
-    DokumentasiBorangValidation.PARAMS_KEBUTUHAN_DOKUMENTASI_ID,
-  ),
-  DokumentasiBorangController.findAllByKebutuhanDokumentasiPicId,
 );
 
 // ajukan

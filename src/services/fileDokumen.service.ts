@@ -122,6 +122,7 @@ export class FileDokumenService {
     file_id: string;
     nama_file: string;
     uploaded_by_id: number;
+    tipe_file: TipeDokumentasi;
   } | null> {
     const result = await prisma.fileDokumen.findUnique({
       where: {
@@ -134,6 +135,7 @@ export class FileDokumenService {
         file_id: true,
         nama_file: true,
         uploaded_by_id: true,
+        tipe_file: true,
       },
     });
 
@@ -147,6 +149,7 @@ export class FileDokumenService {
       storage_provider: result.storage_provider as StorageProvider,
       file_id: result.file_id ?? undefined,
       uploaded_by_id: result.uploaded_by_id,
+      tipe_file: result.tipe_file as TipeDokumentasi,
     };
   }
 

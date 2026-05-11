@@ -21,7 +21,7 @@ authRoute.post(
 // register
 authRoute.post(
   "/register",
-  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  // [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
   zodValidation<CreateDosenType>(DosenValidation.CREATE),
   AuthController.register,
 );
