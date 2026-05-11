@@ -1,5 +1,6 @@
 import z from "zod";
 import { PaginationType } from "../types/pagination";
+import { TipeDokumentasi } from "../utils/contstanst";
 
 export class GlobalValidation {
   static readonly QUERY = z

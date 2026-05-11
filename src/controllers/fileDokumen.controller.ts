@@ -13,6 +13,7 @@ import path from "node:path";
 import fsSync from "fs";
 import { DriveApiService } from "../services/driveapi.service";
 import { meta } from "zod/v4/core";
+import { TipeDokumentasi } from "../utils/contstanst";
 
 export class FileDokumenController {
   // find all for choose
@@ -20,7 +21,10 @@ export class FileDokumenController {
     _req: Request,
     res: Response<
       ResponseStructure<ResponseFileDokumenForChooseWithMetaType | null>,
-      { validatedQuery: PaginationType }
+      {
+        validatedParams: { tipe_file: TipeDokumentasi };
+        validatedQuery: PaginationType;
+      }
     >,
     next: NextFunction,
   ) {
@@ -28,12 +32,18 @@ export class FileDokumenController {
       // get query
       const { limit, page, search, sort } = res.locals.validatedQuery;
 
+      // get params
+      const { tipe_file } = res.locals.validatedParams;
+
       // call service
       const service = await FileDokumenService.findAllForChoose({
-        limit,
-        page,
-        search,
-        sort,
+        query: {
+          limit,
+          page,
+          search,
+          sort,
+        },
+        tipe_file,
       });
 
       // check

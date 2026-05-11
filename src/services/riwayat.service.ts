@@ -209,6 +209,20 @@ export class RiwayatService {
         },
       });
 
+      // update active file
+      await tx.fileDokumen.updateMany({
+        where: {
+          dokumentasi_borang_files: {
+            some: {
+              dokumentasi_borang_id,
+            },
+          },
+        },
+        data: {
+          is_active: true,
+        },
+      });
+
       // create riwayat
       const riwayat = await tx.riwayat.create({
         data: {

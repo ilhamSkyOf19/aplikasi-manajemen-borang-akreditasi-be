@@ -9,17 +9,22 @@ import {
 import { PaginationType } from "../types/pagination";
 import {
   SortOrder,
+  Status,
   StorageProvider,
   TipeDokumentasi,
 } from "../utils/contstanst";
 
 export class FileDokumenService {
   // find all get id and nama by active
-  static async findAllForChoose(
-    query: PaginationType,
-  ): Promise<ResponseFileDokumenForChooseWithMetaType | null> {
-    // get query
-    const { limit = 8, page = 1, search, sort } = query;
+  static async findAllForChoose(params: {
+    tipe_file: TipeDokumentasi;
+    query: PaginationType;
+  }): Promise<ResponseFileDokumenForChooseWithMetaType | null> {
+    // get params
+    const {
+      query: { limit = 8, page = 1, search, sort },
+      tipe_file,
+    } = params;
 
     // current page
     const currentPage = page < 1 ? 1 : page;
@@ -31,6 +36,7 @@ export class FileDokumenService {
           contains: search,
         },
       }),
+      tipe_file,
       is_active: true,
     };
 

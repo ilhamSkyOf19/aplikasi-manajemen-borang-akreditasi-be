@@ -15,6 +15,7 @@ import { DosenRole, Status, TipeRiwayat } from "../utils/contstanst";
 import { RiwayatService } from "../services/riwayat.service";
 import { PicKebutuhanDokumentasiServices } from "../services/picKebutuhanDokumentasi.service";
 import { AuthRequest } from "../types/authRequest";
+import { PayloadDosenType } from "../models/dosen.model";
 
 export class KebutuhanDokumentasiPicController {
   // create
@@ -262,7 +263,7 @@ export class KebutuhanDokumentasiPicController {
   }
 
   // find all by dosen id
-  static async findAllForDokumentasiBorangByDosen(
+  static async findAllForDokumentasiBorang(
     req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
@@ -275,69 +276,20 @@ export class KebutuhanDokumentasiPicController {
       const { limit, page, search, sort } = res.locals.validatedQuery;
 
       // get role from req data
-      const { role, id } = req.data as { role: DosenRole; id: number };
+      const { role, id } = req?.data as { role: DosenRole; id: number };
 
       // call service
       const service =
-        await KebutuhanDokumentasiPicServices.findAllForDokumentasiBorangByDosen(
-          {
-            dosen_id: id,
-            query: {
-              role,
-              limit,
-              page,
-              search,
-              sort,
-            },
+        await KebutuhanDokumentasiPicServices.findAllForDokumentasiBorang({
+          dosen_id: id,
+          role,
+          query: {
+            limit,
+            page,
+            search,
+            sort,
           },
-        );
-
-      // check service
-      if (!service) {
-        return ResponseResult.error(
-          res,
-          400,
-          "kebutuhan dokumentasi not found",
-        );
-      }
-
-      // return success
-      return ResponseResult.success<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>(
-        service,
-        res,
-        200,
-        "success read all kebutuhan dokumentasi pic",
-      );
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // find all by kaprodi
-  static async findAllForDokumentasiBorangByKaprodi(
-    req: AuthRequest,
-    res: Response<
-      ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
-      { validatedQuery: PaginationType }
-    >,
-    next: NextFunction,
-  ) {
-    try {
-      // get query
-      const { limit, page, search, sort } = res.locals.validatedQuery;
-
-      // call service
-      const service =
-        await KebutuhanDokumentasiPicServices.findAllForDokumentasiBorangByKaprodi(
-          {
-            query: {
-              limit,
-              page,
-              search,
-              sort,
-            },
-          },
-        );
+        });
 
       // check service
       if (!service) {
@@ -380,13 +332,16 @@ export class KebutuhanDokumentasiPicController {
       const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
 
       // get dosen id
-      const { id } = req?.data as { id: number };
+      const { id, role } = req?.data as { id: number; role: DosenRole };
 
       // call service
       const service =
         await KebutuhanDokumentasiPicServices.findAllforDokumentasiBorangByKriteriaAndPendekatan(
           {
-            dosen_id: id,
+            dosen: {
+              id,
+              role,
+            },
             kriteria_id,
             pendekatan_id,
             query: {

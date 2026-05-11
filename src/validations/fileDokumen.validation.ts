@@ -1,5 +1,6 @@
 import z from "zod";
 import { UpdateFileDefaultType } from "../models/fileDokumen.model";
+import { TipeDokumentasi } from "../utils/contstanst";
 
 export class FileDokumenValidation {
   // update file default
@@ -21,4 +22,11 @@ export class FileDokumenValidation {
     file_id: number;
     dokumentasi_borang_id: number;
   }>;
+
+  //  params tipe file
+  static readonly PARAMS_TIPE_FILE = z
+    .object({
+      tipe_file: z.enum(TipeDokumentasi),
+    })
+    .strict() satisfies z.ZodType<{ tipe_file: TipeDokumentasi }>;
 }

@@ -51,21 +51,14 @@ kebutuhanDokumentasiPicRoute.get(
 // find all by dosen id
 kebutuhanDokumentasiPicRoute.get(
   "/for-dokumentasi-borang",
-  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
+  ],
   zodValidationQuery<PaginationType>(
     KebutuhanDokumentasiPicValidation.QUERY_NON_STATUS,
   ),
-  KebutuhanDokumentasiPicController.findAllForDokumentasiBorangByDosen,
-);
-
-// find all by kaprodi
-kebutuhanDokumentasiPicRoute.get(
-  "/for-dokumentasi-borang/by-kaprodi",
-  [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
-  zodValidationQuery<PaginationType>(
-    KebutuhanDokumentasiPicValidation.QUERY_NON_STATUS,
-  ),
-  KebutuhanDokumentasiPicController.findAllForDokumentasiBorangByKaprodi,
+  KebutuhanDokumentasiPicController.findAllForDokumentasiBorang,
 );
 
 // find all

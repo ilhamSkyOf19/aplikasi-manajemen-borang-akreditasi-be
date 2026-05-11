@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
-import { DosenRole } from "../utils/contstanst";
+import { DosenRole, TipeDokumentasi } from "../utils/contstanst";
 import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
 import { PaginationType } from "../types/pagination";
 import { FileDokumenController } from "../controllers/fileDokumen.controller";
@@ -15,9 +15,12 @@ const fileDokumenRouter: Router = Router();
 
 // dokumen borang router
 fileDokumenRouter.get(
-  "/for-choose",
+  "/for-choose/:tipe_file",
   [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
   zodValidationQuery<PaginationType>(GlobalValidation.QUERY),
+  zodValidationParams<{ tipe_file: TipeDokumentasi }>(
+    FileDokumenValidation.PARAMS_TIPE_FILE,
+  ),
   FileDokumenController.findAllForChoose,
 );
 

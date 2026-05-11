@@ -38,6 +38,15 @@ export interface ResponseFileDokumenForDetailType {
   } | null;
 }
 
+// response for choose
+export interface ResponsFileDokumenForChooseWithMetaType {
+  meta: MetaType;
+  data: {
+    id: number;
+    nama_file: string;
+  }[];
+}
+
 // update file default
 export interface UpdateFileDefaultType {
   nama_file?: string;

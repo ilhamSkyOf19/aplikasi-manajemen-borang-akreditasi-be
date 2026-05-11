@@ -41,7 +41,9 @@ export class DokumentasiBorangController {
         {
           ...req.body,
           kebutuhan_dokumentasi_id: Number(req.body.kebutuhan_dokumentasi_id),
-          dokumentasi_borang_id: Number(req.body.dokumentasi_borang_id),
+          dokumentasi_borang_id: req.body.dokumentasi_borang_id
+            ? Number(req.body.dokumentasi_borang_id)
+            : undefined,
           old_file: req.body.old_file ? Number(req.body.old_file) : undefined,
           folder: req.body.folder ? Number(req.body.folder) : undefined,
         },
