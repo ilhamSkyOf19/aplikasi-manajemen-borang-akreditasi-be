@@ -232,22 +232,11 @@ model FileDokumen {
 
   dokumentasi_borang_files DokumentasiBorangFile[]
 
-  default_detail FileDokumenDefault?
+  default_detail    FileDokumenDefault?
+  penelitian_detail FileDokumenPenelitian?
 
   @@index([uploaded_by_id])
   @@map("file_dokumen")
-}
-
-model FileDokumenDefault {
-  id              Int      @id @default(autoincrement())
-  file_dokumen_id Int      @unique
-  nomor_dokumen   String?
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-
-  file_dokumen FileDokumen @relation(fields: [file_dokumen_id], references: [id], onDelete: Cascade)
-
-  @@map("file_dokumen_default")
 }
 
 // dokumentasi borang file pivot 
@@ -269,6 +258,40 @@ model DokumentasiBorangFile {
   @@unique([dokumentasi_borang_id, file_dokumen_id])
   @@index([dokumentasi_borang_id, folder_dokumen_id])
   @@map("dokumentasi_borang_file")
+}
+
+model FileDokumenDefault {
+  id              Int      @id @default(autoincrement())
+  file_dokumen_id Int      @unique
+  nomor_dokumen   String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  file_dokumen FileDokumen @relation(fields: [file_dokumen_id], references: [id], onDelete: Cascade)
+
+  @@map("file_dokumen_default")
+}
+
+model FileDokumenPenelitian {
+  id               Int      @id @default(autoincrement())
+  file_dokumen_id  Int      @unique
+  judul_penelitian String
+  tahun            Int      @db.Year
+  link_publikasi   String
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  file_dokumen FileDokumen @relation(fields: [file_dokumen_id], references: [id], onDelete: Cascade)
+
+  @@map("file_dokumen_penelitian")
+}
+
+// distribusi 
+model DistribusiKebutuhanDokumentasi {
+  id         Int      @id @default(autoincrement())
+  is_active  Boolean
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 // model KebutuhanDokumentasiDokumentasiBorang {

@@ -8,8 +8,9 @@ import { FileDokumenController } from "../controllers/fileDokumen.controller";
 import { GlobalValidation } from "../validations/global.validation";
 import { zodValidationParams } from "../middlewares/validationParams.middleware";
 import { zodValidation } from "../middlewares/validation.middleware";
-import { UpdateFileDefaultType } from "../models/fileDokumen.model";
 import { FileDokumenValidation } from "../validations/fileDokumen.validation";
+import { UpdateFileDefaultType } from "../models/fileDokumenDefault";
+import { FileDokumenDefaultValidation } from "../validations/fileDokumenDefault.validation";
 
 const fileDokumenRouter: Router = Router();
 
@@ -26,13 +27,13 @@ fileDokumenRouter.get(
 
 // find for detail
 fileDokumenRouter.get(
-  "/:id",
+  "/default/:id",
   [
     authMiddleware,
     aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
   ],
   zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_ID),
-  FileDokumenController.findForDetail,
+  FileDokumenController.findFileDefaultForDetail,
 );
 
 // update file default
@@ -40,7 +41,9 @@ fileDokumenRouter.patch(
   "/default/:id",
   [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
   zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_ID),
-  zodValidation<UpdateFileDefaultType>(FileDokumenValidation.UPDATE_DEFAULT),
+  zodValidation<UpdateFileDefaultType>(
+    FileDokumenDefaultValidation.UPDATE_DEFAULT,
+  ),
   FileDokumenController.updateFileDefault,
 );
 

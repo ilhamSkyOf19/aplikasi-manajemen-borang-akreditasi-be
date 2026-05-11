@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import {
   AjukanRequestType,
-  CreateDokumentasiBorangDefaultRequestType,
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
   ResponseDokumentasiBorangWithKebutuhanDokumentasiType,
@@ -24,6 +23,8 @@ import {
 } from "../utils/contstanst";
 import { ResponseRiwayatType } from "../models/riwayat.model";
 import { RiwayatService } from "../services/riwayat.service";
+import { CreateDokumentasiBorangDefaultRequestType } from "../models/fileDokumenDefault.model";
+import { FileDokumenDefaultValidation } from "../validations/fileDokumenDefault.validation";
 
 export class DokumentasiBorangController {
   // create
@@ -37,7 +38,7 @@ export class DokumentasiBorangController {
     try {
       // validasi
       const body = validation<CreateDokumentasiBorangDefaultRequestType>(
-        DokumentasiBorangValidation.CREATE_DEFAULT,
+        FileDokumenDefaultValidation.CREATE_DEFAULT,
         {
           ...req.body,
           kebutuhan_dokumentasi_id: Number(req.body.kebutuhan_dokumentasi_id),

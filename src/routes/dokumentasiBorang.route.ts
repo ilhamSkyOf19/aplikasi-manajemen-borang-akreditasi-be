@@ -16,7 +16,7 @@ const upload = FileService.uploadFile({
   allowedMimeTypes: /pdf/,
 });
 
-// create
+// default
 dokumentasiBorangRoute.post(
   "/default",
   [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],

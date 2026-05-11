@@ -1,8 +1,6 @@
 import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
 import {
-  CreateDokumentasiBorangDefaultType,
-  IDokumentasiBorangDefault,
   IFolderDokumentasiBorang,
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
@@ -12,6 +10,10 @@ import {
   toResponseDokumentasiBorangType,
   toResponseFoldersAndFilesType,
 } from "../models/dokumentasiBorang.model";
+import {
+  CreateDokumentasiBorangDefaultType,
+  IDokumentasiBorangDefault,
+} from "../models/fileDokumenDefault.model";
 import { ResponseResult } from "../types/response";
 import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 import { FileService } from "./file.service";

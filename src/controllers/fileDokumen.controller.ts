@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
+import { ResponseFileDokumenForChooseWithMetaType } from "../models/fileDokumen.model";
 import {
-  ResponseFileDokumenForChooseWithMetaType,
-  ResponseFileDokumenForDetailType,
-  ResponseUpdateFileType,
+  ResponseFileDokumenDefaultForDetailType,
+  ResponseUpdateFileDefaultType,
   UpdateFileDefaultType,
-} from "../models/fileDokumen.model";
+} from "../models/fileDokumenDefault";
 import { PaginationType } from "../types/pagination";
 import { FileDokumenService } from "../services/fileDokumen.service";
 import { AuthRequest } from "../types/authRequest";
@@ -15,6 +15,7 @@ import { DriveApiService } from "../services/driveapi.service";
 import { meta } from "zod/v4/core";
 import { StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 import { FileService } from "../services/file.service";
+import { FileDokumenDefaultService } from "../services/fileDokumenDefault.service";
 
 export class FileDokumenController {
   // find all for choose
@@ -58,87 +59,6 @@ export class FileDokumenController {
         res,
         200,
         "berhasil mendapatkan data file dokumen",
-      );
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // find for detail
-  static async findForDetail(
-    _req: Request,
-    res: Response<
-      ResponseStructure<ResponseFileDokumenForDetailType | null>,
-      { validatedParams: { id: number } }
-    >,
-    next: NextFunction,
-  ) {
-    try {
-      // get id
-      const { id } = res.locals.validatedParams;
-
-      // call service
-      const service = await FileDokumenService.findByIdForDetail(id);
-
-      // check
-      if (!service) {
-        return ResponseResult.error(res, 400, "data not found");
-      }
-
-      // return
-      return ResponseResult.success<ResponseFileDokumenForDetailType | null>(
-        service,
-        res,
-        200,
-        "berhasil mendapatkan data file dokumen",
-      );
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // update file default
-  static async updateFileDefault(
-    req: AuthRequest<{}, {}, UpdateFileDefaultType>,
-    res: Response<
-      ResponseStructure<ResponseUpdateFileType | null>,
-      { validatedParams: { id: number } }
-    >,
-    next: NextFunction,
-  ) {
-    try {
-      // get id
-      const { id } = res.locals.validatedParams;
-
-      // get body
-      const body = req.body;
-
-      // get dosen id
-      const { id: dosenId } = req?.data as { id: number };
-
-      // find file
-      const findFile = await FileDokumenService.findById(id);
-
-      // check
-      if (!findFile) {
-        return ResponseResult.error(res, 400, "data not found");
-      }
-
-      // check uploaded
-      if (findFile.uploaded_by_id !== dosenId)
-        return ResponseResult.forbidden(res, "Forbidden");
-
-      // call service
-      const service = await FileDokumenService.updateFileDefault({
-        id,
-        data: body,
-      });
-
-      return ResponseResult.success<ResponseUpdateFileType | null>(
-        service,
-        res,
-        200,
-        "berhasil update file default",
       );
     } catch (error) {
       next(error);
@@ -281,6 +201,87 @@ export class FileDokumenController {
       });
 
       stream.pipe(res);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find for detail
+  static async findFileDefaultForDetail(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseFileDokumenDefaultForDetailType | null>,
+      { validatedParams: { id: number } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get id
+      const { id } = res.locals.validatedParams;
+
+      // call service
+      const service = await FileDokumenDefaultService.findByIdForDetail(id);
+
+      // check
+      if (!service) {
+        return ResponseResult.error(res, 400, "data not found");
+      }
+
+      // return
+      return ResponseResult.success<ResponseFileDokumenDefaultForDetailType | null>(
+        service,
+        res,
+        200,
+        "berhasil mendapatkan data file dokumen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // update file default
+  static async updateFileDefault(
+    req: AuthRequest<{}, {}, UpdateFileDefaultType>,
+    res: Response<
+      ResponseStructure<ResponseUpdateFileDefaultType | null>,
+      { validatedParams: { id: number } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get id
+      const { id } = res.locals.validatedParams;
+
+      // get body
+      const body = req.body;
+
+      // get dosen id
+      const { id: dosenId } = req?.data as { id: number };
+
+      // find file
+      const findFile = await FileDokumenService.findById(id);
+
+      // check
+      if (!findFile) {
+        return ResponseResult.error(res, 400, "data not found");
+      }
+
+      // check uploaded
+      if (findFile.uploaded_by_id !== dosenId)
+        return ResponseResult.forbidden(res, "Forbidden");
+
+      // call service
+      const service = await FileDokumenDefaultService.updateFileDefault({
+        id,
+        data: body,
+      });
+
+      return ResponseResult.success<ResponseUpdateFileDefaultType | null>(
+        service,
+        res,
+        200,
+        "berhasil update file default",
+      );
     } catch (error) {
       next(error);
     }
