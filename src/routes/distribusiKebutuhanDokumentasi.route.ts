@@ -9,8 +9,25 @@ const distribusiKebutuhanDokumentasiRouter: Router = Router();
 // find
 distribusiKebutuhanDokumentasiRouter.get(
   "/",
-  [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.kaprodi, DosenRole.tim_akreditasi]),
+  ],
   DistribusiKebutuhanDokumentasiController.find,
+);
+
+// handle distribusi active
+distribusiKebutuhanDokumentasiRouter.put(
+  "/active",
+  [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
+  DistribusiKebutuhanDokumentasiController.active,
+);
+
+// handle distribusi an active
+distribusiKebutuhanDokumentasiRouter.put(
+  "/an-active",
+  [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
+  DistribusiKebutuhanDokumentasiController.anActive,
 );
 
 export default distribusiKebutuhanDokumentasiRouter;

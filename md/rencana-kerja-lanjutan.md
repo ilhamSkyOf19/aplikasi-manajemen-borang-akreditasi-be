@@ -8,6 +8,6 @@
 # Rencana kerja
 
 - [✅] Membuat tabel distribusi dan membuat service create distribusi yang disisipkan pada service kriteria
-- [90%] membuat service untuk file dokumen penelitian
-- [] membuat service delete from dokumentasi borang untuk file dokumen penelitian
+- [✅] membuat service untuk file dokumen penelitian
+- [✅] membuat service delete from dokumentasi borang untuk file dokumen penelitian
 - [] Membuat service untuk schema distribusi kebutuhan dokumentasi

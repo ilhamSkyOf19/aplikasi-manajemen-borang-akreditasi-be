@@ -20,6 +20,7 @@ export class DistribusiKebutuhanDokumentasiService {
 
       const created = await tx.distribusiKebutuhanDokumentasi.create({
         data: {
+          id: 1,
           is_active: false,
         },
         select: {
@@ -40,6 +41,48 @@ export class DistribusiKebutuhanDokumentasiService {
   static async find(): Promise<ResponseDistribusiKebutuhanDokumentasiType | null> {
     // call db
     const result = await prisma.distribusiKebutuhanDokumentasi.findFirst({
+      select: {
+        id: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    return result;
+  }
+
+  // handle distribusi active
+  static async active(): Promise<ResponseDistribusiKebutuhanDokumentasiType | null> {
+    // call db
+    const result = await prisma.distribusiKebutuhanDokumentasi.update({
+      where: {
+        id: 1,
+      },
+      data: {
+        is_active: true,
+      },
+      select: {
+        id: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    return result;
+  }
+
+  // handle distribusi an active
+  static async anActive(): Promise<ResponseDistribusiKebutuhanDokumentasiType | null> {
+    // call db
+    const result = await prisma.distribusiKebutuhanDokumentasi.update({
+      where: {
+        id: 1,
+      },
+      data: {
+        is_active: false,
+      },
       select: {
         id: true,
         is_active: true,

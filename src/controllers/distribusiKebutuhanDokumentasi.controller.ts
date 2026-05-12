@@ -26,4 +26,50 @@ export class DistribusiKebutuhanDokumentasiController {
       next(error);
     }
   }
+
+  // active
+  static async active(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseDistribusiKebutuhanDokumentasiType | null>
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // call service
+      const service = await DistribusiKebutuhanDokumentasiService.active();
+
+      return ResponseResult.success<ResponseDistribusiKebutuhanDokumentasiType | null>(
+        service,
+        res,
+        200,
+        "success active distribusi kebutuhan dokumentasi",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // an active
+  static async anActive(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseDistribusiKebutuhanDokumentasiType | null>
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // call service
+      const service = await DistribusiKebutuhanDokumentasiService.anActive();
+
+      return ResponseResult.success<ResponseDistribusiKebutuhanDokumentasiType | null>(
+        service,
+        res,
+        200,
+        "success an active distribusi kebutuhan dokumentasi",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }

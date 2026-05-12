@@ -288,7 +288,7 @@ model FileDokumenPenelitian {
 
 // distribusi 
 model DistribusiKebutuhanDokumentasi {
-  id         Int      @id @default(autoincrement())
+  id         Int      @id
   is_active  Boolean
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
