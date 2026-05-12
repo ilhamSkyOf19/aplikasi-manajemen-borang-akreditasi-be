@@ -72,7 +72,7 @@ export class VerifikasiController {
 
   // update verifikasi
   static async updateVerifikasi(
-    req: Request<{}, {}, VerifikasiUpdateType>,
+    req: AuthRequest<{}, {}, VerifikasiUpdateType>,
     res: Response<
       ResponseStructure<ResponseRiwayatType | null>,
       { validatedParams: { id: number } }
@@ -82,6 +82,9 @@ export class VerifikasiController {
     try {
       // get id parmas
       const { id } = res.locals.validatedParams;
+
+      // get role
+      const role = req.data?.role;
 
       // get body
       const {
@@ -94,7 +97,7 @@ export class VerifikasiController {
       // service
       let result: ResponseRiwayatType | null = null;
 
-      if (kebutuhan_dokumentasi_pic_id) {
+      if (kebutuhan_dokumentasi_pic_id && role === DosenRole.wakil_dekan_1) {
         result = await RiwayatService.updateForKebutuhanDokumentasiPic({
           riwayat_id: id,
           data: {
@@ -105,7 +108,7 @@ export class VerifikasiController {
         });
       }
 
-      if (dokumentasi_borang_id) {
+      if (dokumentasi_borang_id && role === DosenRole.kaprodi) {
         result = await RiwayatService.updateForDokumentasiBorang({
           riwayat_id: id,
           data: {
@@ -118,11 +121,7 @@ export class VerifikasiController {
 
       // check service
       if (!result) {
-        return ResponseResult.error(
-          res,
-          400,
-          "update verifikasi kebutuhan dokumentasi pic gagal",
-        );
+        return ResponseResult.error(res, 400, "update verifikasi gagal");
       }
 
       return ResponseResult.success<ResponseRiwayatType | null>(

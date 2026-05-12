@@ -29,12 +29,15 @@ fileDokumenRouter.get(
 
 // find for default
 fileDokumenRouter.get(
-  "/default/:id",
+  "/:file_dokumen_id/dokumentasi-borang/:dokumentasi_borang_id/default",
   [
     authMiddleware,
     aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
   ],
-  zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_ID),
+  zodValidationParams<{
+    dokumentasi_borang_id: number;
+    file_dokumen_id: number;
+  }>(GlobalValidation.PARAMS_DOKUMENTASI_BORANG_ID_AND_FILE_DOKUMEN_ID),
   FileDokumenController.findFileDefaultForDetail,
 );
 
@@ -51,12 +54,15 @@ fileDokumenRouter.patch(
 
 // find for penelitian
 fileDokumenRouter.get(
-  "/penelitian/:id",
+  "/:file_dokumen_id/dokumentasi-borang/:dokumentasi_borang_id/penelitian",
   [
     authMiddleware,
     aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
   ],
-  zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_ID),
+  zodValidationParams<{
+    dokumentasi_borang_id: number;
+    file_dokumen_id: number;
+  }>(GlobalValidation.PARAMS_DOKUMENTASI_BORANG_ID_AND_FILE_DOKUMEN_ID),
   FileDokumenController.findFilePenelitianForDetail,
 );
 

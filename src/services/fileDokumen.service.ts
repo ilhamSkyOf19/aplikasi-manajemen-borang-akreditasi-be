@@ -183,45 +183,37 @@ export class FileDokumenService {
     return result.id;
   }
 
+  // delete file by id and tipe
+  static async delete(params: {
+    idFileDokumen: number;
+    tipe_file: TipeDokumentasi;
+  }): Promise<boolean | null> {
+    // call db
+    const result = await prisma.fileDokumen.delete({
+      where: {
+        id: params.idFileDokumen,
+        tipe_file: params.tipe_file,
+      },
+    });
+
+    return result ? true : null;
+  }
+
   // delete from dokumentasi borang
   static async deleteFromDokumentasiBorang(params: {
     id: number;
     dokumentasi_borang_id: number;
   }): Promise<boolean> {
     console.log(params);
-    const result = await prisma.$transaction(async (tx) => {
-      // delete from dokumentasi borang files
-      const deleteFromDokumentasiBorang =
-        await tx.dokumentasiBorangFile.deleteMany({
-          where: {
-            dokumentasi_borang_id: params.dokumentasi_borang_id,
-            file_dokumen_id: params.id,
-          },
-        });
 
-      // check
-      if (!deleteFromDokumentasiBorang.count)
-        throw new Error("Data pivot not found");
-
-      const checkActivatedFalse = await tx.fileDokumen.findFirst({
-        where: {
-          id: params.id,
-          is_active: false,
+    // call db call
+    const result = await prisma.dokumentasiBorangFile.delete({
+      where: {
+        dokumentasi_borang_id_file_dokumen_id: {
+          dokumentasi_borang_id: params.dokumentasi_borang_id,
+          file_dokumen_id: params.id,
         },
-      });
-
-      if (checkActivatedFalse) {
-        // delete from file dokumentasi
-        const deleteFromFileDokumentasi = await tx.fileDokumen.delete({
-          where: {
-            id: params.id,
-          },
-        });
-        // check
-        if (!deleteFromFileDokumentasi) throw new Error("Data not found");
-      }
-
-      return true;
+      },
     });
 
     return !!result;

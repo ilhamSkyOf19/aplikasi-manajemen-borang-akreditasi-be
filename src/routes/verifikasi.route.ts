@@ -25,7 +25,7 @@ verifikasiRoute.post(
 // update verifikasi kebutuhan dokumentasi pic
 verifikasiRoute.patch(
   "/:id",
-  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi])],
   zodValidationParams<{ id: number }>(VerifikasiValidation.PARAMS_ID),
   zodValidation<VerifikasiUpdateType>(VerifikasiValidation.UPDATE_VERIFIKASI),
   VerifikasiController.updateVerifikasi,

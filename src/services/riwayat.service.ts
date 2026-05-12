@@ -219,7 +219,8 @@ export class RiwayatService {
           },
         },
         data: {
-          is_active: true,
+          ...(status === Status.REVISION && { is_active: false }),
+          ...(status === Status.APPROVED && { is_active: true }),
         },
       });
 
@@ -260,6 +261,59 @@ export class RiwayatService {
     });
   }
 
+  // create dokumentasi borang
+  static async createManyForDokumentasiBorang(
+    data: Omit<CreateRiwayatDokumentasiBorangType, "dokumentasi_borang_id"> & {
+      dokumentasi_borang_ids: number[];
+    },
+  ): Promise<number | null> {
+    const { tipe_riwayat, keterangan, dokumentasi_borang_ids, status } = data;
+    // call db
+    const result = await prisma.$transaction(async (tx) => {
+      // update status
+      await tx.dokumentasiBorang.updateMany({
+        where: {
+          id: {
+            in: dokumentasi_borang_ids,
+          },
+        },
+        data: {
+          status,
+        },
+      });
+
+      // update active file
+      await tx.fileDokumen.updateMany({
+        where: {
+          dokumentasi_borang_files: {
+            some: {
+              dokumentasi_borang_id: {
+                in: dokumentasi_borang_ids,
+              },
+            },
+          },
+        },
+        data: {
+          is_active: true,
+        },
+      });
+
+      // create riwayat
+      const createRiwayat = await tx.riwayat.createMany({
+        data: dokumentasi_borang_ids.map((dokumentasi_borang_id) => ({
+          tipe_riwayat,
+          keterangan,
+          dokumentasi_borang_id: dokumentasi_borang_id,
+          status,
+        })),
+      });
+
+      return createRiwayat;
+    });
+
+    return result.count;
+  }
+
   static async updateForDokumentasiBorang(params: {
     riwayat_id: number;
     data: UpdateRiwayatDokumentasiBorangType;
@@ -277,6 +331,40 @@ export class RiwayatService {
           },
           data: {
             status,
+          },
+        });
+      }
+
+      // if revision
+      if (status === Status.REVISION) {
+        // update active file
+        await tx.fileDokumen.updateMany({
+          where: {
+            dokumentasi_borang_files: {
+              some: {
+                dokumentasi_borang_id,
+              },
+            },
+          },
+          data: {
+            is_active: false,
+          },
+        });
+      }
+
+      // if approved
+      if (status === Status.APPROVED) {
+        // update active file
+        await tx.fileDokumen.updateMany({
+          where: {
+            dokumentasi_borang_files: {
+              some: {
+                dokumentasi_borang_id,
+              },
+            },
+          },
+          data: {
+            is_active: true,
           },
         });
       }

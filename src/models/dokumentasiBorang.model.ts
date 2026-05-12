@@ -70,6 +70,7 @@ export interface ResponseDokumentasiBorangWithKebutuhanDokumentasiType {
   files: {
     id: number;
     nama_file: string;
+    dokumentasi_borang_id: number;
   }[];
   folders: {
     id: number;
@@ -77,6 +78,7 @@ export interface ResponseDokumentasiBorangWithKebutuhanDokumentasiType {
     files: {
       id: number;
       nama_file: string;
+      dokumentasi_borang_id: number;
     }[];
   }[];
   status: Status | null;

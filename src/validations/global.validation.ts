@@ -26,6 +26,17 @@ export class GlobalValidation {
     .strict() satisfies z.ZodType<{ id: number }>;
 
   // params id
+  static readonly PARAMS_DOKUMENTASI_BORANG_ID_AND_FILE_DOKUMEN_ID = z
+    .object({
+      dokumentasi_borang_id: z.coerce.number().int().positive().max(2147483647),
+      file_dokumen_id: z.coerce.number().int().positive().max(2147483647),
+    })
+    .strict() satisfies z.ZodType<{
+    dokumentasi_borang_id: number;
+    file_dokumen_id: number;
+  }>;
+
+  // params id
   static readonly PARAMS_PREVIEW_FILE = z
     .object({
       id: z.coerce.number().int().positive().max(2147483647),

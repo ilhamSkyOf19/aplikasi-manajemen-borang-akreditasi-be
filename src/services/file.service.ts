@@ -97,7 +97,7 @@ export class FileService {
 
     const filePathFull = path.join(
       process.cwd(),
-      `${FOLDER_GLOBAL_UPLOAD}${tipe_file.toLowerCase()}/${fileName}`,
+      `${FOLDER_GLOBAL_UPLOAD}/${tipe_file.toLowerCase()}/${fileName}`,
     );
 
     await fsAsync.access(filePathFull);

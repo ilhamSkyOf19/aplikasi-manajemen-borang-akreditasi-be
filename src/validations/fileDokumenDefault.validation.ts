@@ -44,9 +44,6 @@ export class FileDokumenDefaultValidation {
       const hasKeterangan =
         data.keterangan !== undefined && data.keterangan !== null;
 
-      // has folder
-      const hasFolder = data.folder !== undefined && data.folder !== null;
-
       // check has new file
       if (hasNewFile) {
         if (hasOldFile) {
@@ -110,15 +107,6 @@ export class FileDokumenDefaultValidation {
             code: "custom",
             path: ["nomor_dokumen"],
             message: "jika old file ada maka nomor dokumen tidak boleh ada",
-          });
-        }
-
-        // check has folder
-        if (hasFolder) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["folder"],
-            message: "jika old file ada maka folder tidak boleh ada",
           });
         }
       }

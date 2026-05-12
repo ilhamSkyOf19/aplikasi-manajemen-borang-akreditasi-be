@@ -287,6 +287,7 @@ export class DokumentasiBorangServices {
             },
             files: {
               select: {
+                dokumentasi_borang_id: true,
                 file_dokumen: {
                   select: {
                     id: true,
@@ -317,6 +318,7 @@ export class DokumentasiBorangServices {
         files: {
           id: number;
           nama_file: string;
+          dokumentasi_borang_id: number;
         }[];
       }
     >();
@@ -327,6 +329,7 @@ export class DokumentasiBorangServices {
       {
         id: number;
         nama_file: string;
+        dokumentasi_borang_id: number;
       }
     >();
 
@@ -347,6 +350,7 @@ export class DokumentasiBorangServices {
           groupedFiles.set(item.file_dokumen.id, {
             id: item.file_dokumen.id,
             nama_file: item.file_dokumen.nama_file,
+            dokumentasi_borang_id: item.dokumentasi_borang_id,
           });
 
           continue;
@@ -362,6 +366,7 @@ export class DokumentasiBorangServices {
         const file = {
           id: item.file_dokumen.id,
           nama_file: item.file_dokumen.nama_file,
+          dokumentasi_borang_id: item.dokumentasi_borang_id,
         };
 
         // check
@@ -696,5 +701,29 @@ export class DokumentasiBorangServices {
     });
 
     return result ? 1 : 0;
+  }
+
+  // temukan dokumentasi yang memiliki file tertentu dan memiliki status approved
+  static async findDokumentasiByFileDokumenIdAndStatusApprovedOrPending(
+    file_dokumen_id: number,
+  ): Promise<{ dokumentasi_borang_id: number }[] | null> {
+    // call db
+    const result = await prisma.dokumentasiBorangFile.findMany({
+      where: {
+        file_dokumen_id: file_dokumen_id,
+        dokumentasi_borang: {
+          status: Status.APPROVED || Status.PENDING,
+        },
+      },
+      select: {
+        dokumentasi_borang_id: true,
+      },
+    });
+
+    if (!result) return null;
+
+    return result.map((item) => ({
+      dokumentasi_borang_id: item.dokumentasi_borang_id,
+    }));
   }
 }

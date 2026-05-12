@@ -16,61 +16,68 @@ import {
 
 export class FileDokumenDefaultService {
   // find by id
-  static async findByIdForDetail(
-    id: number,
-  ): Promise<ResponseFileDokumenDefaultForDetailType | null> {
+  static async findByIdForDetail(params: {
+    dokumentasi_borang_id: number;
+    file_dokumen_id: number;
+  }): Promise<ResponseFileDokumenDefaultForDetailType | null> {
+    const { dokumentasi_borang_id, file_dokumen_id } = params;
     // call db
-    const result = await prisma.fileDokumen.findUnique({
+    const result = await prisma.dokumentasiBorangFile.findUnique({
       where: {
-        id,
-        tipe_file: TipeDokumentasi.DEFAULT,
+        dokumentasi_borang_id_file_dokumen_id: {
+          dokumentasi_borang_id,
+          file_dokumen_id,
+        },
       },
       select: {
-        id: true,
-        nama_file: true,
-        storage_provider: true,
-        file_id: true,
-        uploaded_by: {
+        dokumentasi_borang: {
           select: {
             id: true,
-            nama: true,
-            email: true,
-            nidn: true,
-          },
-        },
-        dokumentasi_borang_files: {
-          select: {
-            dokumentasi_borang: {
+            status: true,
+            kebutuhan_dokumentasi: {
               select: {
-                id: true,
-                status: true,
-                kebutuhan_dokumentasi: {
+                kriteria: {
                   select: {
-                    kriteria: {
-                      select: {
-                        kode_kriteria: true,
-                        nama_kriteria: true,
-                      },
-                    },
-                    pendekatan: {
-                      select: {
-                        tahap: true,
-                        keterangan: true,
-                      },
-                    },
+                    id: true,
+                    nama_kriteria: true,
+                    kode_kriteria: true,
+                  },
+                },
+                pendekatan: {
+                  select: {
+                    id: true,
+                    tahap: true,
+                    keterangan: true,
                   },
                 },
               },
             },
           },
         },
-        keterangan: true,
-        tipe_file: true,
-        created_at: true,
-        updated_at: true,
-        default_detail: {
+        file_dokumen: {
           select: {
-            nomor_dokumen: true,
+            id: true,
+            nama_file: true,
+            storage_provider: true,
+            file_id: true,
+            uploaded_by: {
+              select: {
+                id: true,
+                nama: true,
+                email: true,
+                nidn: true,
+              },
+            },
+            keterangan: true,
+            tipe_file: true,
+            is_active: true,
+            created_at: true,
+            updated_at: true,
+            default_detail: {
+              select: {
+                nomor_dokumen: true,
+              },
+            },
           },
         },
       },
@@ -79,31 +86,33 @@ export class FileDokumenDefaultService {
     // check
     if (!result) return null;
 
+    // get jumlah file
+    const getJumlahFileDigunakan = await prisma.dokumentasiBorangFile.count({
+      where: {
+        file_dokumen_id: result.file_dokumen.id,
+      },
+    });
+
     return {
-      id: result.id,
-      dokumentasi_borang_id:
-        result.dokumentasi_borang_files[0].dokumentasi_borang.id,
-      nama_file: result.nama_file,
-      kriteria:
-        result.dokumentasi_borang_files[0].dokumentasi_borang
-          .kebutuhan_dokumentasi.kriteria,
-      pendekatan:
-        result.dokumentasi_borang_files[0].dokumentasi_borang
-          .kebutuhan_dokumentasi.pendekatan,
-      storage_provider: result.storage_provider as StorageProvider,
-      file_id: result.file_id,
-      uploaded_by: result.uploaded_by,
-      keterangan: result.keterangan,
-      tipe_file: result.tipe_file as TipeDokumentasi,
-      created_at: result.created_at,
-      updated_at: result.updated_at,
-      dokumentasi_default: result.default_detail?.nomor_dokumen
+      id: result.file_dokumen.id,
+      dokumentasi_borang_id: result.dokumentasi_borang.id,
+      nama_file: result.file_dokumen.nama_file,
+      kriteria: result.dokumentasi_borang.kebutuhan_dokumentasi.kriteria,
+      pendekatan: result.dokumentasi_borang.kebutuhan_dokumentasi.pendekatan,
+      storage_provider: result.file_dokumen.storage_provider as StorageProvider,
+      file_id: result.file_dokumen.file_id,
+      uploaded_by: result.file_dokumen.uploaded_by,
+      keterangan: result.file_dokumen.keterangan,
+      tipe_file: result.file_dokumen.tipe_file as TipeDokumentasi,
+      created_at: result.file_dokumen.created_at,
+      updated_at: result.file_dokumen.updated_at,
+      dokumentasi_default: result.file_dokumen.default_detail?.nomor_dokumen
         ? {
-            nomor_dokumentasi: result.default_detail.nomor_dokumen,
+            nomor_dokumentasi: result.file_dokumen.default_detail.nomor_dokumen,
           }
         : null,
-      status: result.dokumentasi_borang_files[0].dokumentasi_borang
-        .status as Status,
+      total_digunakan: getJumlahFileDigunakan,
+      status: result.dokumentasi_borang.status as Status,
     };
   }
 

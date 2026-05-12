@@ -100,8 +100,6 @@ export class FileDokumenPenelitianValidation {
       const hasKeterangan =
         data.keterangan !== undefined && data.keterangan !== null;
 
-      const hasFolder = data.folder !== undefined && data.folder !== null;
-
       // wajib pilih salah satu: file lama atau file baru
       if (!hasOldFile && !hasNewFile) {
         ctx.addIssue({
@@ -212,14 +210,6 @@ export class FileDokumenPenelitianValidation {
             code: "custom",
             path: ["keterangan"],
             message: "jika menggunakan file lama, keterangan tidak boleh ada",
-          });
-        }
-
-        if (hasFolder) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["folder"],
-            message: "jika menggunakan file lama, folder tidak boleh ada",
           });
         }
       }

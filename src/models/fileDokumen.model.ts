@@ -31,6 +31,7 @@ export interface IDataFileGlobalType {
   };
   keterangan: string;
   tipe_file: TipeDokumentasi;
+  total_digunakan: number;
   created_at: Date;
   updated_at: Date;
 }

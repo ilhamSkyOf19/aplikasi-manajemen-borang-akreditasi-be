@@ -23,6 +23,7 @@ import {
 } from "../utils/contstanst";
 import {
   getPriorityStatusKaprodi,
+  getPriorityStatusKaprodiForDokumentasiBorang,
   getPriorityStatusTimAkreditasi,
   getPriorityStatusWakilDekan,
 } from "../utils/utils";
@@ -649,7 +650,7 @@ export class KebutuhanDokumentasiPicServices {
               .reduce((prev, current) =>
                 role === DosenRole.tim_akreditasi
                   ? getPriorityStatusTimAkreditasi(prev, current)
-                  : getPriorityStatusKaprodi(prev, current),
+                  : getPriorityStatusKaprodiForDokumentasiBorang(prev, current),
               )
           : null;
 
