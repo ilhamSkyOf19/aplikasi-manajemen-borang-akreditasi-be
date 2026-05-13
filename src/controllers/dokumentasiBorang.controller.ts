@@ -427,7 +427,7 @@ export class DokumentasiBorangController {
 
   // find by id with kebutuhan dokumentasi
   static async findByKebutuhanDokumentasiId(
-    _req: Request,
+    req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseDokumentasiBorangWithKebutuhanDokumentasiType | null>,
       {
@@ -442,9 +442,12 @@ export class DokumentasiBorangController {
       // get params
       const { kebutuhan_dokumentasi_id } = res.locals.validatedParams;
 
+      const role = req?.data?.role;
+
       // call service
       const service =
         await DokumentasiBorangServices.findByKebutuhanDokumentasiId({
+          role: role!,
           kebutuhan_dokumentasi_id,
         });
 

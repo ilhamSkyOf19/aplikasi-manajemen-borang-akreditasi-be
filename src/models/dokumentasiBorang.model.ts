@@ -1,4 +1,5 @@
 import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
+import { IDosen } from "./dosen.model";
 import { IDokumentasiBorangDefault } from "./fileDokumenDefault.model";
 import { IKebutuhanDokumentsiPic } from "./kebutuhanDokumentasiPic.model";
 
@@ -67,6 +68,10 @@ export interface ResponseDokumentasiBorangWithKebutuhanDokumentasiType {
     | "keterangan"
     | "nama_kebutuhan_dokumentasi"
   >;
+  kriteria_pic: Omit<
+    IDosen,
+    "password" | "created_at" | "updated_at" | "roles"
+  >[];
   files: {
     id: number;
     nama_file: string;

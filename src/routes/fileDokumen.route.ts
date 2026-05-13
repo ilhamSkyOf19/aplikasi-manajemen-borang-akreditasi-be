@@ -30,10 +30,7 @@ fileDokumenRouter.get(
 // find for default
 fileDokumenRouter.get(
   "/:file_dokumen_id/dokumentasi-borang/:dokumentasi_borang_id/default",
-  [
-    authMiddleware,
-    aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
-  ],
+  [authMiddleware],
   zodValidationParams<{
     dokumentasi_borang_id: number;
     file_dokumen_id: number;
@@ -55,10 +52,7 @@ fileDokumenRouter.patch(
 // find for penelitian
 fileDokumenRouter.get(
   "/:file_dokumen_id/dokumentasi-borang/:dokumentasi_borang_id/penelitian",
-  [
-    authMiddleware,
-    aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
-  ],
+  [authMiddleware],
   zodValidationParams<{
     dokumentasi_borang_id: number;
     file_dokumen_id: number;
@@ -80,10 +74,7 @@ fileDokumenRouter.patch(
 // preview
 fileDokumenRouter.get(
   "/preview-sistem/:id/:nama_file",
-  [
-    authMiddleware,
-    aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
-  ],
+  [authMiddleware],
   zodValidationParams<{ id: number; nama_file: string }>(
     GlobalValidation.PARAMS_PREVIEW_FILE,
   ),
@@ -92,10 +83,7 @@ fileDokumenRouter.get(
 
 fileDokumenRouter.get(
   "/preview-drive/:id/:nama_file",
-  [
-    authMiddleware,
-    aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
-  ],
+  [authMiddleware],
   zodValidationParams<{ id: number; nama_file: string }>(
     GlobalValidation.PARAMS_PREVIEW_FILE,
   ),

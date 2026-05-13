@@ -16,7 +16,12 @@ import {
 } from "../models/fileDokumenDefault.model";
 import { CreateDokumentasiBorangPenelitianType } from "../models/fileDokumenPenelitian.model";
 import { ResponseResult } from "../types/response";
-import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
+import {
+  DosenRole,
+  Status,
+  StorageProvider,
+  TipeDokumentasi,
+} from "../utils/contstanst";
 import { FileService } from "./file.service";
 import { FileDokumenService } from "./fileDokumen.service";
 
@@ -231,10 +236,40 @@ export class DokumentasiBorangServices {
 
   // find by id with kebutuhan dokumentasi
   static async findByKebutuhanDokumentasiId(params: {
+    role: DosenRole;
     kebutuhan_dokumentasi_id: number;
   }): Promise<ResponseDokumentasiBorangWithKebutuhanDokumentasiType | null> {
     // get params
-    const { kebutuhan_dokumentasi_id } = params;
+    const { kebutuhan_dokumentasi_id, role } = params;
+
+    // role wd
+    const isWd1 = role === DosenRole.wakil_dekan_1;
+
+    // select kriteria
+    const kriteriaSelect = isWd1
+      ? {
+          id: true,
+          kode_kriteria: true,
+          nama_kriteria: true,
+
+          kriteriaPic: {
+            select: {
+              dosen: {
+                select: {
+                  id: true,
+                  nama: true,
+                  email: true,
+                  nidn: true,
+                },
+              },
+            },
+          },
+        }
+      : {
+          id: true,
+          kode_kriteria: true,
+          nama_kriteria: true,
+        };
 
     // call db
     const result = await prisma.kebutuhanDokumentasi.findUnique({
@@ -265,6 +300,18 @@ export class DokumentasiBorangServices {
             id: true,
             kode_kriteria: true,
             nama_kriteria: true,
+            kriteriaPic: {
+              select: {
+                dosen: {
+                  select: {
+                    id: true,
+                    nama: true,
+                    email: true,
+                    nidn: true,
+                  },
+                },
+              },
+            },
           },
         },
         pendekatan: {
@@ -276,6 +323,22 @@ export class DokumentasiBorangServices {
         },
         tipe_dokumentasi: true,
         dokumentasi_borang: {
+          ...(role === DosenRole.wakil_dekan_1 && {
+            where: {
+              NOT: {
+                OR: [
+                  {
+                    status: null,
+                  },
+                  {
+                    status: {
+                      in: [Status.REVISION, Status.PENDING],
+                    },
+                  },
+                ],
+              },
+            },
+          }),
           select: {
             id: true,
             status: true,
@@ -402,6 +465,12 @@ export class DokumentasiBorangServices {
           nama: item.pic.nama,
         })),
       },
+      kriteria_pic: result.kriteria.kriteriaPic?.map((item) => ({
+        id: item.dosen.id,
+        nama: item.dosen.nama,
+        email: item.dosen.email,
+        nidn: item.dosen.nidn,
+      })),
       folders: finalGroupedFolders,
       files: finalGroupedFiles,
       status: result.dokumentasi_borang?.status

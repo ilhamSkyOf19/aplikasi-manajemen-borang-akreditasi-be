@@ -33,11 +33,17 @@ dokumentasiBorangRoute.post(
 );
 
 // find
+
+// gunakan pada detail
 dokumentasiBorangRoute.get(
   "/by-kebutuhan-dokumentasi/:kebutuhan_dokumentasi_id",
   [
     authMiddleware,
-    aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
+    aclMiddleware([
+      DosenRole.tim_akreditasi,
+      DosenRole.kaprodi,
+      DosenRole.wakil_dekan_1,
+    ]),
   ],
   zodValidationParams<{
     kebutuhan_dokumentasi_id: number;
