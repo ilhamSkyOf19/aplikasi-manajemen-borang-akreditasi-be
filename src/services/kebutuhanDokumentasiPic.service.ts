@@ -865,6 +865,133 @@ export class KebutuhanDokumentasiPicServices {
     );
   }
 
+  // find all for dokumentasi borang complated
+  static async findAllforDokumentasiBorangComplated(data: {
+    dosen: {
+      id: number;
+      role: DosenRole;
+    };
+    kriteria_id: number;
+    pendekatan_id: number;
+    query: PaginationType;
+  }): Promise<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null> {
+    // get data
+
+    const {
+      kriteria_id,
+      pendekatan_id,
+      dosen: { id, role },
+      query: { limit = 8, page = 1, search, sort },
+    } = data;
+
+    // get page
+    const currentPage = page < 1 ? 1 : page;
+
+    // conditional
+    const conditional: Prisma.KebutuhanDokumentasiWhereInput = {
+      status: Status.APPROVED,
+      kriteria_id,
+      pendekatan_id,
+      ...(search && {
+        OR: [
+          {
+            nama_kebutuhan_dokumentasi: {
+              nama_kebutuhan_dokumentasi: {
+                contains: search,
+              },
+            },
+          },
+          {
+            kebutuhan_dokumentasi_pic: {
+              some: {
+                pic: {
+                  nama: {
+                    contains: search,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      }),
+    };
+
+    // get count data
+    const totalData = await prisma.kebutuhanDokumentasi.count({
+      where: conditional,
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
+
+    // call db
+    const result = await prisma.kebutuhanDokumentasi.findMany({
+      where: conditional,
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: {
+        updated_at: sort ? (sort as SortOrder) : "asc",
+      },
+      select: {
+        id: true,
+        nama_kebutuhan_dokumentasi: {
+          select: {
+            id: true,
+            nama_kebutuhan_dokumentasi: true,
+          },
+        },
+        tipe_dokumentasi: true,
+        kebutuhan_dokumentasi_pic: {
+          select: {
+            pic: {
+              select: {
+                id: true,
+                nama: true,
+              },
+            },
+          },
+        },
+        dokumentasi_borang: {
+          select: {
+            status: true,
+          },
+        },
+        keterangan: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    return toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType(
+      {
+        data: result.map((item) => ({
+          id: item.id,
+          nama_kebutuhan_dokumentasi: {
+            id: item.nama_kebutuhan_dokumentasi.id,
+            nama: item.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
+          },
+          tipe_dokumentasi: item.tipe_dokumentasi as TipeDokumentasi,
+          keterangan: item.keterangan,
+          pic: item.kebutuhan_dokumentasi_pic.map((item) => ({
+            id: item.pic.id,
+            nama: item.pic.nama,
+          })),
+          status: item.dokumentasi_borang?.status
+            ? (item.dokumentasi_borang.status as Status)
+            : null,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+        })),
+        meta: {
+          currentPage,
+          limit,
+          totalData,
+          totalPage,
+        },
+      },
+    );
+  }
+
   // update
   static async update(
     kebutuhan_dokumentasi_id: number,

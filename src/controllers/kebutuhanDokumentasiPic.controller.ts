@@ -374,6 +374,64 @@ export class KebutuhanDokumentasiPicController {
     }
   }
 
+  // find all for dokumentasi borang complated
+  static async findAllForDokumentasiBorangComplated(
+    req: AuthRequest,
+    res: Response<
+      ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
+      {
+        validatedQuery: PaginationType;
+        validatedParams: { kriteria_id: number; pendekatan_id: number };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get query
+      const { limit, page, search, sort } = res.locals.validatedQuery;
+
+      // get params
+      const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
+
+      // get dosen id
+      const { id, role } = req?.data as { id: number; role: DosenRole };
+
+      // call service
+      const service =
+        await KebutuhanDokumentasiPicServices.findAllforDokumentasiBorangComplated(
+          {
+            dosen: {
+              id,
+              role,
+            },
+            kriteria_id,
+            pendekatan_id,
+            query: {
+              limit,
+              page,
+              search,
+              sort,
+            },
+          },
+        );
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(res, 400, "data not found");
+      }
+
+      // return success
+      return ResponseResult.success<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>(
+        service,
+        res,
+        200,
+        "success read all ",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // update
   static async update(
     req: Request<{}, {}, UpdateKebutuhanDokumentasiPicRequestType>,

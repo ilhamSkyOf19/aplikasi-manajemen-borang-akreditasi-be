@@ -56,17 +56,4 @@ dokumentasiBorangRoute.post(
   DokumentasiBorangController.ajukan,
 );
 
-// find all by kebutuhan dokumentasi pic id and folder id
-// dokumentasiBorangRoute.get(
-//   "/by-dokumentasi-borang-folder-id/:dokumentasi_borang_id/folder/:folder_id",
-//   [
-//     authMiddleware,
-//     aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
-//   ],
-//   zodValidationParams<{ dokumentasi_borang_id: number; folder_id: number }>(
-//     DokumentasiBorangValidation.PARAMS_DOKUMENTASI_BORANG_ID_AND_FOLDER_ID,
-//   ),
-//   DokumentasiBorangController.findFilesByFolderIdAndDokumentasiBorangId,
-// );
-
 export default dokumentasiBorangRoute;
