@@ -14,6 +14,7 @@ import {
 } from "../models/kebutuhanDokumentasiPic.model";
 import { ResponseKriteriaPicType } from "../models/kriteriaPic.model";
 import { IPendekatan } from "../models/pendekatan.model";
+import { namaPendekatanArray } from "../models/statistik.model";
 import { PaginationType } from "../types/pagination";
 import {
   DosenRole,
@@ -229,16 +230,28 @@ export class KebutuhanDokumentasiPicServices {
       }));
 
       // status
-      const statusKebutuhan =
-        item.kebutuhan_dokumentasi.length > 0
-          ? item.kebutuhan_dokumentasi
-              .map((itemChild) => itemChild.status as Status | null)
-              .reduce((prev, current) =>
-                role === DosenRole.kaprodi
-                  ? getPriorityStatusKaprodi(prev, current)
-                  : getPriorityStatusWakilDekan(prev, current),
-              )
-          : null;
+      let statusKebutuhan: Status | null = null;
+
+      const kondisi = namaPendekatanArray.every((pendekatan) =>
+        item.kebutuhan_dokumentasi.some(
+          (itemChild) => itemChild.pendekatan.keterangan === pendekatan,
+        ),
+      );
+
+      if (kondisi) {
+        statusKebutuhan =
+          item.kebutuhan_dokumentasi.length > 0
+            ? item.kebutuhan_dokumentasi
+                .map((itemChild) => itemChild.status as Status | null)
+                .reduce((prev, current) =>
+                  role === DosenRole.kaprodi
+                    ? getPriorityStatusKaprodi(prev, current)
+                    : getPriorityStatusWakilDekan(prev, current),
+                )
+            : null;
+      } else {
+        statusKebutuhan = null;
+      }
 
       // status detail
       const groupedStatusDetail = new Map<

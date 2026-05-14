@@ -11,7 +11,11 @@ distribusiKebutuhanDokumentasiRouter.get(
   "/",
   [
     authMiddleware,
-    aclMiddleware([DosenRole.kaprodi, DosenRole.tim_akreditasi]),
+    aclMiddleware([
+      DosenRole.kaprodi,
+      DosenRole.tim_akreditasi,
+      DosenRole.wakil_dekan_1,
+    ]),
   ],
   DistribusiKebutuhanDokumentasiController.find,
 );
