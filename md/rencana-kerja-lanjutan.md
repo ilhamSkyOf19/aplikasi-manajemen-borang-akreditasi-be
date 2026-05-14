@@ -12,4 +12,4 @@
 - [✅] membuat service delete from dokumentasi borang untuk file dokumen penelitian
 - [✅] Membuat service untuk schema distribusi kebutuhan dokumentasi
 
-- [] Membuat service get untuk data monitoring dokumentasi borang -> menyesuaikan ui front end
+- [✅] Membuat service get untuk data monitoring dokumentasi borang -> menyesuaikan ui front end

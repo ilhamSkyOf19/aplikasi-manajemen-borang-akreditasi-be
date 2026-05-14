@@ -18,6 +18,7 @@ import namaKebutuhanDokumentasiRouter from "./namaKebutuhanDokumentasi.route";
 import folderRouter from "./folder.route";
 import fileDokumenRouter from "./fileDokumen.route";
 import distribusiKebutuhanDokumentasiRouter from "./distribusiKebutuhanDokumentasi.route";
+import statistikRoute from "./statistik.route";
 
 const appRoute: Router = Router();
 
@@ -65,6 +66,9 @@ appRoute.use(
   "/api/distribusi-kebutuhan-dokumentasi",
   distribusiKebutuhanDokumentasiRouter,
 );
+
+// statistik route
+appRoute.use("/api/statistik", statistikRoute);
 
 // // tim akreditasi router
 // appRoute.use("/api/tim-akreditasi", timAkreditasiRoute);
