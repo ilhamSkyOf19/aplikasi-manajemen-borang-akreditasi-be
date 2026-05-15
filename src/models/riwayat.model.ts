@@ -14,6 +14,7 @@ export interface IRiwayat {
 // create
 export interface CreateRiwayatKebutuhanDokumentasiPicType {
   status: Status;
+  dosen_id: number;
   tipe_riwayat: TipeRiwayat;
   kebutuhan_dokumentasi_pic_id: number;
   keterangan: string;
@@ -29,6 +30,7 @@ export interface UpdateRiwayatKebutuhanDokumentasiPicType extends Partial<
 
 // create riwayat dokumentasi borang
 export interface CreateRiwayatDokumentasiBorangType {
+  dosen_id: number;
   status: Status;
   tipe_riwayat: TipeRiwayat;
   dokumentasi_borang_id: number;

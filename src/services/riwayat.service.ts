@@ -20,8 +20,13 @@ export class RiwayatService {
   static async createForKebutuhanDokumentasiPic(
     data: CreateRiwayatKebutuhanDokumentasiPicType,
   ): Promise<ResponseRiwayatType | null> {
-    const { tipe_riwayat, keterangan, kebutuhan_dokumentasi_pic_id, status } =
-      data;
+    const {
+      tipe_riwayat,
+      keterangan,
+      kebutuhan_dokumentasi_pic_id,
+      status,
+      dosen_id,
+    } = data;
     // call db
     const result = await prisma.$transaction(async (tx) => {
       // update status
@@ -37,6 +42,7 @@ export class RiwayatService {
       // create riwayat
       const riwayat = await tx.riwayat.create({
         data: {
+          dosen_id,
           tipe_riwayat,
           keterangan,
           kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_pic_id,
@@ -196,7 +202,13 @@ export class RiwayatService {
   static async createForDokumentasiBorang(
     data: CreateRiwayatDokumentasiBorangType,
   ): Promise<ResponseRiwayatType | null> {
-    const { tipe_riwayat, keterangan, dokumentasi_borang_id, status } = data;
+    const {
+      tipe_riwayat,
+      keterangan,
+      dokumentasi_borang_id,
+      status,
+      dosen_id,
+    } = data;
     // call db
     const result = await prisma.$transaction(async (tx) => {
       // update status
@@ -227,6 +239,7 @@ export class RiwayatService {
       // create riwayat
       const riwayat = await tx.riwayat.create({
         data: {
+          dosen_id,
           tipe_riwayat,
           keterangan,
           dokumentasi_borang_id: dokumentasi_borang_id,
@@ -261,65 +274,12 @@ export class RiwayatService {
     });
   }
 
-  // create dokumentasi borang
-  static async createManyForDokumentasiBorang(
-    data: Omit<CreateRiwayatDokumentasiBorangType, "dokumentasi_borang_id"> & {
-      dokumentasi_borang_ids: number[];
-    },
-  ): Promise<number | null> {
-    const { tipe_riwayat, keterangan, dokumentasi_borang_ids, status } = data;
-    // call db
-    const result = await prisma.$transaction(async (tx) => {
-      // update status
-      await tx.dokumentasiBorang.updateMany({
-        where: {
-          id: {
-            in: dokumentasi_borang_ids,
-          },
-        },
-        data: {
-          status,
-        },
-      });
-
-      // update active file
-      await tx.fileDokumen.updateMany({
-        where: {
-          dokumentasi_borang_files: {
-            some: {
-              dokumentasi_borang_id: {
-                in: dokumentasi_borang_ids,
-              },
-            },
-          },
-        },
-        data: {
-          is_active: true,
-        },
-      });
-
-      // create riwayat
-      const createRiwayat = await tx.riwayat.createMany({
-        data: dokumentasi_borang_ids.map((dokumentasi_borang_id) => ({
-          tipe_riwayat,
-          keterangan,
-          dokumentasi_borang_id: dokumentasi_borang_id,
-          status,
-        })),
-      });
-
-      return createRiwayat;
-    });
-
-    return result.count;
-  }
-
   static async updateForDokumentasiBorang(params: {
     riwayat_id: number;
     data: UpdateRiwayatDokumentasiBorangType;
   }): Promise<ResponseRiwayatType | null> {
     const { riwayat_id, data } = params;
-    const { dokumentasi_borang_id, keterangan, status } = data;
+    const { dokumentasi_borang_id, keterangan, status, dosen_id } = data;
 
     // call db
     const result = await prisma.$transaction(async (tx) => {
@@ -378,6 +338,7 @@ export class RiwayatService {
         data: {
           keterangan,
           status,
+          dosen_id,
         },
         select: {
           id: true,
@@ -453,6 +414,26 @@ export class RiwayatService {
       created_at: result.created_at,
       updated_at: result.updated_at,
     });
+  }
+
+  // find by id for get dosen id
+  static async findByIdForGetDosenId(params: { id: number }) {
+    const { id } = params;
+
+    const result = await prisma.riwayat.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        dosen: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    return result?.dosen?.id;
   }
 
   // // create many

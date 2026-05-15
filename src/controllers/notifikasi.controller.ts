@@ -1,119 +1,73 @@
-// import { NextFunction, Request, Response } from "express";
-// import { PaginationType } from "../types/pagination";
-// import { ResponseResult, ResponseStructure } from "../types/response";
-// import {
-//   ResponseNotifikasiType,
-//   ResponseNotifikasiWithMetaType,
-// } from "../models/notifikasi.model";
-// import checkParamsId from "../utils/checkParamsId";
-// import { NotifikasiService } from "../services/notifikasi.service";
-// import { AuthRequest } from "../types/authRequest";
-// import { checkQueryPagination } from "../utils/checkQueryPagination";
+import { NextFunction, Request, Response } from "express";
+import { ResponseResult, ResponseStructure } from "../types/response";
+import { AuthRequest } from "../types/authRequest";
+import { NotifikasiService } from "../services/notifikasi.service";
+import { PaginationType } from "../types/pagination";
+import {
+  ResponseNotifikasiType,
+  ResponseNotifikasiWithMetaType,
+} from "../models/notifikasi.model";
 
-// export class NotifikasiController {
-//   // create
-//   static async getNotifikasi(
-//     req: AuthRequest<
-//       {},
-//       {},
-//       {},
-//       PaginationType & { isRead?: string; sort?: string }
-//     >,
-//     res: Response<ResponseStructure<ResponseNotifikasiWithMetaType | null>>,
-//     next: NextFunction,
-//   ) {
-//     try {
-//       // get query from params
-//       const { limit = 10, page, search, isRead } = req.query;
+export class NotifikasiController {
+  // get notifikasi
+  static async getNotifikasi(
+    req: AuthRequest,
+    res: Response<
+      ResponseStructure<ResponseNotifikasiWithMetaType | null>,
+      { validatedQuery: PaginationType & { isRead?: boolean } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get role
+      const role = req.data?.role;
 
-//       //   check is read query
-//       if (isRead) {
-//         if (
-//           isRead.toLowerCase() !== "true" &&
-//           isRead.toLowerCase() !== "false"
-//         ) {
-//           return ResponseResult.error(res, 400, "isRead must be true or false");
-//         }
-//       }
+      // get query
+      const { limit, page, search, sort, isRead } = res.locals.validatedQuery;
 
-//       // get id from req data
-//       const id = req?.data?.id as number;
+      // call service
+      const service = await NotifikasiService.getNotifikasiByRole({
+        role: role!,
+        query: {
+          limit,
+          page,
+          search,
+          sort,
+          isRead,
+        },
+      });
 
-//       // check query
-//       const checkQuery = checkQueryPagination(page, limit);
+      return ResponseResult.success<ResponseNotifikasiWithMetaType | null>(
+        service,
+        res,
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 
-//       // check query
-//       if (!checkQuery?.status) {
-//         return ResponseResult.error(res, 400, "page and limit must be numbers");
-//       }
+  // is read
+  static async isRead(
+    _req: Request,
+    response: Response<
+      ResponseStructure<ResponseNotifikasiType | null>,
+      { validatedParams: { id: number } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get id
+      const id = response.locals.validatedParams.id;
 
-//       // call service
-//       const service = await NotifikasiService.findAll(id, {
-//         limit: checkQuery.limit,
-//         page: checkQuery.page,
-//         isRead:
-//           isRead === "true" ? true : isRead === "false" ? false : undefined,
-//         search,
-//       });
+      // call service
+      const service = await NotifikasiService.isRead(id);
 
-//       // return success
-//       return ResponseResult.success(service, res, 200);
-//     } catch (error) {
-//       next(error);
-//     }
-//   }
-
-//   // is read
-//   static async isRead(
-//     req: Request<{ id: string }>,
-//     res: Response<ResponseStructure<ResponseNotifikasiType | null>>,
-//     next: NextFunction,
-//   ) {
-//     try {
-//       // get id from params
-//       const { id } = req.params;
-
-//       // check id
-//       const checkId = checkParamsId(res, id);
-
-//       // call service
-//       const service = await NotifikasiService.isRead(checkId as number);
-
-//       // return
-//       return ResponseResult.success(service, res, 200);
-//     } catch (error) {
-//       next(error);
-//     }
-//   }
-
-//   // delete
-//   static async delete(
-//     req: Request<{ id: string }>,
-//     res: Response<ResponseStructure<null>>,
-//     next: NextFunction,
-//   ) {
-//     try {
-//       // get id from params
-//       const id = req.params.id;
-
-//       // check params
-//       const checkId = checkParamsId(res, id);
-
-//       // check
-//       if (!checkId) {
-//         return ResponseResult.error(res, 400, "id must be number");
-//       }
-
-//       // call service
-//       const service = await NotifikasiService.delete(checkId as number);
-//       // return success
-//       return ResponseResult.successNoContent(
-//         null,
-//         res,
-//         "success delete notifikasi",
-//       );
-//     } catch (error) {
-//       next(error);
-//     }
-//   }
-// }
+      return ResponseResult.success<ResponseNotifikasiType | null>(
+        service,
+        response,
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+}

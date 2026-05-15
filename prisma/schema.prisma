@@ -33,11 +33,7 @@ model Dosen {
 
   // dokumen borang
   // dokumentasi_borang DokumentasiBorang[]
-
-  // Relasi baru: notifikasi yang DITERIMA oleh user ini
-  // notifications Notification[] @relation("NotificationRecipient")
-
-  // kebutuhan_dokumentasi_dokumentasi_borang KebutuhanDokumentasiDokumentasiBorang[] @relation("PicDokumenAssignedBy")
+  riwayats Riwayat[]
 
   @@map("dosen")
 }
@@ -314,6 +310,8 @@ model DistribusiKebutuhanDokumentasi {
 model Riwayat {
   id                       Int         @id @default(autoincrement())
   tipe_riwayat             TipeRiwayat
+  dosen_id                 Int
+  isRead                   Boolean     @default(false)
   keterangan               String      @db.VarChar(1000)
   created_at               DateTime    @default(now())
   updated_at               DateTime    @updatedAt
@@ -321,6 +319,8 @@ model Riwayat {
   dokumentasi_borang_id    Int?
   status                   Status
   // dokumentasi_borang Int?
+
+  dosen Dosen @relation(fields: [dosen_id], references: [id], onDelete: Cascade)
 
   kebutuhan_dokumentasi_pic KebutuhanDokumentasi? @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
 
@@ -334,54 +334,6 @@ enum StorageProvider {
   GDRIVE
   SISTEM
 }
-
-// // =============================================
-// // ✅ MODEL BARU: NOTIFICATION
-// // =============================================
-
-// model Notification {
-//   id Int @id @default(autoincrement())
-
-//   // Penerima notifikasi
-//   recipientId Int
-//   recipient   User @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
-
-//   // Tipe notifikasi (menentukan ikon & routing di frontend)
-//   type NotificationType
-
-//   // Judul & isi pesan
-//   title   String @db.VarChar(255)
-//   message String @db.VarChar(1000)
-
-//   // Status baca
-//   isRead Boolean @default(false)
-
-//   // Referensi opsional ke entitas terkait (untuk deep-link di frontend)
-//   picId            Int?
-//   kebutuhanDokumen String?
-//   kriteria         String?
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([recipientId, isRead])
-//   @@map("notification")
-// }
-
-// enum NotificationType {
-//   // Dipicu oleh WD1 → diterima semua anggota
-//   KRITERIA_DITAMBAH
-//   KRITERIA_DIEDIT
-//   KRITERIA_DIHAPUS
-
-//   // Dipicu oleh Kaprodi → diterima WD1
-//   PIC_BARU_PERLU_VERIFIKASI
-//   PIC_DIREVISI_KAPRODI // Kaprodi mengedit ulang setelah revisi WD1
-
-//   // Dipicu oleh WD1 → diterima Kaprodi
-//   PIC_DISETUJUI_WD1
-//   PIC_DIREVISI_WD1 // WD1 meminta revisi ke Kaprodi
-// }
 
 // enum tipe kebutuhan 
 enum TipeDokumentasi {

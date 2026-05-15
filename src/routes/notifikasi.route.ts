@@ -1,17 +1,30 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import { aclMiddleware } from "../middlewares/acl.middleware";
 import { NotifikasiController } from "../controllers/notifikasi.controller";
+import { PaginationType } from "../types/pagination";
+import { GlobalValidation } from "../validations/global.validation";
+import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
+import { NotifikasiValidation } from "../validations/notifikasi.validation";
+import { zodValidationParams } from "../middlewares/validationParams.middleware";
 // notifikasi route
 const notifikasiRoute: Router = Router();
 
 // get notifikasi
-notifikasiRoute.get("/", authMiddleware, NotifikasiController.getNotifikasi);
+notifikasiRoute.get(
+  "/",
+  authMiddleware,
+  zodValidationQuery<PaginationType & { isRead?: boolean }>(
+    NotifikasiValidation.QUERY,
+  ),
+  NotifikasiController.getNotifikasi,
+);
 
-// is read
-notifikasiRoute.put("/isRead/:id", authMiddleware, NotifikasiController.isRead);
-
-// delete notifikasi
-notifikasiRoute.delete("/:id", authMiddleware, NotifikasiController.delete);
+// is read notifikasi
+notifikasiRoute.put(
+  "/:id/is-read",
+  authMiddleware,
+  zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_ID),
+  NotifikasiController.isRead,
+);
 
 export default notifikasiRoute;

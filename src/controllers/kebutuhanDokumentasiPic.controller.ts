@@ -19,7 +19,7 @@ import { AuthRequest } from "../types/authRequest";
 export class KebutuhanDokumentasiPicController {
   // create
   static async create(
-    req: Request<{}, {}, CreateKebutuhanDokumentasiPicRequestType>,
+    req: AuthRequest<{}, {}, CreateKebutuhanDokumentasiPicRequestType>,
     res: Response<
       ResponseStructure<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>
     >,
@@ -36,6 +36,9 @@ export class KebutuhanDokumentasiPicController {
         keterangan,
         pic,
       } = req.body;
+
+      // get dosen id
+      const dosenId = req?.data?.id;
 
       //   nama dokumentasi new
       let namaKebutuhanDokumentasiNew: number | null = null;
@@ -108,6 +111,20 @@ export class KebutuhanDokumentasiPicController {
           400,
           "kebutuhan dokumentasi pic gagal dibuat",
         );
+      }
+
+      // create riwayat
+      const riwayat = await RiwayatService.createForKebutuhanDokumentasiPic({
+        dosen_id: dosenId ?? 0,
+        tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
+        keterangan: "Membuat kebutuhan dokumentasi pic",
+        kebutuhan_dokumentasi_pic_id: service.id,
+        status: Status.PENDING,
+      });
+
+      // check riwayat
+      if (!riwayat) {
+        return ResponseResult.error(res, 400, "riwayat gagal dibuat");
       }
 
       //   service succes
@@ -434,7 +451,7 @@ export class KebutuhanDokumentasiPicController {
 
   // update
   static async update(
-    req: Request<{}, {}, UpdateKebutuhanDokumentasiPicRequestType>,
+    req: AuthRequest<{}, {}, UpdateKebutuhanDokumentasiPicRequestType>,
     res: Response<
       ResponseStructure<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>,
       { validatedParams: { kebutuhan_dokumentasi_pic_id: number } }
@@ -444,6 +461,10 @@ export class KebutuhanDokumentasiPicController {
     try {
       // get params
       const { kebutuhan_dokumentasi_pic_id } = res.locals.validatedParams;
+
+      // get dosen id
+      const dosenId = req?.data?.id;
+
       // get body
       const {
         nama_dokumentasi_new,
@@ -458,8 +479,6 @@ export class KebutuhanDokumentasiPicController {
 
       //   nama dokumentasi new
       let namaKebutuhanDokumentasiNew: number | null = null;
-      //   pic new
-      let picNew: number | null = null;
 
       //   check nama dokumentasi new || pic new
       if (nama_dokumentasi_new) {
@@ -539,6 +558,7 @@ export class KebutuhanDokumentasiPicController {
 
       // create riwayat
       const riwayat = await RiwayatService.createForKebutuhanDokumentasiPic({
+        dosen_id: dosenId ?? 0,
         tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
         keterangan: keterangan_update,
         kebutuhan_dokumentasi_pic_id: service.id,

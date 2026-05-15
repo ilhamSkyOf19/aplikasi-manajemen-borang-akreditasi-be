@@ -79,8 +79,8 @@ appRoute.use("/api/statistik", statistikRoute);
 // riwayat router
 appRoute.use("/api/riwayat", riwayatRouter);
 
-// // notifikasi router
-// appRoute.use("/api/notifikasi", notifikasiRoute);
+// notifikasi router
+appRoute.use("/api/notifikasi", notifikasiRoute);
 
 // // dokumen borang router
 // appRoute.use("/api/dokumen-borang", dokumenBorangRoute);

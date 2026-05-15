@@ -19,7 +19,7 @@ export class VerifikasiController {
   ) {
     try {
       // get role
-      const { role } = req.data as { role: DosenRole };
+      const { role, id: dosenId } = req.data as { role: DosenRole; id: number };
 
       // get body
       const {
@@ -34,6 +34,7 @@ export class VerifikasiController {
       // call service
       if (kebutuhan_dokumentasi_pic_id && role === DosenRole.wakil_dekan_1) {
         result = await RiwayatService.createForKebutuhanDokumentasiPic({
+          dosen_id: dosenId,
           tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
           kebutuhan_dokumentasi_pic_id,
           keterangan: keterangan_verifikasi,
@@ -43,6 +44,7 @@ export class VerifikasiController {
 
       if (dokumentasi_borang_id && role === DosenRole.kaprodi) {
         result = await RiwayatService.createForDokumentasiBorang({
+          dosen_id: dosenId,
           tipe_riwayat: TipeRiwayat.DOKUMENTASI_BORANG,
           dokumentasi_borang_id,
           keterangan: keterangan_verifikasi,
@@ -84,7 +86,7 @@ export class VerifikasiController {
       const { id } = res.locals.validatedParams;
 
       // get role
-      const role = req.data?.role;
+      const { role, id: dosenId } = req.data as { role: DosenRole; id: number };
 
       // get body
       const {
@@ -94,11 +96,22 @@ export class VerifikasiController {
         status,
       } = req.body;
 
+      // find riwayat and get dosen id
+      const dosenInRiwayat = await RiwayatService.findByIdForGetDosenId({ id });
+
+      // check
+      if (!dosenInRiwayat) {
+        return ResponseResult.error(res, 400, "riwayat tidak ditemukan");
+      }
+
       // service
       let result: ResponseRiwayatType | null = null;
 
       if (kebutuhan_dokumentasi_pic_id && role === DosenRole.wakil_dekan_1) {
         result = await RiwayatService.updateForKebutuhanDokumentasiPic({
+          ...(dosenId !== dosenInRiwayat && {
+            dosen_id: dosenId,
+          }),
           riwayat_id: id,
           data: {
             keterangan: keterangan_verifikasi,
@@ -110,6 +123,9 @@ export class VerifikasiController {
 
       if (dokumentasi_borang_id && role === DosenRole.kaprodi) {
         result = await RiwayatService.updateForDokumentasiBorang({
+          ...(dosenId !== dosenInRiwayat && {
+            dosen_id: dosenId,
+          }),
           riwayat_id: id,
           data: {
             keterangan: keterangan_verifikasi,

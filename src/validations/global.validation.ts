@@ -5,15 +5,12 @@ import { TipeDokumentasi } from "../utils/contstanst";
 export class GlobalValidation {
   static readonly QUERY = z
     .object({
-      page: z
-        .string()
-        .transform((val) => parseInt(val))
-        .optional(),
-      limit: z
-        .string()
-        .transform((val) => parseInt(val))
-        .optional(),
+      page: z.coerce.number().optional(),
+
+      limit: z.coerce.number().optional(),
+
       search: z.string().trim().optional(),
+
       sort: z.enum(["asc", "desc"]).optional(),
     })
     .strict() satisfies z.ZodType<PaginationType>;

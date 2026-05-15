@@ -497,7 +497,7 @@ export class DokumentasiBorangController {
   }
 
   static async ajukan(
-    req: Request<{}, {}, AjukanRequestType>,
+    req: AuthRequest<{}, {}, AjukanRequestType>,
     res: Response<
       ResponseStructure<ResponseRiwayatType | null>,
       { validatedParams: { dokumentasi_borang_id: number } }
@@ -510,8 +510,12 @@ export class DokumentasiBorangController {
 
       const { keterangan } = req.body;
 
+      // get dosen id
+      const dosenId = req?.data?.id;
+
       // create riwayat
       const service = await RiwayatService.createForDokumentasiBorang({
+        dosen_id: dosenId ?? 0,
         dokumentasi_borang_id,
         keterangan,
         tipe_riwayat: TipeRiwayat.DOKUMENTASI_BORANG,

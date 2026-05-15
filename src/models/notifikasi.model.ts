@@ -1,44 +1,37 @@
-import { MetaType, TypeNotifikasi } from "../utils/contstanst";
+import { MetaType, Status, TipeRiwayat } from "../utils/contstanst";
 
 export interface INotifikasi {
   id: number;
-  recipient: number;
-  type: TypeNotifikasi;
-  title: string;
-  message: string;
+  dosen: {
+    nama: string;
+  };
+  tipe_notifikasi: TipeRiwayat;
+  kriteria_id: number;
+  pendekatan_id: number;
+  kebutuhan_dokumentasi_id: number;
+  keterangan_notifikasi: string;
   isRead: boolean;
-  picId?: number;
-  kebutuhanDokumen?: string;
-  kriteria?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// create
-export interface CreateNotifikasiType {
-  recipientId: number;
-  type: TypeNotifikasi;
-  title: string;
-  message: string;
-  picId?: number;
-  kebutuhanDokumen?: string;
-  kriteria?: string;
+  status: Status;
+  created_at: Date;
+  updated_at: Date;
 }
 
 // response
-export interface ResponseNotifikasiType extends INotifikasi {}
-
-// to response
-export const toResponseNotifikasiType = (
-  notifikasi: ResponseNotifikasiType,
-): ResponseNotifikasiType => notifikasi;
-
-export interface ResponseNotifikasiWithMetaType {
-  data: INotifikasi[];
-  meta: MetaType;
+export interface ResponseNotifikasiType {
+  id: number;
+  isRead: boolean;
 }
 
-// to response
+export const toResponseNotifikasiType = (
+  data: ResponseNotifikasiType,
+): ResponseNotifikasiType => data;
+
+// response notifikasi
+export interface ResponseNotifikasiWithMetaType {
+  meta: MetaType;
+  data: INotifikasi[];
+}
+
 export const toResponseNotifikasiWithMetaType = (
-  notifikasi: ResponseNotifikasiWithMetaType,
-): ResponseNotifikasiWithMetaType => notifikasi;
+  data: ResponseNotifikasiWithMetaType,
+): ResponseNotifikasiWithMetaType => data;

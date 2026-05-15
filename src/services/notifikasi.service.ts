@@ -1,280 +1,204 @@
-// import { cpuUsage } from "node:process";
-// import { Prisma } from "../../generated/prisma/browser";
-// import prisma from "../libs/prisma";
-// import {
-//   CreateNotifikasiType,
-//   ResponseNotifikasiType,
-//   ResponseNotifikasiWithMetaType,
-//   toResponseNotifikasiType,
-//   toResponseNotifikasiWithMetaType,
-// } from "../models/notifikasi.model";
-// import { PaginationType } from "../types/pagination";
-// import { TypeNotifikasi, UserRole } from "../utils/contstanst";
-// import { UserService } from "./dosen.service";
+import { Prisma } from "../../generated/prisma/client";
+import prisma from "../libs/prisma";
+import {
+  ResponseNotifikasiType,
+  ResponseNotifikasiWithMetaType,
+  toResponseNotifikasiWithMetaType,
+} from "../models/notifikasi.model";
+import { toResponseRiwayatType } from "../models/riwayat.model";
+import dosenRoute from "../routes/dosen.route";
+import { PaginationType } from "../types/pagination";
+import { DosenRole, SortOrder, Status, TipeRiwayat } from "../utils/contstanst";
 
-// export class NotifikasiService {
-//   // =============================================
-//   // BASIC CREATE
-//   // =============================================
+export class NotifikasiService {
+  // get notifikasi by role
+  static async getNotifikasiByRole(params: {
+    query: PaginationType & { isRead?: boolean };
+    role: DosenRole;
+  }): Promise<ResponseNotifikasiWithMetaType | null> {
+    const {
+      role,
+      query: { limit = 8, page = 1, search, sort, isRead },
+    } = params;
 
-//   static async createNotification(params: CreateNotifikasiType): Promise<void> {
-//     await prisma.notification.create({ data: params });
-//   }
+    // get current page
+    const currentPage = page < 1 ? 1 : page;
 
-//   // =============================================
-//   // BULK CREATE
-//   // =============================================
+    // conditional
+    const conditional: Prisma.RiwayatWhereInput = {
+      ...(isRead && { isRead: isRead }),
+      ...(role === DosenRole.kaprodi && {
+        OR: [
+          {
+            tipe_riwayat: TipeRiwayat.DOKUMENTASI_BORANG,
+            status: Status.PENDING,
+          },
+          {
+            tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
+            status: {
+              in: [Status.REVISION, Status.APPROVED],
+            },
+          },
+        ],
+      }),
 
-//   static async createBulkNotifications(
-//     recipientIds: number[],
-//     params: Omit<CreateNotifikasiType, "recipientId">,
-//   ): Promise<void> {
-//     await prisma.notification.createMany({
-//       data: recipientIds.map((id) => ({
-//         ...params,
-//         recipientId: id,
-//       })),
-//     });
-//   }
+      ...(role === DosenRole.tim_akreditasi && {
+        AND: [
+          {
+            tipe_riwayat: TipeRiwayat.DOKUMENTASI_BORANG,
+            status: { in: [Status.REVISION, Status.APPROVED] },
+          },
+        ],
+      }),
 
-//   // =============================================
-//   // HELPER
-//   // =============================================
+      // wakil dekan
+      ...(role === DosenRole.wakil_dekan_1 && {
+        tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
+        status: Status.PENDING,
+      }),
+    };
 
-//   static async getUserIdsByRole(role: UserRole): Promise<number[]> {
-//     const users = await prisma.user.findMany({
-//       where: { role },
-//       select: { id: true },
-//     });
+    // get count data
+    const totalData = await prisma.riwayat.count({ where: conditional });
 
-//     return users.map((u) => u.id);
-//   }
+    // get total page
+    const totalPage = Math.ceil(totalData / limit);
 
-//   // =============================================
-//   // SKENARIO 1A — WD1 MENAMBAH KRITERIA
-//   // =============================================
+    // call db
+    const result = await prisma.riwayat.findMany({
+      where: conditional,
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      select: {
+        id: true,
+        dokumentasi_borang: {
+          select: {
+            kebutuhan_dokumentasi: {
+              select: {
+                id: true,
+                kriteria_id: true,
+                pendekatan_id: true,
+              },
+            },
+          },
+        },
+        kebutuhan_dokumentasi_pic: {
+          select: {
+            id: true,
+            kriteria_id: true,
+            pendekatan_id: true,
+            status: true,
+          },
+        },
+        dosen: {
+          select: {
+            nama: true,
+          },
+        },
+        isRead: true,
+        status: true,
+        tipe_riwayat: true,
+        created_at: true,
+        updated_at: true,
+      },
+      orderBy: {
+        created_at: sort ? (sort as SortOrder) : "asc",
+      },
+    });
 
-//   static async notifyKriteriaDitambah(namaKriteria: string): Promise<void> {
-//     const allUserIdsNotWD1 = await UserService.findAllUserIds([
-//       UserRole.wakil_dekan_1,
-//     ]);
+    // notifikasi
+    let keterangan_notifikasi: string = "";
+    let kriteriId: number | null = null;
+    let pendekatanId: number | null = null;
+    let kebutuhanDokumentasiId: number | null = null;
 
-//     await this.createBulkNotifications(allUserIdsNotWD1, {
-//       type: TypeNotifikasi.KRITERIA_DITAMBAH,
-//       title: "Kriteria Baru",
-//       message: `Kriteria "${namaKriteria}" telah ditambahkan oleh Wakil Dekan 1.`,
-//       kriteria: namaKriteria,
-//     });
-//   }
+    // kebutuhan dokumentasi
+    if (result.find((item) => item.kebutuhan_dokumentasi_pic)) {
+      kriteriId =
+        result.find((item) => item.kebutuhan_dokumentasi_pic)
+          ?.kebutuhan_dokumentasi_pic?.kriteria_id || null;
+      pendekatanId =
+        result.find((item) => item.kebutuhan_dokumentasi_pic)
+          ?.kebutuhan_dokumentasi_pic?.pendekatan_id || null;
+      kebutuhanDokumentasiId =
+        result.find((item) => item.kebutuhan_dokumentasi_pic)
+          ?.kebutuhan_dokumentasi_pic?.id || null;
 
-//   // =============================================
-//   // SKENARIO 1B — WD1 EDIT KRITERIA
-//   // =============================================
+      if (role === DosenRole.kaprodi) {
+        keterangan_notifikasi =
+          "Kebutuhan Dokumentasi Borang sudah diverifikasi oleh Wakil Dekan 1";
+      }
 
-//   static async notifyKriteriaDiedit(namaKriteria: string): Promise<void> {
-//     const allUserIdsNotWD1 = await UserService.findAllUserIds([
-//       UserRole.wakil_dekan_1,
-//     ]);
+      if (role === DosenRole.wakil_dekan_1) {
+        if (result.find((item) => item.kebutuhan_dokumentasi_pic)) {
+          keterangan_notifikasi =
+            "Kaprodi mengajukan kebutuhan dokumentasi, harap lakukan verifikasi";
+        }
+      }
+    }
 
-//     await this.createBulkNotifications(allUserIdsNotWD1, {
-//       type: TypeNotifikasi.KRITERIA_DIEDIT,
-//       title: "Kriteria Diperbarui",
-//       message: `Kriteria "${namaKriteria}" telah diperbarui oleh WD1.`,
-//       kriteria: namaKriteria,
-//     });
-//   }
+    // dokumentasi borang
+    if (result.find((item) => item.dokumentasi_borang)) {
+      kriteriId =
+        result.find((item) => item.dokumentasi_borang)?.dokumentasi_borang
+          ?.kebutuhan_dokumentasi.kriteria_id || null;
+      pendekatanId =
+        result.find((item) => item.dokumentasi_borang)?.dokumentasi_borang
+          ?.kebutuhan_dokumentasi.pendekatan_id || null;
+      kebutuhanDokumentasiId =
+        result.find((item) => item.dokumentasi_borang)?.dokumentasi_borang
+          ?.kebutuhan_dokumentasi.id || null;
 
-//   // =============================================
-//   // SKENARIO 1C — WD1 HAPUS KRITERIA
-//   // =============================================
+      if (role === DosenRole.tim_akreditasi) {
+        keterangan_notifikasi =
+          "Dokumentasi Borang sudah diverifikasi oleh Kaprodi";
+      }
 
-//   static async notifyKriteriaDihapus(kriteria: string): Promise<void> {
-//     const allUserIdsNotWD1 = await UserService.findAllUserIds([
-//       UserRole.wakil_dekan_1,
-//     ]);
+      if (role === DosenRole.kaprodi) {
+        keterangan_notifikasi =
+          "Dokumentasi Borang diajukan oleh tim akreditasi, harap lakukan verifikasi";
+      }
+    }
 
-//     await this.createBulkNotifications(allUserIdsNotWD1, {
-//       type: TypeNotifikasi.KRITERIA_DIHAPUS,
-//       title: "Kriteria Dihapus",
-//       message: `Kriteria "${kriteria}" telah dihapus oleh WD1.`,
-//     });
-//   }
+    return toResponseNotifikasiWithMetaType({
+      meta: {
+        currentPage,
+        limit,
+        totalData,
+        totalPage,
+      },
+      data: result.map((item) => ({
+        id: item.id,
+        dosen: item.dosen,
+        keterangan_notifikasi: keterangan_notifikasi,
+        status: item.status as Status,
+        tipe_notifikasi: item.tipe_riwayat as TipeRiwayat,
+        isRead: item.isRead,
+        kriteria_id: kriteriId ?? 0,
+        pendekatan_id: pendekatanId ?? 0,
+        kebutuhan_dokumentasi_id: kebutuhanDokumentasiId ?? 0,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      })),
+    });
+  }
 
-//   // =============================================
-//   // SKENARIO 2A — KAPRODI MEMBUAT PIC
-//   // =============================================
+  // isRead
+  static async isRead(id: number): Promise<ResponseNotifikasiType | null> {
+    // call db
+    const result = await prisma.riwayat.update({
+      where: {
+        id,
+      },
+      data: {
+        isRead: true,
+      },
+      select: {
+        id: true,
+        isRead: true,
+      },
+    });
 
-//   static async notifyPicBaruKeWD1(
-//     picId: number,
-//     namaDokumen: string,
-//   ): Promise<void> {
-//     const wd1Id = await UserService.getWD1Id();
-
-//     await this.createNotification({
-//       recipientId: wd1Id,
-//       type: TypeNotifikasi.PIC_BARU_PERLU_VERIFIKASI,
-//       title: "PIC Baru Menunggu Verifikasi",
-//       message: `Kaprodi telah membuat PIC baru untuk dokumen "${namaDokumen}". Mohon lakukan verifikasi.`,
-//       picId,
-//       kebutuhanDokumen: namaDokumen,
-//     });
-//   }
-
-//   // =============================================
-//   // SKENARIO 2B — REVISI PIC OLEH KAPRODI
-//   // =============================================
-
-//   static async notifyPicRevisiKaprodiKeWD1(
-//     picId: number,
-//     namaDokumen: string,
-//     title?: string,
-//     message?: string,
-//   ): Promise<void> {
-//     const wd1Id = await UserService.getWD1Id();
-
-//     await this.createNotification({
-//       recipientId: wd1Id,
-//       type: TypeNotifikasi.PIC_DIREVISI_KAPRODI,
-//       title: title ?? "Revisi PIC Menunggu Verifikasi",
-//       message:
-//         message ??
-//         `Kaprodi telah mengirimkan revisi untuk dokumen "${namaDokumen}". Mohon periksa kembali.`,
-//       picId,
-//       kebutuhanDokumen: namaDokumen,
-//     });
-//   }
-
-//   // =============================================
-//   // SKENARIO 3A — WD1 MENYETUJUI PIC
-//   // =============================================
-
-//   static async notifyPicDisetujuiWD1(
-//     picId: number,
-//     namaDokumen: string,
-//   ): Promise<void> {
-//     const kaprodiId = await UserService.getKaprodiId();
-
-//     await this.createNotification({
-//       recipientId: kaprodiId,
-//       type: TypeNotifikasi.PIC_DISETUJUI_WD1,
-//       title: "PIC Disetujui",
-//       message: `Dokumen "${namaDokumen}" telah disetujui oleh Wakil Dekan 1.`,
-//       picId,
-//       kebutuhanDokumen: namaDokumen,
-//     });
-//   }
-
-//   // =============================================
-//   // SKENARIO 3B — WD1 MEMINTA REVISI PIC
-//   // =============================================
-
-//   static async notifyPicDirevisiWD1(
-//     picId: number,
-//     namaDokumen: string,
-//     keteranganRevisi: string,
-//   ): Promise<void> {
-//     const kaprodiId = await UserService.getKaprodiId();
-
-//     console.log(kaprodiId);
-
-//     await this.createNotification({
-//       recipientId: kaprodiId,
-//       type: TypeNotifikasi.PIC_DIREVISI_WD1,
-//       title: "PIC Perlu Direvisi",
-//       message: `Wakil Dekan 1 meminta revisi untuk dokumen "${namaDokumen}". Catatan: ${keteranganRevisi}`,
-//       picId,
-//       kebutuhanDokumen: namaDokumen,
-//     });
-//   }
-
-//   //   find all user by ids user
-//   static async findAll(
-//     id: number,
-//     req: PaginationType & {
-//       isRead?: boolean;
-//       sort?: string;
-//     },
-//   ): Promise<ResponseNotifikasiWithMetaType | null> {
-//     const { limit = 10, page = 1, search, isRead, sort = "desc" } = req;
-
-//     const currentPage = page < 1 ? 1 : page;
-
-//     const conditional = {
-//       where: {
-//         recipientId: id,
-//         title: search
-//           ? {
-//               contains: search,
-//             }
-//           : undefined,
-//         isRead: isRead,
-//       },
-//     };
-
-//     const totalData = await prisma.notification.count(conditional);
-
-//     const totalPage = Math.ceil(totalData / limit);
-
-//     const skip = (currentPage - 1) * limit;
-//     const take = limit;
-
-//     const result = await prisma.notification.findMany({
-//       ...conditional,
-//       skip,
-//       take,
-//       orderBy: {
-//         createdAt: sort ? (sort as Prisma.SortOrder) : "desc",
-//       },
-//     });
-
-//     return toResponseNotifikasiWithMetaType({
-//       meta: {
-//         currentPage,
-//         limit,
-//         totalData,
-//         totalPage,
-//       },
-//       data: result.map((item) =>
-//         toResponseNotifikasiType({
-//           ...item,
-//           type: item.type as TypeNotifikasi,
-//           recipient: item.recipientId,
-//           picId: item.picId ?? undefined,
-//           kebutuhanDokumen: item.kebutuhanDokumen ?? undefined,
-//           kriteria: item.kriteria ?? undefined,
-//         }),
-//       ),
-//     });
-//   }
-
-//   // read
-//   static async isRead(id: number): Promise<ResponseNotifikasiType> {
-//     // call db
-//     const result = await prisma.notification.update({
-//       where: {
-//         id,
-//       },
-//       data: {
-//         isRead: true,
-//       },
-//     });
-
-//     return toResponseNotifikasiType({
-//       ...result,
-//       recipient: result.recipientId,
-//       type: result.type as TypeNotifikasi,
-//       picId: result.picId ?? undefined,
-//       kebutuhanDokumen: result.kebutuhanDokumen ?? undefined,
-//       kriteria: result.kriteria ?? undefined,
-//     });
-//   }
-
-//   // delete
-//   static async delete(id: number): Promise<void> {
-//     await prisma.notification.delete({
-//       where: {
-//         id,
-//       },
-//     });
-//   }
-// }
+    return result;
+  }
+}
