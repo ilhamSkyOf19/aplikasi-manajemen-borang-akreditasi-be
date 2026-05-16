@@ -7,7 +7,12 @@ export class GlobalValidation {
     .object({
       page: z.coerce.number().optional(),
 
-      limit: z.coerce.number().optional(),
+      limit: z.coerce
+        .number()
+        .transform((val) => {
+          return val > 24 ? 24 : val;
+        })
+        .optional(),
 
       search: z.string().trim().optional(),
 

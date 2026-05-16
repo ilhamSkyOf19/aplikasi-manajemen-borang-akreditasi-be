@@ -12,6 +12,7 @@ import { DosenRole } from "../utils/contstanst";
 import { zodValidationParams } from "../middlewares/validationParams.middleware";
 import { PaginationType } from "../types/pagination";
 import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
+import { GlobalValidation } from "../validations/global.validation";
 
 const kriteriaRouter: Router = Router();
 
@@ -26,7 +27,7 @@ kriteriaRouter.get(
       DosenRole.wakil_dekan_1,
     ]),
   ],
-  zodValidationQuery<PaginationType>(KriteriaValidation.QUERY),
+  zodValidationQuery<PaginationType>(GlobalValidation.QUERY),
   KriteriaController.findAll,
 );
 
@@ -41,7 +42,7 @@ kriteriaRouter.get(
       DosenRole.wakil_dekan_1,
     ]),
   ],
-  zodValidationQuery<PaginationType>(KriteriaValidation.QUERY),
+  zodValidationQuery<PaginationType>(GlobalValidation.QUERY),
   KriteriaController.findAllWithPic,
 );
 

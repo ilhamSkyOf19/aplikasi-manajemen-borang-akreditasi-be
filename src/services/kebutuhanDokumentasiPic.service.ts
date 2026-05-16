@@ -567,6 +567,11 @@ export class KebutuhanDokumentasiPicServices {
     const currentPage = page < 1 ? 1 : page;
 
     const conditional: Prisma.KriteriaWhereInput = {
+      ...(search && {
+        nama_kriteria: {
+          contains: search,
+        },
+      }),
       ...(role === DosenRole.tim_akreditasi && {
         kriteriaPic: {
           some: {
