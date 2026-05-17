@@ -5,6 +5,7 @@ import {
   PayloadDosenForAuthMeType,
   PayloadDosenType,
   ResponseDosenType,
+  UpdatePasswordType,
 } from "../models/dosen.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { DosenServices } from "../services/dosen.service";
@@ -35,11 +36,6 @@ export class AuthController {
         if (countWd1 === 2) {
           return ResponseResult.error(res, 400, "max record wd 1 is 2");
         }
-      }
-
-      // check password & confirm password
-      if (body.password !== body.confirmPassword) {
-        return ResponseResult.error(res, 400, "Password not match");
       }
 
       // hash password
@@ -227,6 +223,59 @@ export class AuthController {
     }
   }
 
+  // update password
+  static async updatePassword(
+    req: AuthRequest<{}, {}, UpdatePasswordType>,
+    res: Response<ResponseStructure<ResponseDosenType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get data
+      const { newPassword, oldPassword } = req.body;
+
+      // get req data
+      const { id } = req?.data as { id: number };
+
+      // check old password
+      const getPassword = await DosenServices.findByIdForGetPassword({ id });
+
+      // check old password
+      const isMatch = await argon2.verify(
+        getPassword ?? "",
+        oldPassword.trim(),
+      );
+
+      // check old password
+      if (!isMatch)
+        return ResponseResult.error(res, 400, "Password lama tidak valid");
+
+      // hash password
+      const hashedNewPassword = await argon2.hash(newPassword.trim(), {
+        type: argon2.argon2id,
+        hashLength: 64,
+      });
+
+      // find dosen by id and role
+      const dosen = await DosenServices.updatePassword({
+        id,
+        password: hashedNewPassword,
+      });
+
+      // check
+      if (!dosen)
+        return ResponseResult.error(res, 400, "Update password gagal");
+
+      return ResponseResult.success<ResponseDosenType | null>(
+        dosen,
+        res,
+        200,
+        "success update password",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // logout
   static async logout(
     _req: Request,
@@ -241,6 +290,7 @@ export class AuthController {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",
+        path: "/api",
       });
 
       return ResponseResult.success<null>(null, res, 200, "success logout");

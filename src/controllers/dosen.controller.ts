@@ -5,10 +5,12 @@ import {
   ResponseDosenType,
   ResponseDosenWithMetaType,
   UpdateDosenType,
+  UpdateSelfDataType,
 } from "../models/dosen.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { NextFunction, Request, Response } from "express";
 import { DosenServices } from "../services/dosen.service";
+import { AuthRequest } from "../types/authRequest";
 
 export class DosenController {
   // find all dosen
@@ -180,6 +182,40 @@ export class DosenController {
         res,
         200,
         "success update dosen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // update self
+  static async updateSelf(
+    req: AuthRequest<{}, {}, UpdateSelfDataType>,
+    res: Response<ResponseStructure<ResponseDosenType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get body
+      const body = req.body;
+
+      const dosenId = req?.data?.id;
+
+      // update dosen
+      const service = await DosenServices.updateSelf({
+        id: dosenId ?? 0,
+        data: body,
+      });
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(res, 404, "dosen not found");
+      }
+      // return success
+      return ResponseResult.success<ResponseDosenType | null>(
+        service,
+        res,
+        200,
+        "success update data",
       );
     } catch (error) {
       next(error);

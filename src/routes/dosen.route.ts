@@ -3,7 +3,7 @@ import { DosenController } from "../controllers/dosen.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import { zodValidation } from "../middlewares/validation.middleware";
-import { UpdateDosenType } from "../models/dosen.model";
+import { UpdateDosenType, UpdateSelfDataType } from "../models/dosen.model";
 import { DosenValidation } from "../validations/dosen.validation";
 import { DosenRole } from "../utils/contstanst";
 import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
@@ -40,6 +40,14 @@ dosenRoute.get(
   DosenController.findById,
 );
 
+// update dosen
+dosenRoute.patch(
+  "/self",
+  authMiddleware,
+  zodValidation<UpdateSelfDataType>(DosenValidation.UPDATE_SELF_DATA),
+  DosenController.updateSelf,
+);
+
 // // update dosen
 dosenRoute.patch(
   "/:id",
@@ -49,7 +57,7 @@ dosenRoute.patch(
   DosenController.update,
 );
 
-// // delete
+// delete
 dosenRoute.delete(
   "/:id",
   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],

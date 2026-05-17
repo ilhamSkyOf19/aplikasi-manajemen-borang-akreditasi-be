@@ -14,7 +14,7 @@
 
 - [✅] Membuat service get untuk data monitoring dokumentasi borang -> menyesuaikan ui front end
 
-- [] Memperbaiki service notifikasi, notifikasi hanya di berikan untuk :
+- [✅] Memperbaiki service notifikasi, notifikasi hanya di berikan untuk :
   1. Tim akreditasi
      - Mengirim notifikasi ke kaprodi saat setelah mengajukan dokumentasi
      - Menerima notifikasi revisi atau setuju dari kaprodi
@@ -28,4 +28,8 @@
      - Menerima notifikasi dari kaprodi
      - Mengirin notifikasi ke kaprodi
 
-- [] Memperbaiki service dari notfikasi -> buat lebih spesifik lagi untuk memisahkan tipe notifikasi nya [kebutuhan dokumentasi, verifikasi kebutuhan dokumentasi, dokumentasi borang, verifikasi dokumentasi borang]
+- [✅] Memperbaiki service dari notfikasi -> buat lebih spesifik lagi untuk memisahkan tipe notifikasi nya [kebutuhan dokumentasi, verifikasi kebutuhan dokumentasi, dokumentasi borang, verifikasi dokumentasi borang]
+
+## Urgent
+
+- [ ] Membuat api service ubah password

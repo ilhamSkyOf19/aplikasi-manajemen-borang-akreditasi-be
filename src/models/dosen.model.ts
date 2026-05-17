@@ -30,6 +30,17 @@ export interface LoginDosenType extends Pick<IDosen, "password"> {
   identifier: string;
 }
 
+export interface UpdatePasswordType {
+  newPassword: string;
+  confirmNewPassword: string;
+  oldPassword: string;
+}
+
+export interface UpdateSelfDataType {
+  nama?: string;
+  email?: string;
+  nidn?: string;
+}
 // payload
 export interface PayloadDosenType extends Omit<
   IDosen,

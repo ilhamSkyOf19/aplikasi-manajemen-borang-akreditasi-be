@@ -9,11 +9,13 @@ import {
   ResponseDosenWithMetaType,
   toDosenResponse,
   UpdateDosenType,
+  UpdateSelfDataType,
 } from "../models/dosen.model";
 import { PaginationType } from "../types/pagination";
 import { DosenRole } from "../utils/contstanst";
 import { SortOrder } from "../../generated/prisma/internal/prismaNamespaceBrowser";
 import { Prisma } from "../../generated/prisma/client";
+import { argon2 } from "node:crypto";
 
 export class DosenServices {
   // create
@@ -68,7 +70,112 @@ export class DosenServices {
     });
   }
 
-  // //   // find user by email or name & password
+  // update password by id
+  static async updatePassword(params: {
+    id: number;
+    password: string;
+  }): Promise<ResponseDosenType | null> {
+    const { id, password } = params;
+    const result = await prisma.dosen.update({
+      where: {
+        id,
+      },
+      data: {
+        password,
+      },
+      select: {
+        id: true,
+        nama: true,
+        nidn: true,
+        email: true,
+        created_at: true,
+        updated_at: true,
+        dosenRole: {
+          select: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    // check result
+    if (!result) return null;
+    const { dosenRole, ...dataDosen } = result;
+
+    return toDosenResponse({
+      ...dataDosen,
+      roles: result?.dosenRole.map((dr) => dr.role) as DosenRole[],
+    });
+  }
+
+  // find by id and password
+  static async findByIdForGetPassword(params: {
+    id: number;
+  }): Promise<string | null> {
+    const { id } = params;
+
+    const dosen = await prisma.dosen.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        password: true,
+      },
+    });
+
+    // check
+    if (!dosen) return null;
+
+    return dosen.password;
+  }
+
+  // update data self
+  static async updateSelf(params: {
+    id: number;
+    data: UpdateSelfDataType;
+  }): Promise<ResponseDosenType | null> {
+    // params
+    const {
+      data: { email, nama, nidn },
+      id,
+    } = params;
+
+    // update data
+    const result = await prisma.dosen.update({
+      where: {
+        id,
+      },
+      data: {
+        email,
+        nama,
+        nidn,
+      },
+      select: {
+        id: true,
+        nama: true,
+        nidn: true,
+        email: true,
+        created_at: true,
+        updated_at: true,
+        dosenRole: {
+          select: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    // check result
+    if (!result) return null;
+    const { dosenRole, ...dataDosen } = result;
+
+    return toDosenResponse({
+      ...dataDosen,
+      roles: result?.dosenRole.map((dr) => dr.role) as DosenRole[],
+    });
+  }
+
+  // find user by email or name & password
   static async findDosenByIdentifier({
     identifier,
   }: Omit<LoginDosenType, "password" | "role">): Promise<

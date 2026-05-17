@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller";
 import { zodValidation } from "../middlewares/validation.middleware";
-import { CreateDosenType, LoginDosenType } from "../models/dosen.model";
+import {
+  CreateDosenType,
+  LoginDosenType,
+  UpdatePasswordType,
+} from "../models/dosen.model";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import LimiterMiddleware from "../middlewares/limiter.middleware";
@@ -21,9 +25,17 @@ authRoute.post(
 // register
 authRoute.post(
   "/register",
-  // [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
   zodValidation<CreateDosenType>(DosenValidation.CREATE),
   AuthController.register,
+);
+
+// update password
+authRoute.put(
+  "/update-password",
+  authMiddleware,
+  zodValidation<UpdatePasswordType>(DosenValidation.UPDATE_PASSWORD),
+  AuthController.updatePassword,
 );
 
 // // me

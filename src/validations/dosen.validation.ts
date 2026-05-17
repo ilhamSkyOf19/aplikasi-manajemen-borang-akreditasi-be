@@ -3,6 +3,8 @@ import {
   CreateDosenType,
   LoginDosenType,
   UpdateDosenType,
+  UpdatePasswordType,
+  UpdateSelfDataType,
 } from "../models/dosen.model";
 import { DosenRole } from "../utils/contstanst";
 import { PaginationType } from "../types/pagination";
@@ -63,6 +65,40 @@ export class DosenValidation {
     })
     .strict() satisfies z.ZodType<CreateDosenType>;
 
+  static readonly UPDATE_PASSWORD = z
+    .object({
+      newPassword: this.passwordSchema(),
+      oldPassword: this.passwordSchema(),
+      confirmNewPassword: this.passwordSchema(),
+    })
+    .superRefine((data, ctx) => {
+      if (data.newPassword !== data.confirmNewPassword) {
+        ctx.addIssue({
+          code: "custom",
+          message: "password tidak sama",
+          path: ["newPassword"],
+        });
+        ctx.addIssue({
+          code: "custom",
+          message: "password tidak sama",
+          path: ["confirmPassword"],
+        });
+      }
+      if (data.newPassword === data.oldPassword) {
+        ctx.addIssue({
+          code: "custom",
+          message: "password tidak boleh sama dengan password lama",
+          path: ["newPassword"],
+        });
+        ctx.addIssue({
+          code: "custom",
+          message: "password tidak boleh sama dengan password lama",
+          path: ["oldPassword"],
+        });
+      }
+    })
+    .strict() satisfies z.ZodType<UpdatePasswordType>;
+
   // login
   static readonly LOGIN = z
     .object({
@@ -85,6 +121,15 @@ export class DosenValidation {
         .optional(),
     })
     .strict() satisfies z.ZodType<UpdateDosenType>;
+
+  // update
+  static readonly UPDATE_SELF_DATA = z
+    .object({
+      nama: this.onlyCharSchema().optional(),
+      email: this.emailSchema().optional(),
+      nidn: this.nidnSchema().optional(),
+    })
+    .strict() satisfies z.ZodType<UpdateSelfDataType>;
 
   // pagination
   static readonly QUERY_PARAMS = z
