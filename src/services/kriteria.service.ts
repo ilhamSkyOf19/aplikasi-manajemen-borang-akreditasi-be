@@ -152,6 +152,7 @@ export class KriteriaServices {
         nama_kriteria: true,
         created_at: true,
         updated_at: true,
+        periode_id: true,
         kriteriaPic: {
           select: {
             dosen: {
@@ -177,6 +178,7 @@ export class KriteriaServices {
       },
       data: result.map((item) => ({
         id: item.id,
+        periode_id: item.periode_id,
         kode_kriteria: item.kode_kriteria,
         nama_kriteria: item.nama_kriteria,
         created_at: item.created_at,

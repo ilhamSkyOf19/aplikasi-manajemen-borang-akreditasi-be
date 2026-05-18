@@ -32,4 +32,10 @@
 
 ## Urgent
 
-- [ ] Membuat api service ubah password
+- [✅] Membuat api service ubah password
+
+- [ ] Membuat sebuah container lagi untuk membuat priode akreditasi , jadi kedudukan paling tinggi adalah priode bukan kriteria.
+- [ ] Membuat sebuah api lagi untuk timeline dari pengerjaan dan lain lain.
+- [ ] Membuat api search file untuk mempercepat pencarian file , dengan response
+- [ ] Membuat api untuk dokumen panduan cara menyusun borang akreditasi
+- [ ] Membuat api service lupa password dengan email

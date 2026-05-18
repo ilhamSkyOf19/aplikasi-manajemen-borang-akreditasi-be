@@ -52,19 +52,61 @@ model DosenRole {
   @@map("dosen_role")
 }
 
+// periode 
+model Periode {
+  id         Int      @id @default(autoincrement())
+  start_date DateTime
+  end_date   DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // timeline 
+  timeline Timeline[]
+
+  // kriteria 
+  kriteria Kriteria[]
+
+  // unique 
+  @@unique([start_date, end_date])
+  @@map("periode")
+}
+
+// timeline 
+model Timeline {
+  id                             Int      @id @default(autoincrement())
+  periode_id                     Int
+  deadline_kebutuhan_dokumentasi DateTime
+  deadline_dokumentasi_borang    DateTime
+  created_at                     DateTime @default(now())
+  updated_at                     DateTime @updatedAt
+
+  // periode
+  periode Periode @relation(fields: [periode_id], references: [id], onDelete: Cascade)
+
+  // unique 
+  @@unique([periode_id, deadline_kebutuhan_dokumentasi, deadline_dokumentasi_borang])
+  @@map("timeline")
+}
+
 // kriteria 
 model Kriteria {
   id            Int      @id @default(autoincrement())
+  periode_id    Int
   kode_kriteria Int      @unique
   nama_kriteria String   @unique
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
+
+  // periode
+  periode Periode @relation(fields: [periode_id], references: [id], onDelete: Cascade)
 
   kebutuhan_dokumentasi KebutuhanDokumentasi[]
 
   // relasi ke kriteria_pic
   kriteriaPic KriteriaPic[]
 
+  // unique
+  @@unique([periode_id, kode_kriteria, nama_kriteria])
   @@map("kriteria")
 }
 
@@ -180,20 +222,6 @@ model DokumentasiBorang {
   @@map("dokumentasi_borang")
 }
 
-// model DokumentasiBorangPenelitian {
-//   id                    Int      @id @default(autoincrement())
-//   dokumentasi_borang_id Int      @unique
-//   judul_penelitian      String?
-//   tahun_penelitian      Int?
-//   nama_peneliti         String?
-//   created_at            DateTime @default(now())
-//   updated_at            DateTime @updatedAt
-
-//   dokumentasi_borang DokumentasiBorang @relation(fields: [dokumentasi_borang_id], references: [id], onDelete: Cascade)
-
-//   @@map("dokumentasi_borang_penelitian")
-// }
-
 // folder dokumen 
 model FolderDokumen {
   id                    Int      @id @default(autoincrement())
@@ -291,21 +319,6 @@ model DistribusiKebutuhanDokumentasi {
 
   @@map("distribusi_kebutuhan_dokumentasi")
 }
-
-// model KebutuhanDokumentasiDokumentasiBorang {
-//   id                     Int      @id @default(autoincrement())
-//   kebutuhanDokumentasiId Int
-//   dokumentasiBorangId    Int
-//   assignedById           Int
-//   createdAt              DateTime @default(now())
-
-//   kebutuhanDokumentasi KebutuhanDokumentasi @relation(fields: [kebutuhanDokumentasiId], references: [id], onDelete: Cascade)
-//   dokumentasiBorang    DokumentasiBorang    @relation(fields: [dokumentasiBorangId], references: [id], onDelete: Cascade)
-//   assignedBy           User                 @relation("PicDokumenAssignedBy", fields: [assignedById], references: [id])
-
-//   @@unique([kebutuhanDokumentasiId, dokumentasiBorangId])
-//   @@map("kebutuhan_dokumentasi_dokumentasi_borang")
-// }
 
 model Riwayat {
   id                       Int         @id @default(autoincrement())

@@ -21,13 +21,14 @@ export class KriteriaController {
   ) {
     try {
       // get body
-      const { kode_kriteria, nama_kriteria } = req.body;
+      const { kode_kriteria, nama_kriteria, periode_id } = req.body;
 
       // create distribusi untuk kebutuhan dokumentasi
       await DistribusiKebutuhanDokumentasiService.create();
 
       // call service
       const service = await KriteriaServices.create({
+        periode_id,
         kode_kriteria,
         nama_kriteria,
       });

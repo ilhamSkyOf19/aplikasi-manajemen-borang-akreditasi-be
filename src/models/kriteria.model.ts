@@ -3,6 +3,7 @@ import { MetaType } from "../utils/contstanst";
 // kriteria model
 export interface IKriteria {
   id: number;
+  periode_id: number;
   kode_kriteria: number;
   nama_kriteria: string;
   created_at: Date;

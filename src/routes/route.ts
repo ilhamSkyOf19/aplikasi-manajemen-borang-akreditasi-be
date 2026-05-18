@@ -19,6 +19,7 @@ import folderRouter from "./folder.route";
 import fileDokumenRouter from "./fileDokumen.route";
 import distribusiKebutuhanDokumentasiRouter from "./distribusiKebutuhanDokumentasi.route";
 import statistikRoute from "./statistik.route";
+import periodeRoute from "./periode.route";
 
 const appRoute: Router = Router();
 
@@ -33,6 +34,9 @@ appRoute.use("/api/auth", authRoute);
 
 // // user route
 appRoute.use("/api/dosen", dosenRoute);
+
+// // periode route
+appRoute.use("/api/periode", periodeRoute);
 
 // // kriteria router
 appRoute.use("/api/kriteria", kriteriaRouter);

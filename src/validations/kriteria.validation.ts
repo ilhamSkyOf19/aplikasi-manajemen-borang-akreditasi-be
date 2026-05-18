@@ -9,6 +9,7 @@ import { PaginationType } from "../types/pagination";
 export class KriteriaValidation {
   static readonly CREATE = z
     .object({
+      periode_id: z.number().min(1).max(2147483647),
       kode_kriteria: z.number().min(1).max(100),
       nama_kriteria: z.string().trim().min(1).max(100),
     })
