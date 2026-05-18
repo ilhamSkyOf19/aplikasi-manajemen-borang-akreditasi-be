@@ -18,7 +18,7 @@ const kriteriaRouter: Router = Router();
 
 // find all
 kriteriaRouter.get(
-  "/",
+  "/periode/:periode_id",
   [
     authMiddleware,
     aclMiddleware([
@@ -27,13 +27,16 @@ kriteriaRouter.get(
       DosenRole.wakil_dekan_1,
     ]),
   ],
+  zodValidationParams<{ periode_id: number }>(
+    GlobalValidation.PARAMS_PERIODE_ID,
+  ),
   zodValidationQuery<PaginationType>(GlobalValidation.QUERY),
   KriteriaController.findAll,
 );
 
 // find all with pic
 kriteriaRouter.get(
-  "/with-pic",
+  "/with-pic/periode/:periode_id",
   [
     authMiddleware,
     aclMiddleware([
@@ -42,13 +45,16 @@ kriteriaRouter.get(
       DosenRole.wakil_dekan_1,
     ]),
   ],
+  zodValidationParams<{ periode_id: number }>(
+    GlobalValidation.PARAMS_PERIODE_ID,
+  ),
   zodValidationQuery<PaginationType>(GlobalValidation.QUERY),
   KriteriaController.findAllWithPic,
 );
 
 // find all for choose
 kriteriaRouter.get(
-  "/for-choose",
+  "/for-choose/periode/:periode_id",
   [
     authMiddleware,
     aclMiddleware([
@@ -57,6 +63,9 @@ kriteriaRouter.get(
       DosenRole.wakil_dekan_1,
     ]),
   ],
+  zodValidationParams<{ periode_id: number }>(
+    GlobalValidation.PARAMS_PERIODE_ID,
+  ),
   KriteriaController.findAllForChoose,
 );
 

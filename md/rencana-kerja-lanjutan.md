@@ -34,6 +34,8 @@
 
 - [✅] Membuat api service ubah password
 
+- [ ] Menambahkan field active ke data periode
+
 - [ ] Membuat sebuah container lagi untuk membuat priode akreditasi , jadi kedudukan paling tinggi adalah priode bukan kriteria.
 - [ ] Membuat sebuah api lagi untuk timeline dari pengerjaan dan lain lain.
 - [ ] Membuat api search file untuk mempercepat pencarian file , dengan response

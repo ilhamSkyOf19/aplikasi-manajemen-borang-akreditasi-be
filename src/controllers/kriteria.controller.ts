@@ -83,20 +83,29 @@ export class KriteriaController {
     _req: Request,
     res: Response<
       ResponseStructure<ResponseKriteriaWithMetaType | null>,
-      { validatedQuery: PaginationType }
+      {
+        validatedQuery: PaginationType;
+        validatedParams: { periode_id: number };
+      }
     >,
     next: NextFunction,
   ) {
     try {
-      // get params
+      // get query
       const { limit, page, search, sort } = res.locals.validatedQuery;
+
+      // get params
+      const { periode_id } = res.locals.validatedParams;
 
       // call service
       const service = await KriteriaServices.findAll({
-        limit,
-        page,
-        search,
-        sort,
+        periode_id,
+        query: {
+          limit,
+          page,
+          search,
+          sort,
+        },
       });
 
       // return
@@ -116,20 +125,27 @@ export class KriteriaController {
     _req: Request,
     res: Response<
       ResponseStructure<ResponseKriteriaPicWithMetaType | null>,
-      { validatedQuery: PaginationType }
+      {
+        validatedQuery: PaginationType;
+        validatedParams: { periode_id: number };
+      }
     >,
     next: NextFunction,
   ) {
     try {
       // get params
       const { limit, page, search, sort } = res.locals.validatedQuery;
+      const { periode_id } = res.locals.validatedParams;
 
       // call service
       const service = await KriteriaServices.findAllKriteriaWithPic({
-        limit,
-        page,
-        search,
-        sort,
+        periode_id,
+        query: {
+          limit,
+          page,
+          search,
+          sort,
+        },
       });
 
       // return
@@ -147,12 +163,18 @@ export class KriteriaController {
   // find all no pic
   static async findAllForChoose(
     _req: Request,
-    res: Response<ResponseStructure<ResponseKriteriaChooseType[] | null>>,
+    res: Response<
+      ResponseStructure<ResponseKriteriaChooseType[] | null>,
+      { validatedParams: { periode_id: number } }
+    >,
     next: NextFunction,
   ) {
     try {
+      // get params
+      const { periode_id } = res.locals.validatedParams;
+
       // call service
-      const service = await KriteriaServices.findAllForChoose();
+      const service = await KriteriaServices.findAllForChoose({ periode_id });
 
       // return
       return ResponseResult.success<ResponseKriteriaChooseType[] | null>(

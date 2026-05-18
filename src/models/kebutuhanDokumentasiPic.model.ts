@@ -1,13 +1,14 @@
 import { MetaType, Status, TipeDokumentasi } from "../utils/contstanst";
 import { IPendekatan } from "./pendekatan.model";
 import { ResponseKriteriaPicType } from "./kriteriaPic.model";
+import { IPeriode } from "./periode.model";
 
 // type
 export interface IKebutuhanDokumentsiPic {
   id: number;
   kriteria: Omit<
     ResponseKriteriaPicType,
-    "created_at" | "updated_at" | "dosen"
+    "created_at" | "updated_at" | "dosen" | "periode_id"
   >;
   pendekatan: IPendekatan;
   nama_kebutuhan_dokumentasi: {
@@ -19,6 +20,7 @@ export interface IKebutuhanDokumentsiPic {
     id: number;
     nama: string;
   }[];
+  periode: Pick<IPeriode, "id" | "start_date" | "end_date">;
   keterangan: string;
   created_at: Date;
   updated_at: Date;
@@ -82,7 +84,7 @@ export const toResponseCreateUpdateKebutuhanDokumentasiPicType = (
 
 // response
 export interface ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType {
-  data: Omit<IKebutuhanDokumentsiPic, "kriteria" | "pendekatan">[];
+  data: Omit<IKebutuhanDokumentsiPic, "kriteria" | "pendekatan" | "periode">[];
   meta: MetaType;
 }
 

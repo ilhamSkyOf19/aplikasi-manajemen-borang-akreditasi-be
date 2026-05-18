@@ -144,7 +144,10 @@ export class KebutuhanDokumentasiPicController {
     req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
-      { validatedQuery: PaginationType }
+      {
+        validatedQuery: PaginationType;
+        validatedParams: { periode_id: number };
+      }
     >,
     next: NextFunction,
   ) {
@@ -152,17 +155,22 @@ export class KebutuhanDokumentasiPicController {
       // get query
       const { limit, page, search, sort } = res.locals.validatedQuery;
 
+      const { periode_id } = res.locals.validatedParams;
+
       // get role from req data
       const { role } = req.data as { role: DosenRole };
 
       // call service
       const service =
         await KebutuhanDokumentasiPicServices.findAllByKriteriaPic({
-          role,
-          limit,
-          page,
-          search,
-          sort,
+          periode_id,
+          query: {
+            role,
+            limit,
+            page,
+            search,
+            sort,
+          },
         });
 
       // check service
@@ -193,7 +201,11 @@ export class KebutuhanDokumentasiPicController {
       ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
       {
         validatedQuery: PaginationType & { status?: Status };
-        validatedParams: { kriteria_id: number; pendekatan_id: number };
+        validatedParams: {
+          kriteria_id: number;
+          pendekatan_id: number;
+          periode_id: number;
+        };
       }
     >,
     next: NextFunction,
@@ -203,11 +215,13 @@ export class KebutuhanDokumentasiPicController {
       const { limit, page, search, sort, status } = res.locals.validatedQuery;
 
       // get params
-      const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
+      const { kriteria_id, pendekatan_id, periode_id } =
+        res.locals.validatedParams;
 
       // call service
       const service =
         await KebutuhanDokumentasiPicServices.findAllByKriteriaAndPendekatan({
+          periode_id,
           kriteria_id,
           pendekatan_id,
           query: {
@@ -283,7 +297,10 @@ export class KebutuhanDokumentasiPicController {
     req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
-      { validatedQuery: PaginationType }
+      {
+        validatedQuery: PaginationType;
+        validatedParams: { periode_id: number };
+      }
     >,
     next: NextFunction,
   ) {
@@ -291,12 +308,16 @@ export class KebutuhanDokumentasiPicController {
       // get query
       const { limit, page, search, sort } = res.locals.validatedQuery;
 
+      // periode
+      const { periode_id } = res.locals.validatedParams;
+
       // get role from req data
       const { role, id } = req?.data as { role: DosenRole; id: number };
 
       // call service
       const service =
         await KebutuhanDokumentasiPicServices.findAllForDokumentasiBorang({
+          periode_id,
           dosen_id: id,
           role,
           query: {
@@ -335,7 +356,11 @@ export class KebutuhanDokumentasiPicController {
       ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
       {
         validatedQuery: PaginationType & { status?: Status };
-        validatedParams: { kriteria_id: number; pendekatan_id: number };
+        validatedParams: {
+          kriteria_id: number;
+          pendekatan_id: number;
+          periode_id: number;
+        };
       }
     >,
     next: NextFunction,
@@ -345,7 +370,8 @@ export class KebutuhanDokumentasiPicController {
       const { limit, page, search, sort, status } = res.locals.validatedQuery;
 
       // get params
-      const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
+      const { kriteria_id, pendekatan_id, periode_id } =
+        res.locals.validatedParams;
 
       // get dosen id
       const { id, role } = req?.data as { id: number; role: DosenRole };
@@ -354,6 +380,7 @@ export class KebutuhanDokumentasiPicController {
       const service =
         await KebutuhanDokumentasiPicServices.findAllforDokumentasiBorangByKriteriaAndPendekatan(
           {
+            periode_id,
             dosen: {
               id,
               role,
@@ -393,12 +420,16 @@ export class KebutuhanDokumentasiPicController {
 
   // find all for dokumentasi borang complated
   static async findAllForDokumentasiBorangComplated(
-    req: AuthRequest,
+    _req: Request,
     res: Response<
       ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
       {
         validatedQuery: PaginationType;
-        validatedParams: { kriteria_id: number; pendekatan_id: number };
+        validatedParams: {
+          kriteria_id: number;
+          pendekatan_id: number;
+          periode_id: number;
+        };
       }
     >,
     next: NextFunction,
@@ -408,19 +439,14 @@ export class KebutuhanDokumentasiPicController {
       const { limit, page, search, sort } = res.locals.validatedQuery;
 
       // get params
-      const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
-
-      // get dosen id
-      const { id, role } = req?.data as { id: number; role: DosenRole };
+      const { kriteria_id, pendekatan_id, periode_id } =
+        res.locals.validatedParams;
 
       // call service
       const service =
         await KebutuhanDokumentasiPicServices.findAllforDokumentasiBorangComplated(
           {
-            dosen: {
-              id,
-              role,
-            },
+            periode_id,
             kriteria_id,
             pendekatan_id,
             query: {

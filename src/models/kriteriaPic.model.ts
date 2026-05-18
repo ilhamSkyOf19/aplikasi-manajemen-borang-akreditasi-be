@@ -5,7 +5,7 @@ import { IKriteria } from "./kriteria.model";
 // kriteria model
 export interface IKriteriaPic {
   id: number;
-  kriteria: Omit<IKriteria, "created_at" | "updated_at">;
+  kriteria: Omit<IKriteria, "created_at" | "updated_at" | "periode_id">;
   dosen: Omit<IDosen, "password" | "created_at" | "updated_at">[];
   created_at: Date;
   updated_at: Date;

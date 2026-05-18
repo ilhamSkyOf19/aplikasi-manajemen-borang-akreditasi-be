@@ -142,16 +142,21 @@ export class KebutuhanDokumentasiPicServices {
   }
 
   // find all by kriteria pic
-  static async findAllByKriteriaPic(
+  static async findAllByKriteriaPic(params: {
+    periode_id: number;
     query: PaginationType & {
       role: DosenRole;
-    },
-  ): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
-    const { limit = 8, page = 1, search, sort, role } = query;
+    };
+  }): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
+    const {
+      periode_id,
+      query: { limit = 8, page = 1, search, sort, role },
+    } = params;
 
     const currentPage = page < 1 ? 1 : page;
 
     const conditional: Prisma.KriteriaWhereInput = {
+      periode_id,
       ...(search && {
         kriteriaPic: {
           some: {
@@ -320,6 +325,7 @@ export class KebutuhanDokumentasiPicServices {
 
   // find all by kriteria & pendekatan
   static async findAllByKriteriaAndPendekatan(data: {
+    periode_id: number;
     kriteria_id: number;
     pendekatan_id: number;
     query: PaginationType & {
@@ -329,6 +335,7 @@ export class KebutuhanDokumentasiPicServices {
     // get data
 
     const {
+      periode_id,
       kriteria_id,
       pendekatan_id,
       query: { status, limit = 8, page = 1, search, sort },
@@ -341,6 +348,9 @@ export class KebutuhanDokumentasiPicServices {
     const conditional: Prisma.KebutuhanDokumentasiWhereInput = {
       kriteria_id,
       pendekatan_id,
+      kriteria: {
+        periode_id,
+      },
       ...(search && {
         OR: [
           {
@@ -452,6 +462,13 @@ export class KebutuhanDokumentasiPicServices {
             id: true,
             nama_kriteria: true,
             kode_kriteria: true,
+            periode: {
+              select: {
+                id: true,
+                start_date: true,
+                end_date: true,
+              },
+            },
             kriteriaPic: {
               select: {
                 kriteria: {
@@ -501,6 +518,11 @@ export class KebutuhanDokumentasiPicServices {
 
     return toResponseKebutuhanDokumentasiPicType({
       id: result.id,
+      periode: {
+        id: result.kriteria.periode.id,
+        start_date: result.kriteria.periode.start_date,
+        end_date: result.kriteria.periode.end_date,
+      },
       kriteria: {
         kriteria: {
           id: result.kriteria.id,
@@ -554,11 +576,13 @@ export class KebutuhanDokumentasiPicServices {
 
   // get kriteria by dosen
   static async findAllForDokumentasiBorang(params: {
+    periode_id: number;
     query: PaginationType;
     dosen_id: number;
     role: DosenRole;
   }): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
     const {
+      periode_id,
       dosen_id,
       query: { limit = 8, page = 1, search, sort },
       role,
@@ -567,6 +591,7 @@ export class KebutuhanDokumentasiPicServices {
     const currentPage = page < 1 ? 1 : page;
 
     const conditional: Prisma.KriteriaWhereInput = {
+      periode_id,
       ...(search && {
         nama_kriteria: {
           contains: search,
@@ -741,6 +766,7 @@ export class KebutuhanDokumentasiPicServices {
 
   // find all for dokumentasi borang by kriteria & pendekatan
   static async findAllforDokumentasiBorangByKriteriaAndPendekatan(data: {
+    periode_id: number;
     dosen: {
       id: number;
       role: DosenRole;
@@ -754,6 +780,7 @@ export class KebutuhanDokumentasiPicServices {
     // get data
 
     const {
+      periode_id,
       kriteria_id,
       pendekatan_id,
       dosen: { id, role },
@@ -765,6 +792,9 @@ export class KebutuhanDokumentasiPicServices {
 
     // conditional
     const conditional: Prisma.KebutuhanDokumentasiWhereInput = {
+      kriteria: {
+        periode_id,
+      },
       ...(role === DosenRole.tim_akreditasi && {
         kriteria: {
           kriteriaPic: {
@@ -885,10 +915,7 @@ export class KebutuhanDokumentasiPicServices {
 
   // find all for dokumentasi borang complated
   static async findAllforDokumentasiBorangComplated(data: {
-    dosen: {
-      id: number;
-      role: DosenRole;
-    };
+    periode_id: number;
     kriteria_id: number;
     pendekatan_id: number;
     query: PaginationType;
@@ -896,9 +923,9 @@ export class KebutuhanDokumentasiPicServices {
     // get data
 
     const {
+      periode_id,
       kriteria_id,
       pendekatan_id,
-      dosen: { id, role },
       query: { limit = 8, page = 1, search, sort },
     } = data;
 
@@ -907,6 +934,9 @@ export class KebutuhanDokumentasiPicServices {
 
     // conditional
     const conditional: Prisma.KebutuhanDokumentasiWhereInput = {
+      kriteria: {
+        periode_id,
+      },
       status: Status.APPROVED,
       kriteria_id,
       pendekatan_id,

@@ -44,15 +44,21 @@ export class KriteriaServices {
   }
 
   // //   read all
-  static async findAll(
-    query: PaginationType,
-  ): Promise<ResponseKriteriaWithMetaType | null> {
-    const { page = 1, limit = 8, search, sort } = query;
+  static async findAll(params: {
+    periode_id: number;
+    query: PaginationType;
+  }): Promise<ResponseKriteriaWithMetaType | null> {
+    // params
+    const {
+      periode_id,
+      query: { page = 1, limit = 8, search, sort },
+    } = params;
 
     // current page
     const currentPage = page < 1 ? 1 : page;
 
     const conditional: Prisma.KriteriaWhereInput = {
+      periode_id,
       ...(search && {
         nama_kriteria: {
           contains: search,
@@ -116,15 +122,20 @@ export class KriteriaServices {
     return toKriteriaResponse(result);
   }
 
-  static async findAllKriteriaWithPic(
-    query: PaginationType,
-  ): Promise<ResponseKriteriaPicWithMetaType | null> {
-    const { page = 1, limit = 8, search, sort } = query;
+  static async findAllKriteriaWithPic(params: {
+    periode_id: number;
+    query: PaginationType;
+  }): Promise<ResponseKriteriaPicWithMetaType | null> {
+    const {
+      periode_id,
+      query: { page = 1, limit = 8, search, sort },
+    } = params;
 
     // current page
     const currentPage = page < 1 ? 1 : page;
 
     const conditional: Prisma.KriteriaWhereInput = {
+      periode_id,
       ...(search && {
         nama_kriteria: {
           contains: search,
@@ -189,8 +200,13 @@ export class KriteriaServices {
   }
 
   // find all get id and name kriteria by kriteria pic id
-  static async findAllForChoose(): Promise<ResponseKriteriaChooseType[]> {
+  static async findAllForChoose(params: {
+    periode_id: number;
+  }): Promise<ResponseKriteriaChooseType[]> {
     const result = await prisma.kriteria.findMany({
+      where: {
+        periode_id: params.periode_id,
+      },
       select: {
         id: true,
         kode_kriteria: true,

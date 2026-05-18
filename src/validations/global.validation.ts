@@ -45,4 +45,11 @@ export class GlobalValidation {
       nama_file: z.string().trim().min(1).max(100),
     })
     .strict() satisfies z.ZodType<{ id: number; nama_file: string }>;
+
+  // params
+  static readonly PARAMS_PERIODE_ID = z
+    .object({
+      periode_id: z.coerce.number().int().positive().max(2147483647),
+    })
+    .strict() satisfies z.ZodType<{ periode_id: number }>;
 }
