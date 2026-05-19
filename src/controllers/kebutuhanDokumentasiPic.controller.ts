@@ -146,7 +146,6 @@ export class KebutuhanDokumentasiPicController {
       ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
       {
         validatedQuery: PaginationType;
-        validatedParams: { periode_id: number };
       }
     >,
     next: NextFunction,
@@ -155,7 +154,13 @@ export class KebutuhanDokumentasiPicController {
       // get query
       const { limit, page, search, sort } = res.locals.validatedQuery;
 
-      const { periode_id } = res.locals.validatedParams;
+      // get periode
+      const periode_id = req?.periode?.id;
+
+      // check periode
+      if (!periode_id) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
 
       // get role from req data
       const { role } = req.data as { role: DosenRole };
@@ -196,7 +201,7 @@ export class KebutuhanDokumentasiPicController {
 
   // find all by kriteria pic
   static async findAllByKriteriaPendekatan(
-    _req: Request,
+    req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
       {
@@ -204,19 +209,25 @@ export class KebutuhanDokumentasiPicController {
         validatedParams: {
           kriteria_id: number;
           pendekatan_id: number;
-          periode_id: number;
         };
       }
     >,
     next: NextFunction,
   ) {
     try {
+      // get periode
+      const periode_id = req?.periode?.id;
+
+      // check periode
+      if (!periode_id) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
       // get query
       const { limit, page, search, sort, status } = res.locals.validatedQuery;
 
       // get params
-      const { kriteria_id, pendekatan_id, periode_id } =
-        res.locals.validatedParams;
+      const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
 
       // call service
       const service =
@@ -299,20 +310,22 @@ export class KebutuhanDokumentasiPicController {
       ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
       {
         validatedQuery: PaginationType;
-        validatedParams: { periode_id: number };
       }
     >,
     next: NextFunction,
   ) {
     try {
-      // get query
-      const { limit, page, search, sort } = res.locals.validatedQuery;
-
-      // periode
-      const { periode_id } = res.locals.validatedParams;
+      const periode_id = req?.periode?.id;
 
       // get role from req data
       const { role, id } = req?.data as { role: DosenRole; id: number };
+
+      // check periode
+      if (!periode_id) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+      // get query
+      const { limit, page, search, sort } = res.locals.validatedQuery;
 
       // call service
       const service =
@@ -359,19 +372,25 @@ export class KebutuhanDokumentasiPicController {
         validatedParams: {
           kriteria_id: number;
           pendekatan_id: number;
-          periode_id: number;
         };
       }
     >,
     next: NextFunction,
   ) {
     try {
+      // get periode
+      const periode_id = req?.periode?.id;
+
+      // check periode
+      if (!periode_id) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
       // get query
       const { limit, page, search, sort, status } = res.locals.validatedQuery;
 
       // get params
-      const { kriteria_id, pendekatan_id, periode_id } =
-        res.locals.validatedParams;
+      const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
 
       // get dosen id
       const { id, role } = req?.data as { id: number; role: DosenRole };
@@ -420,7 +439,7 @@ export class KebutuhanDokumentasiPicController {
 
   // find all for dokumentasi borang complated
   static async findAllForDokumentasiBorangComplated(
-    _req: Request,
+    req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
       {
@@ -428,19 +447,23 @@ export class KebutuhanDokumentasiPicController {
         validatedParams: {
           kriteria_id: number;
           pendekatan_id: number;
-          periode_id: number;
         };
       }
     >,
     next: NextFunction,
   ) {
     try {
+      const periode_id = req?.periode?.id;
+
+      // check periode
+      if (!periode_id) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
       // get query
       const { limit, page, search, sort } = res.locals.validatedQuery;
 
       // get params
-      const { kriteria_id, pendekatan_id, periode_id } =
-        res.locals.validatedParams;
+      const { kriteria_id, pendekatan_id } = res.locals.validatedParams;
 
       // call service
       const service =

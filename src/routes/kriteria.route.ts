@@ -13,12 +13,13 @@ import { zodValidationParams } from "../middlewares/validationParams.middleware"
 import { PaginationType } from "../types/pagination";
 import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
 import { GlobalValidation } from "../validations/global.validation";
+import { periodeMiddleware } from "../middlewares/periode.middleware";
 
 const kriteriaRouter: Router = Router();
 
 // find all
 kriteriaRouter.get(
-  "/periode/:periode_id",
+  "/",
   [
     authMiddleware,
     aclMiddleware([
@@ -26,17 +27,15 @@ kriteriaRouter.get(
       DosenRole.tim_akreditasi,
       DosenRole.wakil_dekan_1,
     ]),
+    periodeMiddleware,
   ],
-  zodValidationParams<{ periode_id: number }>(
-    GlobalValidation.PARAMS_PERIODE_ID,
-  ),
   zodValidationQuery<PaginationType>(GlobalValidation.QUERY),
   KriteriaController.findAll,
 );
 
 // find all with pic
 kriteriaRouter.get(
-  "/with-pic/periode/:periode_id",
+  "/with-pic",
   [
     authMiddleware,
     aclMiddleware([
@@ -44,17 +43,15 @@ kriteriaRouter.get(
       DosenRole.tim_akreditasi,
       DosenRole.wakil_dekan_1,
     ]),
+    periodeMiddleware,
   ],
-  zodValidationParams<{ periode_id: number }>(
-    GlobalValidation.PARAMS_PERIODE_ID,
-  ),
   zodValidationQuery<PaginationType>(GlobalValidation.QUERY),
   KriteriaController.findAllWithPic,
 );
 
 // find all for choose
 kriteriaRouter.get(
-  "/for-choose/periode/:periode_id",
+  "/for-choose",
   [
     authMiddleware,
     aclMiddleware([
@@ -62,10 +59,8 @@ kriteriaRouter.get(
       DosenRole.tim_akreditasi,
       DosenRole.wakil_dekan_1,
     ]),
+    periodeMiddleware,
   ],
-  zodValidationParams<{ periode_id: number }>(
-    GlobalValidation.PARAMS_PERIODE_ID,
-  ),
   KriteriaController.findAllForChoose,
 );
 
@@ -79,6 +74,7 @@ kriteriaRouter.get(
       DosenRole.tim_akreditasi,
       DosenRole.wakil_dekan_1,
     ]),
+    periodeMiddleware,
   ],
   zodValidationParams<{ id: number }>(KriteriaValidation.PARAMS_ID),
   KriteriaController.findById,
@@ -87,7 +83,7 @@ kriteriaRouter.get(
 // create
 kriteriaRouter.post(
   "/",
-  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1]), periodeMiddleware],
   zodValidation<CreateKriteriaType>(KriteriaValidation.CREATE),
   KriteriaController.create,
 );

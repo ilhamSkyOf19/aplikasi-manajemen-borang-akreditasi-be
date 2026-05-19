@@ -11,20 +11,26 @@ import { ResponseResult, ResponseStructure } from "../types/response";
 import { KriteriaServices } from "../services/kriteria.service";
 import { PaginationType } from "../types/pagination";
 import { DistribusiKebutuhanDokumentasiService } from "../services/distribusiKebutuhanDokumentasi.service";
+import { AuthRequest } from "../types/authRequest";
 
 export class KriteriaController {
   // create
   static async create(
-    req: Request<{}, {}, CreateKriteriaType>,
+    req: AuthRequest<{}, {}, CreateKriteriaType>,
     res: Response<ResponseStructure<ResponseKriteriaType | null>>,
     next: NextFunction,
   ) {
     try {
       // get body
-      const { kode_kriteria, nama_kriteria, periode_id } = req.body;
+      const { kode_kriteria, nama_kriteria } = req.body;
 
-      // create distribusi untuk kebutuhan dokumentasi
-      await DistribusiKebutuhanDokumentasiService.create();
+      // get periode
+      const periode_id = req?.periode?.id;
+
+      // check periode
+      if (!periode_id) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
 
       // call service
       const service = await KriteriaServices.create({
@@ -47,7 +53,7 @@ export class KriteriaController {
 
   // //   read detail by id
   static async findById(
-    _req: Request,
+    req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKriteriaType | null>,
       { validatedParams: { id: number } }
@@ -58,8 +64,16 @@ export class KriteriaController {
       // parse id
       const { id } = res.locals.validatedParams;
 
+      // get periode
+      const periodeId = req?.periode?.id;
+
+      // check periode
+      if (!periodeId) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
       // call service
-      const service = await KriteriaServices.findById(id);
+      const service = await KriteriaServices.findById(id, periodeId);
 
       //   check
       if (!service) {
@@ -80,12 +94,11 @@ export class KriteriaController {
 
   // //   read all
   static async findAll(
-    _req: Request,
+    req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKriteriaWithMetaType | null>,
       {
         validatedQuery: PaginationType;
-        validatedParams: { periode_id: number };
       }
     >,
     next: NextFunction,
@@ -94,12 +107,17 @@ export class KriteriaController {
       // get query
       const { limit, page, search, sort } = res.locals.validatedQuery;
 
-      // get params
-      const { periode_id } = res.locals.validatedParams;
+      // get periode
+      const periodeId = req?.periode?.id;
+
+      // check periode
+      if (!periodeId) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
 
       // call service
       const service = await KriteriaServices.findAll({
-        periode_id,
+        periode_id: periodeId,
         query: {
           limit,
           page,
@@ -122,12 +140,11 @@ export class KriteriaController {
 
   // find all with pic
   static async findAllWithPic(
-    _req: Request,
+    req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseKriteriaPicWithMetaType | null>,
       {
         validatedQuery: PaginationType;
-        validatedParams: { periode_id: number };
       }
     >,
     next: NextFunction,
@@ -135,7 +152,14 @@ export class KriteriaController {
     try {
       // get params
       const { limit, page, search, sort } = res.locals.validatedQuery;
-      const { periode_id } = res.locals.validatedParams;
+
+      // get periode
+      const periode_id = req?.periode?.id;
+
+      // check periode
+      if (!periode_id) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
 
       // call service
       const service = await KriteriaServices.findAllKriteriaWithPic({
@@ -162,16 +186,18 @@ export class KriteriaController {
 
   // find all no pic
   static async findAllForChoose(
-    _req: Request,
-    res: Response<
-      ResponseStructure<ResponseKriteriaChooseType[] | null>,
-      { validatedParams: { periode_id: number } }
-    >,
+    req: AuthRequest,
+    res: Response<ResponseStructure<ResponseKriteriaChooseType[] | null>>,
     next: NextFunction,
   ) {
     try {
-      // get params
-      const { periode_id } = res.locals.validatedParams;
+      // get periode
+      const periode_id = req?.periode?.id;
+
+      // check periode
+      if (!periode_id) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
 
       // call service
       const service = await KriteriaServices.findAllForChoose({ periode_id });

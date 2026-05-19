@@ -13,4 +13,7 @@ export interface AuthRequest<
     email: string;
     role: DosenRole;
   };
+  periode?: {
+    id: number;
+  };
 }

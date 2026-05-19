@@ -2,6 +2,7 @@ export interface IPeriode {
   id: number;
   start_date: Date;
   end_date: Date;
+  is_active: boolean;
   created_at: Date;
   updated_at: Date;
 }

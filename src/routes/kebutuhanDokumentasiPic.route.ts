@@ -13,6 +13,7 @@ import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
 import { PaginationType } from "../types/pagination";
 import { zodValidationParams } from "../middlewares/validationParams.middleware";
 import { GlobalValidation } from "../validations/global.validation";
+import { periodeMiddleware } from "../middlewares/periode.middleware";
 
 const kebutuhanDokumentasiPicRoute: Router = Router();
 
@@ -41,11 +42,12 @@ kebutuhanDokumentasiPicRoute.patch(
 
 // find all
 kebutuhanDokumentasiPicRoute.get(
-  "/periode/:periode_id/by-kriteria-pic",
-  [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
-  zodValidationParams<{ periode_id: number }>(
-    GlobalValidation.PARAMS_PERIODE_ID,
-  ),
+  "/by-kriteria-pic",
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1]),
+    periodeMiddleware,
+  ],
   zodValidationQuery<PaginationType>(
     KebutuhanDokumentasiPicValidation.QUERY_NON_STATUS,
   ),
@@ -54,12 +56,15 @@ kebutuhanDokumentasiPicRoute.get(
 
 // find all
 kebutuhanDokumentasiPicRoute.get(
-  "/periode/:periode_id/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
-  [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
+  "/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1]),
+    periodeMiddleware,
+  ],
   zodValidationParams<{
     kriteria_id: number;
     pendekatan_id: number;
-    periode_id: number;
   }>(KebutuhanDokumentasiPicValidation.PARAMS),
   zodValidationQuery<PaginationType & { status?: Status }>(
     KebutuhanDokumentasiPicValidation.QUERY,
@@ -69,14 +74,12 @@ kebutuhanDokumentasiPicRoute.get(
 
 // find all by dosen id
 kebutuhanDokumentasiPicRoute.get(
-  "/periode/:periode_id/for-dokumentasi-borang",
+  "/for-dokumentasi-borang",
   [
     authMiddleware,
     aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
+    periodeMiddleware,
   ],
-  zodValidationParams<{ periode_id: number }>(
-    GlobalValidation.PARAMS_PERIODE_ID,
-  ),
   zodValidationQuery<PaginationType>(
     KebutuhanDokumentasiPicValidation.QUERY_NON_STATUS,
   ),
@@ -85,15 +88,15 @@ kebutuhanDokumentasiPicRoute.get(
 
 // find all
 kebutuhanDokumentasiPicRoute.get(
-  "/periode/:periode_id/for-dokumentasi-borang/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
+  "/for-dokumentasi-borang/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
   [
     authMiddleware,
     aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
+    periodeMiddleware,
   ],
   zodValidationParams<{
     kriteria_id: number;
     pendekatan_id: number;
-    periode_id: number;
   }>(KebutuhanDokumentasiPicValidation.PARAMS),
   zodValidationQuery<PaginationType & { status?: Status }>(
     KebutuhanDokumentasiPicValidation.QUERY,
@@ -103,12 +106,11 @@ kebutuhanDokumentasiPicRoute.get(
 
 // find all
 kebutuhanDokumentasiPicRoute.get(
-  "/periode/:periode_id/for-dokumentasi-borang-complated/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
-  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1])],
+  "/for-dokumentasi-borang-complated/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1]), periodeMiddleware],
   zodValidationParams<{
     kriteria_id: number;
     pendekatan_id: number;
-    periode_id: number;
   }>(KebutuhanDokumentasiPicValidation.PARAMS),
   zodValidationQuery<PaginationType>(KebutuhanDokumentasiPicValidation.QUERY),
   KebutuhanDokumentasiPicController.findAllForDokumentasiBorangComplated,

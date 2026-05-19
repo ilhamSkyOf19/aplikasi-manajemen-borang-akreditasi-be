@@ -13,7 +13,7 @@ export interface IKriteria {
 // create kriteria model
 export interface CreateKriteriaType extends Omit<
   IKriteria,
-  "id" | "created_at" | "updated_at"
+  "id" | "created_at" | "updated_at" | "periode_id"
 > {}
 
 // update kriteria model

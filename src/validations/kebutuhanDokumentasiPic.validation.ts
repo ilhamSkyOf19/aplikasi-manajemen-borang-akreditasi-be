@@ -143,12 +143,10 @@ export class KebutuhanDokumentasiPicValidation {
   // params
   static readonly PARAMS = z
     .object({
-      periode_id: z.coerce.number().min(1).max(2147483647),
       kriteria_id: z.coerce.number().min(1).max(2147483647),
       pendekatan_id: z.coerce.number().min(1).max(2147483647),
     })
     .strict() satisfies z.ZodType<{
-    periode_id: number;
     kriteria_id: number;
     pendekatan_id: number;
   }>;

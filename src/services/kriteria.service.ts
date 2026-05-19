@@ -17,7 +17,7 @@ import { SortOrder } from "../utils/contstanst";
 export class KriteriaServices {
   // create kriteria
   static async create(
-    req: CreateKriteriaType,
+    req: CreateKriteriaType & { periode_id: number },
   ): Promise<ResponseKriteriaType | null> {
     // call db
     const result = await prisma.kriteria.create({
@@ -30,10 +30,16 @@ export class KriteriaServices {
   }
 
   // //   read by id
-  static async findById(id: number): Promise<ResponseKriteriaType | null> {
+  static async findById(
+    id: number,
+    periode_id?: number,
+  ): Promise<ResponseKriteriaType | null> {
     const result = await prisma.kriteria.findUnique({
       where: {
         id,
+        ...(periode_id && {
+          periode_id,
+        }),
       },
     });
 

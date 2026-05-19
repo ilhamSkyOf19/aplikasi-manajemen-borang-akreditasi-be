@@ -6,17 +6,31 @@ import {
   ResponseStatistikType,
 } from "../models/statistik.model";
 import { AuthRequest } from "../types/authRequest";
+import { DistribusiKebutuhanDokumentasiService } from "../services/distribusiKebutuhanDokumentasi.service";
+import { DosenRole } from "../utils/contstanst";
 
 export class StatistikController {
   // get statistik
   static async getStatistik(
-    _req: Request,
+    req: AuthRequest,
     res: Response<ResponseStructure<ResponseStatistikType | null>>,
     next: NextFunction,
   ) {
     try {
+      // get dosen role
+      const dosenRole = req?.data?.role;
+      // get periode id
+      const periode_id = req?.periode?.id;
+
+      // check periode
+      if (!periode_id && dosenRole === DosenRole.tim_akreditasi) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
       // call service
-      const service = await StatistikService.getStatistik();
+      const service = await StatistikService.getStatistik({
+        periode_id,
+      });
 
       //   return
       return ResponseResult.success<ResponseStatistikType | null>(

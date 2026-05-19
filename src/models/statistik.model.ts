@@ -36,13 +36,13 @@ export interface GrafikKriteriaType {
 }
 
 export interface ResponseStatistikType {
-  total_kriteria: number;
   total_dosen: number;
-  total_dokumentasi: number;
-  total_dokumentasi_borang_selesai: number;
-  total_dokumentasi_borang_belum_selesai: number;
-  total_file_selesai: number;
-  grafik_kriteria: GrafikKriteriaType[];
+  total_kriteria: number | null;
+  total_dokumentasi: number | null;
+  total_dokumentasi_borang_selesai: number | null;
+  total_dokumentasi_borang_belum_selesai: number | null;
+  total_file_selesai: number | null;
+  grafik_kriteria: GrafikKriteriaType[] | null;
 }
 
 // statis for tim akreditasi
