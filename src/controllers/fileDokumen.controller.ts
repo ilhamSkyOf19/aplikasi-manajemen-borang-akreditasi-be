@@ -408,84 +408,10 @@ export class FileDokumenController {
   }
 
   // hapus file secara keseluruhan
-  static async deleteFile(
-    req: AuthRequest,
-    res: Response<
-      ResponseStructure<null>,
-      { validatedParams: { file_id: number } }
-    >,
-    next: NextFunction,
-  ) {
-    try {
-      // get dosen id
-      const { id: dosenId, name } = req?.data as { id: number; name: string };
-
-      // get params id
-      const { file_id: idFileDokumen } = res.locals.validatedParams;
-
-      // get activated
-      const activatedFile = await FileDokumenService.findById(idFileDokumen);
-
-      // check
-      if (!activatedFile) {
-        return ResponseResult.error(res, 400, "data not found");
-      }
-
-      // hapus file
-      const service = await FileDokumenService.delete({
-        idFileDokumen: idFileDokumen,
-        tipe_file: activatedFile.tipe_file,
-      });
-
-      // check service
-      if (!service) {
-        return ResponseResult.error(res, 400, "data not found");
-      }
-
-      // check activated and uploaded, setelah itu hapus file nya jika kondisi terpenuhi
-      if (
-        activatedFile.is_active === false &&
-        activatedFile.uploaded_by_id === dosenId
-      ) {
-        if (activatedFile.storage_provider === StorageProvider.SISTEM) {
-          await FileService.deleteFormPath({
-            fileName: activatedFile.file_id,
-            tipe_file: activatedFile.tipe_file,
-          });
-        } else if (activatedFile.storage_provider === StorageProvider.GDRIVE) {
-          await FileService.deleteFileFormGDrive(activatedFile.file_id);
-        }
-      }
-
-      // temukan dokumentasi yang mempunyai file dan memiliki status approved  tersebut dan update riwayat nya menjadi revisi
-      const getDokumentasi =
-        await DokumentasiBorangServices.findDokumentasiByFileDokumenIdAndStatusApprovedOrPending(
-          activatedFile.id,
-        );
-
-      // check kemudian buat riwayat
-      if (getDokumentasi && getDokumentasi.length > 0) {
-        // create riwayat and update status dokumentasi
-        await RiwayatService.createManyForDokumentasiBorang({
-          dokumentasi_borang_ids: getDokumentasi.map(
-            (item) => item.dokumentasi_borang_id,
-          ),
-          keterangan: `File ${activatedFile.nama_file} telah dihapus oleh ${name} sebagai pihak yang mengunggah file tersebut. Mohon lakukan pengecekan pada dokumentasi terkait, lakukan perbaikan bila diperlukan, kemudian ajukan ulang dokumentasi.`,
-          status: Status.REVISION,
-          tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
-        });
-      }
-
-      // return response
-      return ResponseResult.successNoContent(res, "success delete file");
-    } catch (error) {
-      next(error);
-    }
-  }
 
   // delete file
   static async deleteFromDokumentasiBorang(
-    req: AuthRequest,
+    _req: AuthRequest,
     res: Response<
       ResponseStructure<null>,
       { validatedParams: { file_id: number; dokumentasi_borang_id: number } }
@@ -498,10 +424,10 @@ export class FileDokumenController {
         res.locals.validatedParams;
 
       // get activated
-      const activatedFile = await FileDokumenService.findById(idFileDokumen);
+      const findFileDokumen = await FileDokumenService.findById(idFileDokumen);
 
       // check
-      if (!activatedFile) {
+      if (!findFileDokumen) {
         return ResponseResult.error(res, 400, "data not found");
       }
 
@@ -519,24 +445,28 @@ export class FileDokumenController {
       // temukan dokumentasi yang mempunyai file dan memiliki status approved  tersebut dan update riwayat nya menjadi revisi
       const getDokumentasi =
         await DokumentasiBorangServices.findDokumentasiByFileDokumenIdAndStatusApprovedOrPending(
-          activatedFile.id,
+          findFileDokumen.id,
         );
 
+      console.log(getDokumentasi);
+
       // check activated and uploaded
-      if (activatedFile.is_active === false && getDokumentasi?.length === 0) {
-        if (activatedFile.storage_provider === StorageProvider.SISTEM) {
+      if (getDokumentasi?.length === 0) {
+        if (findFileDokumen.storage_provider === StorageProvider.SISTEM) {
           await FileService.deleteFormPath({
-            fileName: activatedFile.file_id,
-            tipe_file: activatedFile.tipe_file,
+            fileName: findFileDokumen.file_id,
+            tipe_file: findFileDokumen.tipe_file,
           });
-        } else if (activatedFile.storage_provider === StorageProvider.GDRIVE) {
-          await FileService.deleteFileFormGDrive(activatedFile.file_id);
+        } else if (
+          findFileDokumen.storage_provider === StorageProvider.GDRIVE
+        ) {
+          await FileService.deleteFileFormGDrive(findFileDokumen.file_id);
         }
 
         // delete dari file
         await FileDokumenService.delete({
-          idFileDokumen: activatedFile.id,
-          tipe_file: activatedFile.tipe_file,
+          idFileDokumen: findFileDokumen.id,
+          tipe_file: findFileDokumen.tipe_file,
         });
       }
 

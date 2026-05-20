@@ -35,6 +35,7 @@ export class StatistikService {
             kriteria: {
               periode_id,
             },
+            status: Status.APPROVED,
           },
         })
       : null;
@@ -44,7 +45,9 @@ export class StatistikService {
       ? await prisma.kebutuhanDokumentasi.count({
           where: {
             status: Status.APPROVED,
-
+            kriteria: {
+              periode_id,
+            },
             OR: [
               {
                 dokumentasi_borang: {
@@ -63,6 +66,8 @@ export class StatistikService {
           },
         })
       : null;
+
+    console.log(total_dokumentasi_borang_selesai);
 
     // total file selesai count
     const total_file_selesai = periode_id

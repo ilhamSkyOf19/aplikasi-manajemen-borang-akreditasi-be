@@ -274,6 +274,101 @@ export class RiwayatService {
     });
   }
 
+  static async createManyForDokumentasiBorang(
+    data: Pick<
+      CreateRiwayatDokumentasiBorangType,
+      "dosen_id" | "keterangan" | "status" | "tipe_riwayat"
+    > & {
+      dokumentasi_borang_ids: number[];
+    },
+  ): Promise<ResponseRiwayatType[] | null> {
+    const {
+      tipe_riwayat,
+      keterangan,
+      dokumentasi_borang_ids,
+      status,
+      dosen_id,
+    } = data;
+    // call db
+    const result = await prisma.$transaction(async (tx) => {
+      // update status
+      await tx.dokumentasiBorang.updateMany({
+        where: {
+          id: {
+            in: dokumentasi_borang_ids,
+          },
+        },
+        data: {
+          status,
+        },
+      });
+
+      // update active file
+      await tx.fileDokumen.updateMany({
+        where: {
+          dokumentasi_borang_files: {
+            some: {
+              dokumentasi_borang_id: {
+                in: dokumentasi_borang_ids,
+              },
+            },
+          },
+        },
+        data: {
+          ...(status === Status.REVISION && { is_active: false }),
+          ...(status === Status.APPROVED && { is_active: true }),
+        },
+      });
+
+      // create riwayat
+      await tx.riwayat.createMany({
+        data: dokumentasi_borang_ids.map((item) => ({
+          dosen_id,
+          tipe_riwayat,
+          keterangan,
+          dokumentasi_borang_id: item,
+          status,
+        })),
+      });
+
+      // find
+      const riwayats = await tx.riwayat.findMany({
+        where: {
+          dokumentasi_borang_id: {
+            in: dokumentasi_borang_ids,
+          },
+        },
+        select: {
+          id: true,
+          dokumentasi_borang: {
+            select: {
+              id: true,
+            },
+          },
+          status: true,
+          tipe_riwayat: true,
+          keterangan: true,
+          created_at: true,
+          updated_at: true,
+        },
+      });
+
+      return riwayats;
+    });
+
+    return result.map((item) =>
+      toResponseRiwayatType({
+        id: item.id,
+        dokumentasi_borang_id: item.dokumentasi_borang?.id,
+        status: item.status as Status,
+        tipe_riwayat: item.tipe_riwayat as TipeRiwayat,
+        keterangan: item.keterangan,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      }),
+    );
+  }
+
   static async updateForDokumentasiBorang(params: {
     riwayat_id: number;
     data: UpdateRiwayatDokumentasiBorangType;
@@ -291,40 +386,6 @@ export class RiwayatService {
           },
           data: {
             status,
-          },
-        });
-      }
-
-      // if revision
-      if (status === Status.REVISION) {
-        // update active file
-        await tx.fileDokumen.updateMany({
-          where: {
-            dokumentasi_borang_files: {
-              some: {
-                dokumentasi_borang_id,
-              },
-            },
-          },
-          data: {
-            is_active: false,
-          },
-        });
-      }
-
-      // if approved
-      if (status === Status.APPROVED) {
-        // update active file
-        await tx.fileDokumen.updateMany({
-          where: {
-            dokumentasi_borang_files: {
-              some: {
-                dokumentasi_borang_id,
-              },
-            },
-          },
-          data: {
-            is_active: true,
           },
         });
       }

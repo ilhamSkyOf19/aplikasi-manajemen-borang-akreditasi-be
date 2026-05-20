@@ -19,6 +19,7 @@ export class StatistikController {
     try {
       // get dosen role
       const dosenRole = req?.data?.role;
+
       // get periode id
       const periode_id = req?.periode?.id;
 

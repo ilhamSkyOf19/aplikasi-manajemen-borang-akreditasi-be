@@ -204,8 +204,6 @@ export class FileDokumenService {
     id: number;
     dokumentasi_borang_id: number;
   }): Promise<boolean> {
-    console.log(params);
-
     // call db call
     const result = await prisma.dokumentasiBorangFile.delete({
       where: {

@@ -781,7 +781,9 @@ export class DokumentasiBorangServices {
       where: {
         file_dokumen_id: file_dokumen_id,
         dokumentasi_borang: {
-          status: Status.APPROVED || Status.PENDING,
+          status: {
+            in: [Status.APPROVED, Status.PENDING, Status.REVISION],
+          },
         },
       },
       select: {
