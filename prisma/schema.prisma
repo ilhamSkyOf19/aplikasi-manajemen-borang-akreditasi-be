@@ -66,7 +66,7 @@ model Periode {
 
   // kriteria 
   kriteria                        Kriteria[]
-  distribusiKebutuhanDokumentasis DistribusiKebutuhanDokumentasi[]
+  distribusiKebutuhanDokumentasis DistribusiKebutuhanDokumentasi?
 
   // unique 
   @@unique([start_date, end_date])
@@ -94,8 +94,8 @@ model Timeline {
 model Kriteria {
   id            Int      @id @default(autoincrement())
   periode_id    Int
-  kode_kriteria Int      @unique
-  nama_kriteria String   @unique
+  kode_kriteria Int
+  nama_kriteria String
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
@@ -108,7 +108,8 @@ model Kriteria {
   kriteriaPic KriteriaPic[]
 
   // unique
-  @@unique([periode_id, kode_kriteria, nama_kriteria])
+  @@unique([periode_id, kode_kriteria])
+  @@unique([periode_id, nama_kriteria])
   @@map("kriteria")
 }
 
@@ -315,15 +316,13 @@ model FileDokumenPenelitian {
 // distribusi 
 model DistribusiKebutuhanDokumentasi {
   id         Int      @id @default(autoincrement())
-  periode_id Int
+  periode_id Int      @unique
   is_active  Boolean
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   periode Periode @relation(fields: [periode_id], references: [id], onDelete: Cascade)
 
-  // unique
-  @@unique([id, periode_id])
   @@map("distribusi_kebutuhan_dokumentasi")
 }
 

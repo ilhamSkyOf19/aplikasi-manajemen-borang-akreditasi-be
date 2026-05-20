@@ -14,6 +14,7 @@ import { PaginationType } from "../types/pagination";
 import { zodValidationParams } from "../middlewares/validationParams.middleware";
 import { GlobalValidation } from "../validations/global.validation";
 import { periodeMiddleware } from "../middlewares/periode.middleware";
+import { distribusiMiddleware } from "../middlewares/distribusi.middleware";
 
 const kebutuhanDokumentasiPicRoute: Router = Router();
 
@@ -93,6 +94,7 @@ kebutuhanDokumentasiPicRoute.get(
     authMiddleware,
     aclMiddleware([DosenRole.tim_akreditasi, DosenRole.kaprodi]),
     periodeMiddleware,
+    distribusiMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi]),
   ],
   zodValidationParams<{
     kriteria_id: number;

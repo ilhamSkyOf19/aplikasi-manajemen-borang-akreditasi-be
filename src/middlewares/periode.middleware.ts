@@ -7,7 +7,7 @@ import { ENV } from "../utils/env";
 import { PeriodeServices } from "../services/periode.service";
 export const periodeMiddleware = async (
   req: AuthRequest,
-  res: Response<ResponseStructure<null>>,
+  _res: Response<ResponseStructure<null>>,
   next: NextFunction,
 ) => {
   try {

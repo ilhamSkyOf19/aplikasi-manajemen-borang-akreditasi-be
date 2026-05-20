@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   CreatePeriodeType,
   ResponsePeriodeType,
+  ResponsePeriodeWithDistribusiType,
 } from "../models/periode.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { PeriodeServices } from "../services/periode.service";
@@ -9,18 +10,17 @@ import { AuthRequest } from "../types/authRequest";
 import { DistribusiKebutuhanDokumentasiService } from "../services/distribusiKebutuhanDokumentasi.service";
 
 export class PeriodeController {
-  // find periode by is active true
-  static async findIsActive(
-    req: AuthRequest,
-    res: Response<ResponseStructure<ResponsePeriodeType | null>>,
+  static async findIsActiveWithDistribusi(
+    _req: Request,
+    res: Response<ResponseStructure<ResponsePeriodeWithDistribusiType | null>>,
     next: NextFunction,
   ) {
     try {
       // get periode
-      const periode = await PeriodeServices.findIsActive();
+      const periode = await PeriodeServices.findIsActiveWithDistribusi();
 
       // return
-      return ResponseResult.success<ResponsePeriodeType | null>(
+      return ResponseResult.success<ResponsePeriodeWithDistribusiType | null>(
         periode,
         res,
         200,
@@ -32,7 +32,7 @@ export class PeriodeController {
   }
   // find periode
   static async find(
-    req: AuthRequest,
+    _req: Request,
     res: Response<ResponseStructure<ResponsePeriodeType[] | null>>,
     next: NextFunction,
   ) {

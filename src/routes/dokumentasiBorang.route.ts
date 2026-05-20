@@ -8,6 +8,8 @@ import { aclMiddleware } from "../middlewares/acl.middleware";
 import { DosenRole } from "../utils/contstanst";
 import { zodValidation } from "../middlewares/validation.middleware";
 import { AjukanRequestType } from "../models/dokumentasiBorang.model";
+import { periodeMiddleware } from "../middlewares/periode.middleware";
+import { distribusiMiddleware } from "../middlewares/distribusi.middleware";
 
 const dokumentasiBorangRoute: Router = Router();
 
@@ -19,7 +21,12 @@ const upload = FileService.uploadFile({
 // default
 dokumentasiBorangRoute.post(
   "/default",
-  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi]),
+    periodeMiddleware,
+    distribusiMiddleware(),
+  ],
   upload.single("dokumentasi"),
   DokumentasiBorangController.createDokumentasiBorangDefault,
 );
@@ -27,7 +34,12 @@ dokumentasiBorangRoute.post(
 // penelitian
 dokumentasiBorangRoute.post(
   "/penelitian",
-  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi]),
+    periodeMiddleware,
+    distribusiMiddleware(),
+  ],
   upload.single("dokumentasi"),
   DokumentasiBorangController.createDokumentasiBorangPenelitian,
 );
@@ -44,6 +56,8 @@ dokumentasiBorangRoute.get(
       DosenRole.kaprodi,
       DosenRole.wakil_dekan_1,
     ]),
+    periodeMiddleware,
+    distribusiMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi]),
   ],
   zodValidationParams<{
     kebutuhan_dokumentasi_id: number;
@@ -54,7 +68,12 @@ dokumentasiBorangRoute.get(
 // ajukan
 dokumentasiBorangRoute.post(
   "/:dokumentasi_borang_id/ajukan",
-  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi]),
+    periodeMiddleware,
+    distribusiMiddleware(),
+  ],
   zodValidationParams<{ dokumentasi_borang_id: number }>(
     DokumentasiBorangValidation.PARAMS_DOKUMENTASI_BORANG_ID,
   ),

@@ -38,7 +38,7 @@ periodeRoute.get(
     ]),
     periodeMiddleware,
   ],
-  PeriodeController.findIsActive,
+  PeriodeController.findIsActiveWithDistribusi,
 );
 
 // create

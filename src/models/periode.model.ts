@@ -20,3 +20,16 @@ export interface ResponsePeriodeType extends IPeriode {}
 export const toResponsePeriodeType = (
   periode: ResponsePeriodeType,
 ): ResponsePeriodeType => periode;
+
+// response with distribusi
+export interface ResponsePeriodeWithDistribusiType extends IPeriode {
+  distribusi: {
+    id: number;
+    is_distribusi_active: boolean;
+  } | null;
+}
+
+// to response
+export const toResponsePeriodeWithDistribusiType = (
+  periode: ResponsePeriodeWithDistribusiType,
+): ResponsePeriodeWithDistribusiType => periode;

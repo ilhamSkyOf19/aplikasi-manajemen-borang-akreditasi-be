@@ -76,10 +76,8 @@ export class DistribusiKebutuhanDokumentasiService {
     // call db
     const result = await prisma.distribusiKebutuhanDokumentasi.update({
       where: {
-        id_periode_id: {
-          periode_id,
-          id,
-        },
+        id,
+        periode_id,
       },
       data: {
         is_active: true,
@@ -105,10 +103,8 @@ export class DistribusiKebutuhanDokumentasiService {
     // call db
     const result = await prisma.distribusiKebutuhanDokumentasi.update({
       where: {
-        id_periode_id: {
-          periode_id,
-          id,
-        },
+        id,
+        periode_id,
       },
       data: {
         is_active: false,

@@ -106,60 +106,6 @@ export class NotifikasiService {
       },
     });
 
-    // notifikasi
-    let keterangan_notifikasi: string = "";
-    let kriteriId: number | null = null;
-    let pendekatanId: number | null = null;
-    let kebutuhanDokumentasiId: number | null = null;
-
-    // kebutuhan dokumentasi
-    if (result.find((item) => item.kebutuhan_dokumentasi_pic)) {
-      kriteriId =
-        result.find((item) => item.kebutuhan_dokumentasi_pic)
-          ?.kebutuhan_dokumentasi_pic?.kriteria_id || null;
-      pendekatanId =
-        result.find((item) => item.kebutuhan_dokumentasi_pic)
-          ?.kebutuhan_dokumentasi_pic?.pendekatan_id || null;
-      kebutuhanDokumentasiId =
-        result.find((item) => item.kebutuhan_dokumentasi_pic)
-          ?.kebutuhan_dokumentasi_pic?.id || null;
-
-      if (role === DosenRole.kaprodi) {
-        keterangan_notifikasi =
-          "Kebutuhan Dokumentasi Borang sudah diverifikasi oleh Wakil Dekan 1";
-      }
-
-      if (role === DosenRole.wakil_dekan_1) {
-        if (result.find((item) => item.kebutuhan_dokumentasi_pic)) {
-          keterangan_notifikasi =
-            "Kaprodi mengajukan kebutuhan dokumentasi, harap lakukan verifikasi";
-        }
-      }
-    }
-
-    // dokumentasi borang
-    if (result.find((item) => item.dokumentasi_borang)) {
-      kriteriId =
-        result.find((item) => item.dokumentasi_borang)?.dokumentasi_borang
-          ?.kebutuhan_dokumentasi.kriteria_id || null;
-      pendekatanId =
-        result.find((item) => item.dokumentasi_borang)?.dokumentasi_borang
-          ?.kebutuhan_dokumentasi.pendekatan_id || null;
-      kebutuhanDokumentasiId =
-        result.find((item) => item.dokumentasi_borang)?.dokumentasi_borang
-          ?.kebutuhan_dokumentasi.id || null;
-
-      if (role === DosenRole.tim_akreditasi) {
-        keterangan_notifikasi =
-          "Dokumentasi Borang sudah diverifikasi oleh Kaprodi";
-      }
-
-      if (role === DosenRole.kaprodi) {
-        keterangan_notifikasi =
-          "Dokumentasi Borang diajukan oleh tim akreditasi, harap lakukan verifikasi";
-      }
-    }
-
     return toResponseNotifikasiWithMetaType({
       meta: {
         currentPage,
@@ -167,19 +113,65 @@ export class NotifikasiService {
         totalData,
         totalPage,
       },
-      data: result.map((item) => ({
-        id: item.id,
-        dosen: item.dosen,
-        keterangan_notifikasi: keterangan_notifikasi,
-        status: item.status as Status,
-        tipe_notifikasi: item.tipe_riwayat as TipeRiwayat,
-        isRead: item.isRead,
-        kriteria_id: kriteriId ?? 0,
-        pendekatan_id: pendekatanId ?? 0,
-        kebutuhan_dokumentasi_id: kebutuhanDokumentasiId ?? 0,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-      })),
+
+      data: result.map((item) => {
+        let keterangan_notifikasi = "";
+        let kriteriId: number | null = null;
+        let pendekatanId: number | null = null;
+        let kebutuhanDokumentasiId: number | null = null;
+
+        // kebutuhan dokumentasi
+        if (item.kebutuhan_dokumentasi_pic) {
+          kriteriId = item.kebutuhan_dokumentasi_pic.kriteria_id;
+          pendekatanId = item.kebutuhan_dokumentasi_pic.pendekatan_id;
+          kebutuhanDokumentasiId = item.kebutuhan_dokumentasi_pic.id;
+
+          if (role === DosenRole.kaprodi) {
+            keterangan_notifikasi =
+              "Kebutuhan Dokumentasi sudah diverifikasi oleh Wakil Dekan 1";
+          }
+
+          if (role === DosenRole.wakil_dekan_1) {
+            keterangan_notifikasi =
+              "Kaprodi mengajukan kebutuhan dokumentasi, harap lakukan verifikasi";
+          }
+        }
+
+        // dokumentasi borang
+        if (item.dokumentasi_borang) {
+          kriteriId = item.dokumentasi_borang.kebutuhan_dokumentasi.kriteria_id;
+
+          pendekatanId =
+            item.dokumentasi_borang.kebutuhan_dokumentasi.pendekatan_id;
+
+          kebutuhanDokumentasiId =
+            item.dokumentasi_borang.kebutuhan_dokumentasi.id;
+
+          if (role === DosenRole.tim_akreditasi) {
+            keterangan_notifikasi =
+              "Dokumentasi Borang sudah diverifikasi oleh Kaprodi";
+          }
+
+          if (role === DosenRole.kaprodi) {
+            keterangan_notifikasi =
+              "Dokumentasi Borang diajukan oleh tim akreditasi, harap lakukan verifikasi";
+          }
+        }
+
+        return {
+          id: item.id,
+          dosen: item.dosen,
+          keterangan_notifikasi,
+          status: item.status as Status,
+          tipe_notifikasi: item.tipe_riwayat as TipeRiwayat,
+          isRead: item.isRead,
+          kriteria_id: kriteriId ?? 0,
+          pendekatan_id: pendekatanId ?? 0,
+          kebutuhan_dokumentasi_id: kebutuhanDokumentasiId ?? 0,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+        };
+      }),
     });
   }
 

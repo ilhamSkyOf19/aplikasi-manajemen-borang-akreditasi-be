@@ -13,6 +13,8 @@ import { FileDokumenDefaultValidation } from "../validations/fileDokumenDefault.
 import { UpdateFileDefaultType } from "../models/fileDokumenDefault.model";
 import { UpdateFilePenelitianType } from "../models/fileDokumenPenelitian.model";
 import { FileDokumenPenelitianValidation } from "../validations/fileDokumenPenelitian.validation";
+import { periodeMiddleware } from "../middlewares/periode.middleware";
+import { distribusiMiddleware } from "../middlewares/distribusi.middleware";
 
 const fileDokumenRouter: Router = Router();
 
@@ -30,7 +32,11 @@ fileDokumenRouter.get(
 // find for default
 fileDokumenRouter.get(
   "/:file_dokumen_id/dokumentasi-borang/:dokumentasi_borang_id/default",
-  [authMiddleware],
+  [
+    authMiddleware,
+    periodeMiddleware,
+    distribusiMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi]),
+  ],
   zodValidationParams<{
     dokumentasi_borang_id: number;
     file_dokumen_id: number;
@@ -41,7 +47,12 @@ fileDokumenRouter.get(
 // update file default
 fileDokumenRouter.patch(
   "/default/:id",
-  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi]),
+    periodeMiddleware,
+    distribusiMiddleware(),
+  ],
   zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_ID),
   zodValidation<UpdateFileDefaultType>(
     FileDokumenDefaultValidation.UPDATE_DEFAULT,
@@ -52,7 +63,11 @@ fileDokumenRouter.patch(
 // find for penelitian
 fileDokumenRouter.get(
   "/:file_dokumen_id/dokumentasi-borang/:dokumentasi_borang_id/penelitian",
-  [authMiddleware],
+  [
+    authMiddleware,
+    periodeMiddleware,
+    distribusiMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi]),
+  ],
   zodValidationParams<{
     dokumentasi_borang_id: number;
     file_dokumen_id: number;
@@ -63,7 +78,12 @@ fileDokumenRouter.get(
 // update file penelitian
 fileDokumenRouter.patch(
   "/penelitian/:id",
-  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi]),
+    periodeMiddleware,
+    distribusiMiddleware(),
+  ],
   zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_ID),
   zodValidation<UpdateFilePenelitianType>(
     FileDokumenPenelitianValidation.UPDATE_PENELITIAN,
@@ -71,19 +91,28 @@ fileDokumenRouter.patch(
   FileDokumenController.updateFilePenelitian,
 );
 
-// preview
+// preview from sistem
 fileDokumenRouter.get(
   "/preview-sistem/:id/:nama_file",
-  [authMiddleware],
+  [
+    authMiddleware,
+    periodeMiddleware,
+    distribusiMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi]),
+  ],
   zodValidationParams<{ id: number; nama_file: string }>(
     GlobalValidation.PARAMS_PREVIEW_FILE,
   ),
   FileDokumenController.previewFileLocal,
 );
 
+// preview from google drive
 fileDokumenRouter.get(
   "/preview-drive/:id/:nama_file",
-  [authMiddleware],
+  [
+    authMiddleware,
+    periodeMiddleware,
+    distribusiMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi]),
+  ],
   zodValidationParams<{ id: number; nama_file: string }>(
     GlobalValidation.PARAMS_PREVIEW_FILE,
   ),
@@ -93,7 +122,12 @@ fileDokumenRouter.get(
 // delete from dokumentasi borang
 fileDokumenRouter.delete(
   "/:file_id/for-dokumentasi-borang/:dokumentasi_borang_id",
-  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi]),
+    periodeMiddleware,
+    distribusiMiddleware(),
+  ],
   zodValidationParams<{ file_id: number; dokumentasi_borang_id: number }>(
     FileDokumenValidation.PARAMS_FILE_ID_AND_DOKUMENTASI_BORANG_ID,
   ),

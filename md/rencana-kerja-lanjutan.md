@@ -36,6 +36,8 @@
 
 - [✅] Menambahkan field active ke data periode
 
+- [ ] Debug data periode
+
 - [ ] Melanjutkan perbaikan terhadap periode pada setiap api yang membutuhkan
 
 - [ ] Membuat sebuah container lagi untuk membuat priode akreditasi , jadi kedudukan paling tinggi adalah priode bukan kriteria.
@@ -43,3 +45,5 @@
 - [ ] Membuat api search file untuk mempercepat pencarian file , dengan response
 - [ ] Membuat api untuk dokumen panduan cara menyusun borang akreditasi
 - [ ] Membuat api service lupa password dengan email
+
+BUG pada notifikasi

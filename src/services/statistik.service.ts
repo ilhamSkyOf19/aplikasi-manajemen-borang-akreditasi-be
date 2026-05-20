@@ -41,14 +41,25 @@ export class StatistikService {
 
     // get dokumentasi selesai
     const total_dokumentasi_borang_selesai = periode_id
-      ? await prisma.dokumentasiBorang.count({
+      ? await prisma.kebutuhanDokumentasi.count({
           where: {
             status: Status.APPROVED,
-            kebutuhan_dokumentasi: {
-              kriteria: {
-                periode_id,
+
+            OR: [
+              {
+                dokumentasi_borang: {
+                  is: null,
+                },
               },
-            },
+
+              {
+                dokumentasi_borang: {
+                  status: {
+                    in: [Status.PENDING, Status.REVISION],
+                  },
+                },
+              },
+            ],
           },
         })
       : null;
