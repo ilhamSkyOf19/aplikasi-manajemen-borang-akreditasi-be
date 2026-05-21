@@ -8,6 +8,7 @@ import { ResponseResult, ResponseStructure } from "../types/response";
 import { PeriodeServices } from "../services/periode.service";
 import { AuthRequest } from "../types/authRequest";
 import { DistribusiKebutuhanDokumentasiService } from "../services/distribusiKebutuhanDokumentasi.service";
+import { TimelineService } from "../services/timeline.service";
 
 export class PeriodeController {
   static async findIsActiveWithDistribusi(
@@ -69,10 +70,16 @@ export class PeriodeController {
         return ResponseResult.error(res, 400, "Failed create periode");
       }
 
-      // create distribusi
       // create distribusi untuk kebutuhan dokumentasi
       await DistribusiKebutuhanDokumentasiService.create({
         periode_id: service.id,
+      });
+
+      // create timeline
+      await TimelineService.create({
+        periode_id: service.id,
+        deadline_dokumentasi_borang: null,
+        deadline_kebutuhan_dokumentasi: null,
       });
 
       // return

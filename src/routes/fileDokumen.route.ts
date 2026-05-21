@@ -134,4 +134,12 @@ fileDokumenRouter.delete(
   FileDokumenController.deleteFromDokumentasiBorang,
 );
 
+// find all by search and periode
+fileDokumenRouter.get(
+  "/search-all",
+  [authMiddleware, periodeMiddleware],
+  zodValidationQuery<{ search: string }>(GlobalValidation.QUERY_SEARCH),
+  FileDokumenController.findAllBySearch,
+);
+
 export default fileDokumenRouter;

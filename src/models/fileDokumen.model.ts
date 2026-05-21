@@ -35,3 +35,30 @@ export interface IDataFileGlobalType {
   created_at: Date;
   updated_at: Date;
 }
+
+// response search global
+export interface ResponseSearchGlobalType {
+  kriteria: {
+    id: number;
+    nama_kriteria: string;
+  };
+  pendekatan: {
+    id: number;
+    keterangan: string;
+  };
+  kebutuhan_dokumentasi: {
+    id: number;
+    nama_kebutuhan_dokumentasi: string;
+  };
+  file: {
+    id: number;
+    nama_file: string;
+    keterangan: string;
+    tipe_file: TipeDokumentasi;
+  };
+}
+
+// to response search global
+export const toResponseSearchGlobalType = (
+  file: ResponseSearchGlobalType,
+): ResponseSearchGlobalType => file;

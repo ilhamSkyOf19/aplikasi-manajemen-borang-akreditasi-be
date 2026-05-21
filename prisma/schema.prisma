@@ -75,12 +75,12 @@ model Periode {
 
 // timeline 
 model Timeline {
-  id                             Int      @id @default(autoincrement())
+  id                             Int       @id @default(autoincrement())
   periode_id                     Int
-  deadline_kebutuhan_dokumentasi DateTime
-  deadline_dokumentasi_borang    DateTime
-  created_at                     DateTime @default(now())
-  updated_at                     DateTime @updatedAt
+  deadline_kebutuhan_dokumentasi DateTime?
+  deadline_dokumentasi_borang    DateTime?
+  created_at                     DateTime  @default(now())
+  updated_at                     DateTime  @updatedAt
 
   // periode
   periode Periode @relation(fields: [periode_id], references: [id], onDelete: Cascade)

@@ -57,9 +57,13 @@ export class StatistikController {
       // get dosen id
       const dosenId = req?.data?.id;
 
+      // get periode
+      const periodeId = req?.periode?.id;
+
       // call service
       const service = await StatistikService.getStatistikForTimAkreditasi({
         dosenId: dosenId ?? 0,
+        periodeId: periodeId ?? 0,
       });
 
       //   return

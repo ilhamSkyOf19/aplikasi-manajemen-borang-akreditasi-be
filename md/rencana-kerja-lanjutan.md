@@ -36,11 +36,14 @@
 
 - [✅] Menambahkan field active ke data periode
 
-- [ ] Debug data periode
+- [✅] Debug data periode
 
-- [ ] Melanjutkan perbaikan terhadap periode pada setiap api yang membutuhkan
+- [✅] Melanjutkan perbaikan terhadap periode pada setiap api yang membutuhkan
 
-- [ ] Membuat sebuah container lagi untuk membuat priode akreditasi , jadi kedudukan paling tinggi adalah priode bukan kriteria.
+- [✅] Membuat sebuah container lagi untuk membuat priode akreditasi , jadi kedudukan paling tinggi adalah priode bukan kriteria.
+
+## Urgent
+
 - [ ] Membuat sebuah api lagi untuk timeline dari pengerjaan dan lain lain.
 - [ ] Membuat api search file untuk mempercepat pencarian file , dengan response
 - [ ] Membuat api untuk dokumen panduan cara menyusun borang akreditasi

@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { ResponseFileDokumenForChooseWithMetaType } from "../models/fileDokumen.model";
+import {
+  ResponseFileDokumenForChooseWithMetaType,
+  ResponseSearchGlobalType,
+} from "../models/fileDokumen.model";
 import {
   ResponseFileDokumenDefaultForDetailType,
   ResponseUpdateFileDefaultType,
@@ -472,6 +475,45 @@ export class FileDokumenController {
 
       // return response
       return ResponseResult.successNoContent(res, "success delete file");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // find all by search
+  static async findAllBySearch(
+    req: AuthRequest,
+    res: Response<
+      ResponseStructure<any>,
+      { validatedQuery: { search: string } }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get periode id
+      const periodeId = req?.periode?.id;
+
+      // check periode
+      if (!periodeId) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
+      // get keyword search
+      const keyword = res.locals.validatedQuery.search;
+
+      // call service
+      const service = await FileDokumenService.findAllBySearchAndPeriode({
+        periode_id: periodeId,
+        search: keyword,
+      });
+
+      // return response
+      return ResponseResult.success<any | null>(
+        service,
+        res,
+        200,
+        "success find all file dokumentasi",
+      );
     } catch (error) {
       next(error);
     }

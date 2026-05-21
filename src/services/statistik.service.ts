@@ -244,13 +244,15 @@ export class StatistikService {
 
   // get statistik for tim akreditasi
   static async getStatistikForTimAkreditasi(params: {
+    periodeId: number;
     dosenId: number;
   }): Promise<ResponseStatistikTimAkreditasiType[] | null> {
-    const { dosenId } = params;
+    const { dosenId, periodeId } = params;
 
     // grafik kriteria
     const get_grafik_kriteria = await prisma.kriteria.findMany({
       where: {
+        periode_id: periodeId,
         kriteriaPic: {
           some: {
             dosen: {

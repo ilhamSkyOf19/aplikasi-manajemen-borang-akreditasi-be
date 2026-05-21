@@ -1,6 +1,10 @@
 import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
-import { ResponseFileDokumenForChooseWithMetaType } from "../models/fileDokumen.model";
+import {
+  ResponseFileDokumenForChooseWithMetaType,
+  ResponseSearchGlobalType,
+  toResponseSearchGlobalType,
+} from "../models/fileDokumen.model";
 import { PaginationType } from "../types/pagination";
 import {
   SortOrder,
@@ -215,5 +219,135 @@ export class FileDokumenService {
     });
 
     return !!result;
+  }
+
+  // find all by search
+  static async findAllBySearchAndPeriode(params: {
+    search: string;
+    periode_id: number;
+  }): Promise<ResponseSearchGlobalType[] | null> {
+    // get search
+    const { search, periode_id } = params;
+
+    // call db
+    const result = await prisma.fileDokumen.findMany({
+      where: {
+        dokumentasi_borang_files: {
+          some: {
+            dokumentasi_borang: {
+              kebutuhan_dokumentasi: {
+                kriteria: {
+                  periode_id,
+                },
+              },
+            },
+          },
+        },
+        nama_file: {
+          contains: search,
+        },
+      },
+      take: 10,
+      select: {
+        id: true,
+        nama_file: true,
+        tipe_file: true,
+        keterangan: true,
+        dokumentasi_borang_files: {
+          where: {
+            dokumentasi_borang: {
+              status: Status.APPROVED,
+            },
+          },
+          select: {
+            dokumentasi_borang: {
+              select: {
+                kebutuhan_dokumentasi: {
+                  select: {
+                    id: true,
+                    nama_kebutuhan_dokumentasi: {
+                      select: {
+                        nama_kebutuhan_dokumentasi: true,
+                      },
+                    },
+                    kriteria: {
+                      select: {
+                        id: true,
+                        nama_kriteria: true,
+                      },
+                    },
+                    pendekatan: {
+                      select: {
+                        id: true,
+                        keterangan: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // grouped by kriteria
+    const groupedFile = new Map<number, ResponseSearchGlobalType>();
+
+    // mapping
+    for (const file of result) {
+      // mapping dokumentasi borang files
+      for (const dokumentasiBorangFile of file.dokumentasi_borang_files) {
+        // dokumentasi borang id
+        const dokumentasiBorangId =
+          dokumentasiBorangFile.dokumentasi_borang.kebutuhan_dokumentasi.id;
+
+        // check dokumentasi borang id exist
+        const hasDokumentasiBorangId = groupedFile.has(dokumentasiBorangId);
+
+        // mapping
+        const result: ResponseSearchGlobalType = {
+          kriteria: {
+            id: dokumentasiBorangFile.dokumentasi_borang.kebutuhan_dokumentasi
+              .kriteria.id,
+            nama_kriteria:
+              dokumentasiBorangFile.dokumentasi_borang.kebutuhan_dokumentasi
+                .kriteria.nama_kriteria,
+          },
+          pendekatan: {
+            id: dokumentasiBorangFile.dokumentasi_borang.kebutuhan_dokumentasi
+              .pendekatan.id,
+            keterangan:
+              dokumentasiBorangFile.dokumentasi_borang.kebutuhan_dokumentasi
+                .pendekatan.keterangan,
+          },
+          file: {
+            id: file.id,
+            nama_file: file.nama_file,
+            keterangan: file.keterangan,
+            tipe_file: file.tipe_file as TipeDokumentasi,
+          },
+          kebutuhan_dokumentasi: {
+            id: dokumentasiBorangFile.dokumentasi_borang.kebutuhan_dokumentasi
+              .id,
+            nama_kebutuhan_dokumentasi:
+              dokumentasiBorangFile.dokumentasi_borang.kebutuhan_dokumentasi
+                .nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
+          },
+        };
+
+        // not existng
+        if (!hasDokumentasiBorangId) {
+          groupedFile.set(dokumentasiBorangId, result);
+        }
+
+        continue;
+      }
+    }
+
+    // final groupedFile
+    const finalGroupedFile = Array.from(groupedFile.values());
+
+    return finalGroupedFile;
   }
 }

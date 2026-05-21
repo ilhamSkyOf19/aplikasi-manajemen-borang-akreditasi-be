@@ -20,7 +20,11 @@ statistikRoute.get(
 
 statistikRoute.get(
   "/for-tim-akreditasi",
-  [authMiddleware, aclMiddleware([DosenRole.tim_akreditasi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.tim_akreditasi]),
+    periodeMiddleware,
+  ],
   StatistikController.getStatistikForTimAkreditasi,
 );
 

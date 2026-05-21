@@ -52,4 +52,11 @@ export class GlobalValidation {
       periode_id: z.coerce.number().int().positive().max(2147483647),
     })
     .strict() satisfies z.ZodType<{ periode_id: number }>;
+
+  // query only search
+  static readonly QUERY_SEARCH = z
+    .object({
+      search: z.string().trim().min(1).max(100),
+    })
+    .strict() satisfies z.ZodType<{ search: string }>;
 }
