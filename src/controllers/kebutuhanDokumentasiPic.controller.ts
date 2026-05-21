@@ -15,6 +15,7 @@ import { DosenRole, Status, TipeRiwayat } from "../utils/contstanst";
 import { RiwayatService } from "../services/riwayat.service";
 import { PicKebutuhanDokumentasiServices } from "../services/picKebutuhanDokumentasi.service";
 import { AuthRequest } from "../types/authRequest";
+import { NamaKebutuhanDokumentasiServices } from "../services/namaKebutuhanDokumentasi.service";
 
 export class KebutuhanDokumentasiPicController {
   // create
@@ -511,6 +512,21 @@ export class KebutuhanDokumentasiPicController {
       // get params
       const { kebutuhan_dokumentasi_pic_id } = res.locals.validatedParams;
 
+      // find kebutuhan dokumentasi by id
+      const findKebutuhanDokumentasi =
+        await KebutuhanDokumentasiPicServices.findById(
+          kebutuhan_dokumentasi_pic_id,
+        );
+
+      // check
+      if (!findKebutuhanDokumentasi) {
+        return ResponseResult.error(
+          res,
+          400,
+          "kebutuhan dokumentasi pic not found",
+        );
+      }
+
       // get dosen id
       const dosenId = req?.data?.id;
 
@@ -602,6 +618,20 @@ export class KebutuhanDokumentasiPicController {
           res,
           400,
           "kebutuhan dokumentasi pic gagal dibuat",
+        );
+      }
+
+      // check count nama kebutuhan dokumentasi
+      const count =
+        await NamaKebutuhanDokumentasiServices.getCountInKebutuhanDokumentasiById(
+          findKebutuhanDokumentasi.nama_kebutuhan_dokumentasi.id,
+        );
+
+      // check count
+      if (count === 0) {
+        // delete nama kebutuhan dokumentasi jika sudah tidak digunakan
+        await NamaKebutuhanDokumentasiServices.delete(
+          findKebutuhanDokumentasi.nama_kebutuhan_dokumentasi.id,
         );
       }
 

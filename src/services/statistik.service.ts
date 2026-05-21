@@ -107,23 +107,26 @@ export class StatistikService {
                 },
               },
             },
+
             kebutuhan_dokumentasi: {
+              where: {
+                status: Status.APPROVED,
+              },
+
               select: {
+                status: true,
+
                 pendekatan: {
                   select: {
+                    id: true,
                     keterangan: true,
-                    kebutuhan_dokumentasi: {
-                      where: {
-                        status: Status.APPROVED,
-                      },
-                      select: {
-                        dokumentasi_borang: {
-                          select: {
-                            status: true,
-                          },
-                        },
-                      },
-                    },
+                  },
+                },
+
+                dokumentasi_borang: {
+                  select: {
+                    id: true,
+                    status: true,
                   },
                 },
               },
@@ -145,14 +148,11 @@ export class StatistikService {
 
         //   mapping pendekatan
         for (const pendekatan of namaPendekatanArray) {
-          const findPendekatan = kriteria.kebutuhan_dokumentasi.find(
+          const findPendekatan = kriteria.kebutuhan_dokumentasi.filter(
             (item) => item.pendekatan.keterangan === pendekatan,
           );
 
-          if (
-            !findPendekatan ||
-            findPendekatan.pendekatan.kebutuhan_dokumentasi.length === 0
-          ) {
+          if (!findPendekatan || findPendekatan.length === 0) {
             pendekatanResult.push({
               nama_pendekatan: pendekatan as NamaPendekatanType,
               dokumentasi_borang_total: 0,
@@ -165,26 +165,22 @@ export class StatistikService {
           }
 
           // get total dokumentasi selesai
-          const totalDokumentasiApprove =
-            findPendekatan?.pendekatan.kebutuhan_dokumentasi.filter(
-              (item) => item.dokumentasi_borang?.status === Status.APPROVED,
-            ).length;
+          const totalDokumentasiApprove = findPendekatan?.filter(
+            (item) => item.dokumentasi_borang?.status === Status.APPROVED,
+          ).length;
 
           // get total dokumentasi selesai
-          const totalDokumentasiPending =
-            findPendekatan?.pendekatan.kebutuhan_dokumentasi.filter(
-              (item) => item.dokumentasi_borang?.status === Status.PENDING,
-            ).length;
+          const totalDokumentasiPending = findPendekatan?.filter(
+            (item) => item.dokumentasi_borang?.status === Status.PENDING,
+          ).length;
 
           // get total dokumentasi revisi
-          const totalDokumentasiRevisi =
-            findPendekatan?.pendekatan.kebutuhan_dokumentasi.filter(
-              (item) => item.dokumentasi_borang?.status === Status.REVISION,
-            ).length;
+          const totalDokumentasiRevisi = findPendekatan?.filter(
+            (item) => item.dokumentasi_borang?.status === Status.REVISION,
+          ).length;
 
           // get total dokumentasi
-          const totalDokumentasi =
-            findPendekatan?.pendekatan.kebutuhan_dokumentasi.length;
+          const totalDokumentasi = findPendekatan.length;
 
           pendekatanResult.push({
             nama_pendekatan: pendekatan as NamaPendekatanType,
@@ -263,10 +259,12 @@ export class StatistikService {
           },
         },
       },
+
       select: {
         id: true,
         kode_kriteria: true,
         nama_kriteria: true,
+
         kriteriaPic: {
           select: {
             dosen: {
@@ -279,26 +277,34 @@ export class StatistikService {
             },
           },
         },
+
         kebutuhan_dokumentasi: {
+          where: {
+            status: Status.APPROVED,
+          },
+
           select: {
+            status: true,
+
             pendekatan: {
               select: {
+                id: true,
                 keterangan: true,
-                kebutuhan_dokumentasi: {
-                  select: {
-                    dokumentasi_borang: {
-                      select: {
-                        status: true,
-                      },
-                    },
-                  },
-                },
+              },
+            },
+
+            dokumentasi_borang: {
+              select: {
+                id: true,
+                status: true,
               },
             },
           },
         },
       },
     });
+
+    console.log(JSON.stringify(get_grafik_kriteria, null, 2));
 
     // grouped pendekatan
     const groupedPendekatan = new Map<number, GrafikKriteriaType>();
@@ -312,14 +318,11 @@ export class StatistikService {
 
       //   mapping pendekatan
       for (const pendekatan of namaPendekatanArray) {
-        const findPendekatan = kriteria.kebutuhan_dokumentasi.find(
+        const findPendekatan = kriteria.kebutuhan_dokumentasi.filter(
           (item) => item.pendekatan.keterangan === pendekatan,
         );
 
-        if (
-          !findPendekatan ||
-          findPendekatan.pendekatan.kebutuhan_dokumentasi.length === 0
-        ) {
+        if (!findPendekatan || findPendekatan.length === 0) {
           pendekatanResult.push({
             nama_pendekatan: pendekatan as NamaPendekatanType,
             dokumentasi_borang_approve: 0,
@@ -330,14 +333,12 @@ export class StatistikService {
         }
 
         // get total dokumentasi selesai
-        const totalDokumentasiSelesai =
-          findPendekatan?.pendekatan.kebutuhan_dokumentasi.filter(
-            (item) => item.dokumentasi_borang?.status === Status.APPROVED,
-          ).length;
+        const totalDokumentasiSelesai = findPendekatan.filter(
+          (item) => item.dokumentasi_borang?.status === Status.APPROVED,
+        ).length;
 
         // get total dokumentasi
-        const totalDokumentasi =
-          findPendekatan?.pendekatan.kebutuhan_dokumentasi.length;
+        const totalDokumentasi = findPendekatan.length;
 
         pendekatanResult.push({
           nama_pendekatan: pendekatan as NamaPendekatanType,

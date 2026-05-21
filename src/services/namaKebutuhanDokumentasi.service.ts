@@ -58,4 +58,25 @@ export class NamaKebutuhanDokumentasiServices {
       })),
     });
   }
+
+  // get count by name
+  static async getCountInKebutuhanDokumentasiById(id: number): Promise<number> {
+    return await prisma.kebutuhanDokumentasi.count({
+      where: {
+        nama_kebutuhan_dokumentasi_id: id,
+      },
+    });
+  }
+
+  // delete by id
+  static async delete(id: number): Promise<boolean> {
+    // call db
+    const result = await prisma.namaKebutuhanDokumentasi.deleteMany({
+      where: {
+        id,
+      },
+    });
+
+    return result ? true : false;
+  }
 }

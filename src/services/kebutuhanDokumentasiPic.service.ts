@@ -719,7 +719,7 @@ export class KebutuhanDokumentasiPicServices {
                     existPendekatan.status,
                     currentStatus,
                   )
-                : getPriorityStatusKaprodi(
+                : getPriorityStatusKaprodiForDokumentasiBorang(
                     existPendekatan.status,
                     currentStatus,
                   ),
