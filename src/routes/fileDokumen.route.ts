@@ -93,29 +93,25 @@ fileDokumenRouter.patch(
 
 // preview from sistem
 fileDokumenRouter.get(
-  "/preview-sistem/:id/:nama_file",
+  "/preview-sistem/:id",
   [
     authMiddleware,
     periodeMiddleware,
     distribusiMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi]),
   ],
-  zodValidationParams<{ id: number; nama_file: string }>(
-    GlobalValidation.PARAMS_PREVIEW_FILE,
-  ),
+  zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_PREVIEW_FILE),
   FileDokumenController.previewFileLocal,
 );
 
 // preview from google drive
 fileDokumenRouter.get(
-  "/preview-drive/:id/:nama_file",
+  "/preview-drive/:id",
   [
     authMiddleware,
     periodeMiddleware,
     distribusiMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi]),
   ],
-  zodValidationParams<{ id: number; nama_file: string }>(
-    GlobalValidation.PARAMS_PREVIEW_FILE,
-  ),
+  zodValidationParams<{ id: number }>(GlobalValidation.PARAMS_PREVIEW_FILE),
   FileDokumenController.previewFileGoogleDrive,
 );
 

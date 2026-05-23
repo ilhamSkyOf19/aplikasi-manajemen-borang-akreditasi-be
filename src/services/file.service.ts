@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { Request, Response } from "express";
 import multer, { FileFilterCallback, Multer } from "multer";
 import fs from "fs";
 import path from "path";
@@ -11,6 +11,7 @@ import {
 } from "../utils/contstanst";
 import { DriveApiService } from "./driveapi.service";
 import { randomUUID } from "crypto";
+import { ResponseResult } from "../types/response";
 
 type FileConfig = {
   allowedMimeTypes?: RegExp;
@@ -348,5 +349,115 @@ export class FileService {
 
       return null;
     }
+  }
+
+  // preview sistem
+  static async previewFileLocal(data: {
+    req: Request;
+    res: Response;
+    tipe_file?: TipeDokumentasi;
+    dokumen_panduan?: boolean;
+    fileName: string;
+    file_id: string;
+  }): Promise<void> {
+    const { fileName, res, req, file_id, dokumen_panduan, tipe_file } = data;
+
+    const safePath = path.join(
+      process.cwd(),
+      "public",
+      "uploads",
+      "dokumentasi-borang",
+      tipe_file
+        ? tipe_file.toLowerCase()
+        : dokumen_panduan
+          ? "dokumen_panduan"
+          : "lainnya",
+      file_id,
+    );
+
+    const stat = fs.statSync(safePath);
+
+    const fileSize = stat.size;
+
+    const range = req.headers.range;
+
+    const displayFileName = fileName.toLowerCase().endsWith(".pdf")
+      ? fileName
+      : `${fileName}.pdf`;
+
+    const encodedFileName = encodeURIComponent(displayFileName);
+
+    const contentDisposition = `inline; filename="${encodedFileName}";filename*=UTF-8''${encodedFileName}`;
+
+    // chunk
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+
+      const start = parseInt(parts[0], 10);
+
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      const chunkSize = end - start + 1;
+
+      const fileStream = fs.createReadStream(safePath, {
+        start,
+        end,
+      });
+
+      res.writeHead(206, {
+        "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+
+        "Accept-Ranges": "bytes",
+
+        "Content-Length": chunkSize,
+
+        "Content-Type": "application/pdf",
+
+        "Content-Disposition": contentDisposition,
+      });
+
+      fileStream.pipe(res);
+
+      return;
+    }
+
+    // full file
+    res.writeHead(200, {
+      "Content-Length": fileSize,
+
+      "Content-Type": "application/pdf",
+
+      "Content-Disposition": contentDisposition,
+    });
+
+    fs.createReadStream(safePath).pipe(res);
+  }
+
+  // preview file gdrive
+  static async previewFileGoogleDrive(data: {
+    res: Response;
+    fileName: string;
+    file_id: string;
+  }): Promise<void> {
+    const { fileName, file_id, res } = data;
+
+    const { metadata, stream } =
+      await DriveApiService.getFileForPreview(file_id);
+
+    res.setHeader("Content-Type", metadata.mimeType ?? "application/pdf");
+
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${encodeURIComponent(fileName ?? metadata.name)}"; `,
+    );
+
+    res.setHeader("Cache-Control", "private, max-age=0");
+
+    stream.on("error", (error) => {
+      console.log(error);
+      return ResponseResult.error(res, 404, "file not found");
+    });
+
+    stream.pipe(res);
   }
 }

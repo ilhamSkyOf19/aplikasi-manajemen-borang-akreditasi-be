@@ -11,6 +11,9 @@ import { DokumenPanduanValidation } from "../validations/dokumenPanduan.validati
 import { FileService } from "../services/file.service";
 import { DokumenPanduanService } from "../services/dokumenPanduan.service";
 import { StorageProvider } from "../utils/contstanst";
+import path from "node:path";
+import fs from "fs";
+import driveApi from "../configs/driveapi.config";
 
 export class DokumenPanduanController {
   // create
@@ -245,6 +248,123 @@ export class DokumenPanduanController {
         200,
         "success find dokumen panduan",
       );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // download file by periode
+  static async download(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      // get periode id
+      const periodeId = req?.periode?.id;
+
+      // check periode
+      if (!periodeId) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
+      // find dokumen panduan
+      const findDokumenPanduan =
+        await DokumenPanduanService.findByPeriode(periodeId);
+
+      // check dokumen panduan
+      if (!findDokumenPanduan) {
+        return ResponseResult.error(res, 404, "tidak ada dokumen panduan");
+      }
+
+      // stream
+      let stream;
+
+      // lokasi path sistem
+      if (findDokumenPanduan.storage_provider === StorageProvider.SISTEM) {
+        const filePath = path.join(
+          process.cwd(),
+          "public/uploads/dokumentasi-borang",
+          "dokumen_panduan",
+          findDokumenPanduan.id_file,
+        );
+
+        console.log(filePath);
+
+        if (!fs.existsSync(filePath)) {
+          return ResponseResult.error(res, 404, "file tidak ditemukan");
+        }
+
+        // return stream
+        stream = fs.createReadStream(filePath);
+      } else if (
+        findDokumenPanduan.storage_provider === StorageProvider.GDRIVE
+      ) {
+        const response = await driveApi.files.get(
+          {
+            fileId: findDokumenPanduan.id_file,
+            alt: "media",
+          },
+          {
+            responseType: "stream",
+          },
+        );
+
+        // return
+        stream = response.data;
+      } else {
+        return ResponseResult.error(res, 404, "file tidak ditemukan");
+      }
+
+      // return header
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${findDokumenPanduan.nama_file}"`,
+      );
+
+      stream.pipe(res);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // preview
+  static async preview(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      // get periode id
+      const periodeId = req?.periode?.id;
+
+      // check periode
+      if (!periodeId) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
+      // find dokumen panduan
+      const findDokumenPanduan =
+        await DokumenPanduanService.findByPeriode(periodeId);
+
+      // check dokumen panduan
+      if (!findDokumenPanduan) {
+        return ResponseResult.error(res, 404, "tidak ada dokumen panduan");
+      }
+
+      // check storage
+      if (findDokumenPanduan?.storage_provider === StorageProvider.SISTEM) {
+        await FileService.previewFileLocal({
+          res,
+          req,
+          fileName: findDokumenPanduan?.nama_file,
+          file_id: findDokumenPanduan?.id_file,
+          dokumen_panduan: true,
+        });
+
+        return;
+      } else {
+        await FileService.previewFileGoogleDrive({
+          res,
+          fileName: findDokumenPanduan?.nama_file,
+          file_id: findDokumenPanduan?.id_file,
+        });
+
+        return;
+      }
     } catch (error) {
       next(error);
     }

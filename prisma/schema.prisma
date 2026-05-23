@@ -80,8 +80,8 @@ model Timeline {
   periode_id                               Int
   deadline_kebutuhan_dokumentasi           DateTime?
   deadline_dokumentasi_borang              DateTime?
-  is_active_deadline_kebutuhan_dokumentasi Boolean?
-  is_active_deadline_dokumentasi_borang    Boolean?
+  is_active_deadline_kebutuhan_dokumentasi Boolean   @default(false)
+  is_active_deadline_dokumentasi_borang    Boolean   @default(false)
   created_at                               DateTime  @default(now())
   updated_at                               DateTime  @updatedAt
 

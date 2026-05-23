@@ -84,6 +84,10 @@ export class FileDokumenController {
   // preview file local
   static async previewFileLocal(
     req: Request,
+    // res: Response<
+    //   ResponseStructure<null> | void,
+    //   { validatedParams: { id: number } }
+    // >,
     res: Response,
     next: NextFunction,
   ) {
@@ -93,72 +97,19 @@ export class FileDokumenController {
       const file = await FileDokumenService.findById(id);
 
       if (!file) {
-        return res.status(404).json({
-          status: "ERR",
-          message: "File tidak ditemukan di database",
-        });
+        return ResponseResult.error(res, 404, "file not found");
       }
 
-      const fileName = path.basename(file.file_id);
-
-      const safePath = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "dokumentasi-borang",
-        file.tipe_file.toLowerCase(),
-        fileName,
-      );
-
-      console.log("safePath:", safePath);
-
-      if (!fsSync.existsSync(safePath)) {
-        return res.status(404).json({
-          status: "ERR",
-          message: "File tidak ditemukan di folder server",
-          path: safePath,
-        });
-      }
-
-      const stat = fsSync.statSync(safePath);
-      const fileSize = stat.size;
-      const range = req.headers.range;
-
-      const displayFileName = file.nama_file.toLowerCase().endsWith(".pdf")
-        ? file.nama_file
-        : `${file.nama_file}.pdf`;
-
-      const encodedFileName = encodeURIComponent(displayFileName);
-
-      const contentDisposition = `inline; filename="${encodedFileName}"; filename*=UTF-8''${encodedFileName}`;
-
-      if (range) {
-        const parts = range.replace(/bytes=/, "").split("-");
-        const start = parseInt(parts[0], 10);
-        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-        const chunkSize = end - start + 1;
-
-        const fileStream = fsSync.createReadStream(safePath, { start, end });
-
-        res.writeHead(206, {
-          "Content-Range": `bytes ${start}-${end}/${fileSize}`,
-          "Accept-Ranges": "bytes",
-          "Content-Length": chunkSize,
-          "Content-Type": "application/pdf",
-          "Content-Disposition": contentDisposition,
-        });
-
-        return fileStream.pipe(res);
-      }
-
-      res.writeHead(200, {
-        "Content-Length": fileSize,
-        "Content-Type": "application/pdf",
-        "Accept-Ranges": "bytes",
-        "Content-Disposition": contentDisposition,
+      // preview
+      await FileService.previewFileLocal({
+        res,
+        req,
+        fileName: file.nama_file,
+        file_id: file.file_id,
+        tipe_file: file.tipe_file,
       });
 
-      return fsSync.createReadStream(safePath).pipe(res);
+      return;
     } catch (error) {
       next(error);
     }
@@ -168,56 +119,39 @@ export class FileDokumenController {
     _req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<void> {
+  ) {
     try {
       const { id } = res.locals.validatedParams;
 
       const file = await FileDokumenService.findById(id);
 
-      console.log(file);
-
       if (!file) {
-        res.status(404).json({
-          status: "ERR",
-          message: "File tidak ditemukan",
-        });
-        return;
+        return ResponseResult.error(res, 404, "file not found");
       }
 
-      if (file.storage_provider !== "GDRIVE") {
-        res.status(400).json({
-          status: "ERR",
-          message: "File ini bukan file Google Drive",
-        });
-        return;
+      if (file.storage_provider !== StorageProvider.GDRIVE) {
+        return ResponseResult.error(
+          res,
+          400,
+          "File ini bukan file Google Drive",
+        );
       }
 
       if (!file) {
-        res.status(400).json({
-          status: "ERR",
-          message: "Provider file ID tidak ditemukan",
-        });
-        return;
+        return ResponseResult.error(
+          res,
+          404,
+          "Provider file ID tidak ditemukan",
+        );
       }
 
-      const { metadata, stream } = await DriveApiService.getFileForPreview(
-        file.file_id,
-      );
-
-      res.setHeader("Content-Type", metadata.mimeType ?? "application/pdf");
-
-      res.setHeader(
-        "Content-Disposition",
-        `inline; filename="${encodeURIComponent(file.nama_file ?? metadata.name)}"; `,
-      );
-
-      res.setHeader("Cache-Control", "private, max-age=0");
-
-      stream.on("error", (error) => {
-        next(error);
+      await FileService.previewFileGoogleDrive({
+        res,
+        file_id: file.file_id,
+        fileName: file.nama_file,
       });
 
-      stream.pipe(res);
+      return;
     } catch (error) {
       next(error);
     }

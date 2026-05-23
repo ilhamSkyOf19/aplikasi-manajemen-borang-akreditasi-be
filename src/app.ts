@@ -17,6 +17,7 @@ app.use(
   cors({
     origin: true,
     credentials: true,
+    exposedHeaders: ["Content-Disposition"],
   }),
 );
 

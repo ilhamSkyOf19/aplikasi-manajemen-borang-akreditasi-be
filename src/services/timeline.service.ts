@@ -3,6 +3,7 @@ import {
   CreateTimelineType,
   ResponseTimelineType,
   toResponseTimelineType,
+  UpdateIsActiveTimelineType,
   UpdateTimelineType,
 } from "../models/timeline.model";
 
@@ -27,13 +28,8 @@ export class TimelineService {
         id: true,
         deadline_dokumentasi_borang: true,
         deadline_kebutuhan_dokumentasi: true,
-        periode: {
-          select: {
-            id: true,
-            start_date: true,
-            end_date: true,
-          },
-        },
+        is_active_deadline_dokumentasi_borang: true,
+        is_active_deadline_kebutuhan_dokumentasi: true,
         created_at: true,
         updated_at: true,
       },
@@ -64,13 +60,8 @@ export class TimelineService {
         id: true,
         deadline_dokumentasi_borang: true,
         deadline_kebutuhan_dokumentasi: true,
-        periode: {
-          select: {
-            id: true,
-            start_date: true,
-            end_date: true,
-          },
-        },
+        is_active_deadline_dokumentasi_borang: true,
+        is_active_deadline_kebutuhan_dokumentasi: true,
         created_at: true,
         updated_at: true,
       },
@@ -94,11 +85,50 @@ export class TimelineService {
         deadline_kebutuhan_dokumentasi: true,
         created_at: true,
         updated_at: true,
+        is_active_deadline_dokumentasi_borang: true,
+        is_active_deadline_kebutuhan_dokumentasi: true,
       },
     });
 
     // return null
     if (!result) return null;
+
+    return toResponseTimelineType(result);
+  }
+
+  // update is active
+  static async updateIsActive(params: {
+    id: number;
+    data: UpdateIsActiveTimelineType;
+  }): Promise<ResponseTimelineType | null> {
+    // get data
+    const {
+      id,
+      data: {
+        is_active_deadline_dokumentasi_borang,
+        is_active_deadline_kebutuhan_dokumentasi,
+      },
+    } = params;
+
+    // cal db
+    const result = await prisma.timeline.update({
+      where: {
+        id,
+      },
+      data: {
+        is_active_deadline_dokumentasi_borang,
+        is_active_deadline_kebutuhan_dokumentasi,
+      },
+      select: {
+        id: true,
+        deadline_dokumentasi_borang: true,
+        deadline_kebutuhan_dokumentasi: true,
+        is_active_deadline_dokumentasi_borang: true,
+        is_active_deadline_kebutuhan_dokumentasi: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
 
     return toResponseTimelineType(result);
   }

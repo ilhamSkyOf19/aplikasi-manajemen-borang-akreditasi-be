@@ -7,14 +7,16 @@ export interface ITimeline {
   };
   deadline_kebutuhan_dokumentasi: Date | null;
   deadline_dokumentasi_borang: Date | null;
+  is_active_deadline_kebutuhan_dokumentasi: boolean;
+  is_active_deadline_dokumentasi_borang: boolean;
   created_at: Date;
   updated_at: Date;
 }
 
 // create timeline
-export interface CreateTimelineType extends Omit<
+export interface CreateTimelineType extends Pick<
   ITimeline,
-  "id" | "created_at" | "updated_at" | "periode"
+  "deadline_dokumentasi_borang" | "deadline_kebutuhan_dokumentasi"
 > {
   periode_id: number;
 }
@@ -22,6 +24,15 @@ export interface CreateTimelineType extends Omit<
 // update timeline
 export interface UpdateTimelineType extends Partial<
   Omit<CreateTimelineType, "periode_id">
+> {}
+
+// update is active
+export interface UpdateIsActiveTimelineType extends Partial<
+  Pick<
+    ITimeline,
+    | "is_active_deadline_dokumentasi_borang"
+    | "is_active_deadline_kebutuhan_dokumentasi"
+  >
 > {}
 
 // response

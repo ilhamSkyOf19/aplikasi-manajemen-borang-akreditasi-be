@@ -33,7 +33,7 @@ timelineRoute.put(
   zodValidationParams<{ tipe: "kebutuhan_dokumentasi" | "dokumentasi_borang" }>(
     TimelineValidation.PARAMS_TIPE,
   ),
-  TimelineController.isActive,
+  TimelineController.updateIsActive,
 );
 
 // export

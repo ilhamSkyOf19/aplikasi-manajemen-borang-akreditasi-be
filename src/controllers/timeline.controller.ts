@@ -85,7 +85,7 @@ export class TimelineController {
   }
 
   // update timeline
-  static async isActive(
+  static async updateIsActive(
     req: AuthRequest,
     res: Response<
       ResponseStructure<ResponseTimelineType | null>,
@@ -118,21 +118,27 @@ export class TimelineController {
       }
 
       // call service
-      const service = await TimelineService.update({
+      const service = await TimelineService.updateIsActive({
         id: timeline.id,
         data:
           tipe === "kebutuhan_dokumentasi"
             ? {
-                deadline_kebutuhan_dokumentasi: null,
+                is_active_deadline_kebutuhan_dokumentasi:
+                  !timeline.is_active_deadline_kebutuhan_dokumentasi,
               }
             : {
-                deadline_dokumentasi_borang: null,
+                is_active_deadline_dokumentasi_borang:
+                  !timeline.is_active_deadline_dokumentasi_borang,
               },
       });
 
       // check service
       if (!service) {
-        return ResponseResult.error(res, 400, "failed update timeline");
+        return ResponseResult.error(
+          res,
+          400,
+          "failed update is active timeline",
+        );
       }
 
       // return success
@@ -140,7 +146,7 @@ export class TimelineController {
         service,
         res,
         200,
-        "success update timeline",
+        "success update is active timeline",
       );
     } catch (error) {
       next(error);
