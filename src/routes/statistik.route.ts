@@ -4,6 +4,7 @@ import { StatistikController } from "../controllers/statistik.controller";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import { DosenRole } from "../utils/contstanst";
 import { periodeMiddleware } from "../middlewares/periode.middleware";
+import { FileService } from "../services/file.service";
 
 const statistikRoute: Router = Router();
 
@@ -25,6 +26,7 @@ statistikRoute.get(
     aclMiddleware([DosenRole.tim_akreditasi]),
     periodeMiddleware,
   ],
+
   StatistikController.getStatistikForTimAkreditasi,
 );
 

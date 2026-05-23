@@ -24,4 +24,13 @@ export class TimelineValidation {
         .optional(),
     })
     .strict() satisfies z.ZodType<UpdateTimelineType>;
+
+  // params tipe
+  static readonly PARAMS_TIPE = z
+    .object({
+      tipe: z.enum(["kebutuhan_dokumentasi", "dokumentasi_borang"]),
+    })
+    .strict() satisfies z.ZodType<{
+    tipe: "kebutuhan_dokumentasi" | "dokumentasi_borang";
+  }>;
 }

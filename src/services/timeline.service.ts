@@ -92,13 +92,6 @@ export class TimelineService {
         id: true,
         deadline_dokumentasi_borang: true,
         deadline_kebutuhan_dokumentasi: true,
-        periode: {
-          select: {
-            id: true,
-            start_date: true,
-            end_date: true,
-          },
-        },
         created_at: true,
         updated_at: true,
       },

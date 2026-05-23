@@ -10,9 +10,6 @@ export const errorMiddleware = (
   res: Response<ResponseStructure<null>>,
   _next: NextFunction,
 ) => {
-  // log
-  console.log(err);
-
   // prisma error catch
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     // switch case

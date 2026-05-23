@@ -86,10 +86,11 @@ export class FileService {
 
   // delete form path
   static async deleteFormPath(params: {
-    tipe_file: TipeDokumentasi;
+    tipe_file?: TipeDokumentasi;
+    dokumen_panduan?: boolean;
     fileName: string;
   }): Promise<{ success: boolean; message: string }> {
-    const { fileName, tipe_file } = params;
+    const { fileName, tipe_file, dokumen_panduan } = params;
 
     if (!fileName) {
       throw new Error(`Invalid path or filename: ${fileName}`);
@@ -97,8 +98,16 @@ export class FileService {
 
     const filePathFull = path.join(
       process.cwd(),
-      `${FOLDER_GLOBAL_UPLOAD}/${tipe_file.toLowerCase()}/${fileName}`,
+      `${FOLDER_GLOBAL_UPLOAD}/${tipe_file ? tipe_file.toLowerCase() : dokumen_panduan ? "dokumen_panduan" : ""}/${fileName}`,
     );
+
+    // check file exists
+    if (!fs.existsSync(filePathFull)) {
+      return {
+        success: true,
+        message: "File not found",
+      };
+    }
 
     await fsAsync.access(filePathFull);
     await fsAsync.unlink(filePathFull);
@@ -252,13 +261,14 @@ export class FileService {
   // upload file from request
   static async uploadFileFromRequest(data: {
     fileRequest: {
-      tipe_file: TipeDokumentasi;
+      tipe_file?: TipeDokumentasi;
       storage_provider: StorageProvider;
+      dokumen_panduan?: boolean;
     };
     uploadedFile: Express.Multer.File;
   }): Promise<{ file_id: string } | null> {
     const {
-      fileRequest: { storage_provider, tipe_file },
+      fileRequest: { storage_provider, tipe_file, dokumen_panduan },
       uploadedFile,
     } = data;
 
@@ -271,12 +281,6 @@ export class FileService {
       // final name
       const finalName = `${randomUUID()}.pdf`;
 
-      // folder path
-      const folderPath = path.join(
-        FOLDER_GLOBAL_UPLOAD,
-        tipe_file.toLowerCase(),
-      );
-
       if (storage_provider === StorageProvider.GDRIVE) {
         const gdrive = await DriveApiService.upload({
           fileBuffer: uploadedFile.buffer,
@@ -284,6 +288,7 @@ export class FileService {
           mimeType: uploadedFile.mimetype,
           allowMimeType: ["application/pdf"],
           tipeFile: tipe_file,
+          dokumen_panduan,
         });
 
         if (!gdrive.success || !gdrive.fileId) {
@@ -298,14 +303,27 @@ export class FileService {
           file_id: gdrive.fileId,
         };
       } else {
+        // folder path
+        const folderPath = path.join(
+          FOLDER_GLOBAL_UPLOAD,
+          tipe_file
+            ? tipe_file.toLowerCase()
+            : dokumen_panduan
+              ? "dokumen_panduan"
+              : "lainnya",
+        );
+
+        // check folder
         if (!fs.existsSync(folderPath)) {
           fs.mkdirSync(folderPath, {
             recursive: true,
           });
         }
 
+        // file path
         const filePath = path.join(folderPath, finalName);
 
+        // create file
         fs.writeFileSync(filePath, uploadedFile.buffer);
 
         // set file path

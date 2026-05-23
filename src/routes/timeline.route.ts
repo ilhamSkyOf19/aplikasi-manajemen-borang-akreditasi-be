@@ -7,6 +7,7 @@ import { zodValidation } from "../middlewares/validation.middleware";
 import { UpdateTimelineType } from "../models/timeline.model";
 import { TimelineValidation } from "../validations/timeline.validation";
 import { TimelineController } from "../controllers/timeline.controller";
+import { zodValidationParams } from "../middlewares/validationParams.middleware";
 
 const timelineRoute: Router = Router();
 
@@ -21,8 +22,18 @@ timelineRoute.patch(
 // find by periode
 timelineRoute.get(
   "/",
-  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1]), periodeMiddleware],
+  [authMiddleware, periodeMiddleware],
   TimelineController.findByPeriode,
+);
+
+// is active
+timelineRoute.put(
+  "/is-active/tipe/:tipe",
+  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1]), periodeMiddleware],
+  zodValidationParams<{ tipe: "kebutuhan_dokumentasi" | "dokumentasi_borang" }>(
+    TimelineValidation.PARAMS_TIPE,
+  ),
+  TimelineController.isActive,
 );
 
 // export

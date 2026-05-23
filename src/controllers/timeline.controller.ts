@@ -83,4 +83,67 @@ export class TimelineController {
       next(error);
     }
   }
+
+  // update timeline
+  static async isActive(
+    req: AuthRequest,
+    res: Response<
+      ResponseStructure<ResponseTimelineType | null>,
+      {
+        validatedParams: {
+          tipe: "kebutuhan_dokumentasi" | "dokumentasi_borang";
+        };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get periode
+      const periodeId = req?.periode?.id;
+
+      // check periode
+      if (!periodeId) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
+      // get tipe from params
+      const { tipe } = res.locals.validatedParams;
+
+      // find timeline by periode id
+      const timeline = await TimelineService.findByPeriode(periodeId);
+
+      // check timeline
+      if (!timeline) {
+        return ResponseResult.error(res, 404, "tidak ada timeline");
+      }
+
+      // call service
+      const service = await TimelineService.update({
+        id: timeline.id,
+        data:
+          tipe === "kebutuhan_dokumentasi"
+            ? {
+                deadline_kebutuhan_dokumentasi: null,
+              }
+            : {
+                deadline_dokumentasi_borang: null,
+              },
+      });
+
+      // check service
+      if (!service) {
+        return ResponseResult.error(res, 400, "failed update timeline");
+      }
+
+      // return success
+      return ResponseResult.success<ResponseTimelineType | null>(
+        service,
+        res,
+        200,
+        "success update timeline",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }

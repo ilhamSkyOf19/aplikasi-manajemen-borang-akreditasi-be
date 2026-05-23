@@ -67,6 +67,7 @@ model Periode {
   // kriteria 
   kriteria                        Kriteria[]
   distribusiKebutuhanDokumentasis DistribusiKebutuhanDokumentasi?
+  dokumenPanduan                  DokumenPanduan?
 
   // unique 
   @@unique([start_date, end_date])
@@ -75,12 +76,14 @@ model Periode {
 
 // timeline 
 model Timeline {
-  id                             Int       @id @default(autoincrement())
-  periode_id                     Int
-  deadline_kebutuhan_dokumentasi DateTime?
-  deadline_dokumentasi_borang    DateTime?
-  created_at                     DateTime  @default(now())
-  updated_at                     DateTime  @updatedAt
+  id                                       Int       @id @default(autoincrement())
+  periode_id                               Int
+  deadline_kebutuhan_dokumentasi           DateTime?
+  deadline_dokumentasi_borang              DateTime?
+  is_active_deadline_kebutuhan_dokumentasi Boolean?
+  is_active_deadline_dokumentasi_borang    Boolean?
+  created_at                               DateTime  @default(now())
+  updated_at                               DateTime  @updatedAt
 
   // periode
   periode Periode @relation(fields: [periode_id], references: [id], onDelete: Cascade)
@@ -88,6 +91,21 @@ model Timeline {
   // unique 
   @@unique([periode_id, deadline_kebutuhan_dokumentasi, deadline_dokumentasi_borang])
   @@map("timeline")
+}
+
+// dokumen panduan 
+model DokumenPanduan {
+  id               Int             @id @default(autoincrement())
+  periode_id       Int             @unique
+  nama_file        String
+  id_file          String
+  storage_provider StorageProvider @default(SISTEM)
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id], onDelete: Cascade)
+
+  @@map("dokumen_panduan")
 }
 
 // kriteria 

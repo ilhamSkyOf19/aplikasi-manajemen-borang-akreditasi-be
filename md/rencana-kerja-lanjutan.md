@@ -44,9 +44,14 @@
 
 ## Urgent
 
-- [ ] Membuat sebuah api lagi untuk timeline dari pengerjaan dan lain lain.
-- [ ] Membuat api search file untuk mempercepat pencarian file , dengan response
-- [ ] Membuat api untuk dokumen panduan cara menyusun borang akreditasi
+- [✅] Membuat sebuah api lagi untuk timeline dari pengerjaan dan lain lain.
+- [✅] Membuat api search file untuk mempercepat pencarian file , dengan response
+- [✅] Membuat api untuk dokumen panduan cara menyusun borang akreditasi
+
+- [ ] Menyesuaikan lagi data timeline -> tambahkan is active pada setiap deadline
+
+- [ ] Membuat api download dan upload dokumen panduan
+
 - [ ] Membuat api service lupa password dengan email
 
-BUG pada notifikasi
+- [ ] Membuat api service ganti file pada service file dokumen

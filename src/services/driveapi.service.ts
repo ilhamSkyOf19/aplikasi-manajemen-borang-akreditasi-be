@@ -11,7 +11,16 @@ export class DriveApiService {
   }
 
   // get nama folder by tipe
-  private static getFolderNameByTipe(tipe: TipeDokumentasi): string {
+  private static getFolderNameByTipe(params: {
+    tipe?: TipeDokumentasi;
+    dokumen_panduan?: boolean;
+  }): string {
+    const { dokumen_panduan, tipe } = params;
+
+    if (dokumen_panduan) {
+      return "dokumen_panduan";
+    }
+
     switch (tipe) {
       case TipeDokumentasi.PENELITIAN:
         return "penelitian";
@@ -87,9 +96,17 @@ export class DriveApiService {
     fileBuffer: Buffer;
     mimeType: string;
     allowMimeType: string[];
-    tipeFile: TipeDokumentasi;
+    tipeFile?: TipeDokumentasi;
+    dokumen_panduan?: boolean;
   }): Promise<{ success: boolean; message: string; fileId?: string }> {
-    const { allowMimeType, fileBuffer, filename, mimeType, tipeFile } = req;
+    const {
+      allowMimeType,
+      fileBuffer,
+      filename,
+      mimeType,
+      tipeFile,
+      dokumen_panduan,
+    } = req;
 
     if (!allowMimeType.includes(mimeType)) {
       return {
@@ -99,7 +116,10 @@ export class DriveApiService {
     }
 
     // buat folder jika belum ada
-    const folderName = this.getFolderNameByTipe(tipeFile);
+    const folderName = this.getFolderNameByTipe({
+      tipe: tipeFile,
+      dokumen_panduan,
+    });
 
     // check folder dalam google drive
     const targetFolderId = await this.ensureFolder({

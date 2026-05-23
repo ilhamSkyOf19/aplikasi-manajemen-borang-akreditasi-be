@@ -20,7 +20,8 @@ import fileDokumenRouter from "./fileDokumen.route";
 import distribusiKebutuhanDokumentasiRouter from "./distribusiKebutuhanDokumentasi.route";
 import statistikRoute from "./statistik.route";
 import periodeRoute from "./periode.route";
-import timelineRoute from "./timline.route";
+import timelineRoute from "./timeline.route";
+import dokumenPanduanRoute from "./dokumenPanduan.route";
 
 const appRoute: Router = Router();
 
@@ -75,8 +76,11 @@ appRoute.use(
 // statistik route
 appRoute.use("/api/statistik", statistikRoute);
 
-// timeline
+// timeline route
 appRoute.use("/api/timeline", timelineRoute);
+
+// dokumen panduan route
+appRoute.use("/api/dokumen-panduan", dokumenPanduanRoute);
 
 // // tim akreditasi router
 // appRoute.use("/api/tim-akreditasi", timAkreditasiRoute);

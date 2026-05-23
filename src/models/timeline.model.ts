@@ -25,7 +25,7 @@ export interface UpdateTimelineType extends Partial<
 > {}
 
 // response
-export interface ResponseTimelineType extends ITimeline {}
+export interface ResponseTimelineType extends Omit<ITimeline, "periode"> {}
 
 // to response
 export const toResponseTimelineType = (
