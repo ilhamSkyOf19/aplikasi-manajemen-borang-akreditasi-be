@@ -418,7 +418,7 @@ export class FileDokumenController {
   static async findAllBySearch(
     req: AuthRequest,
     res: Response<
-      ResponseStructure<any>,
+      ResponseStructure<ResponseSearchGlobalType[] | null>,
       { validatedQuery: { search: string } }
     >,
     next: NextFunction,
@@ -442,7 +442,7 @@ export class FileDokumenController {
       });
 
       // return response
-      return ResponseResult.success<any | null>(
+      return ResponseResult.success<ResponseSearchGlobalType[] | null>(
         service,
         res,
         200,

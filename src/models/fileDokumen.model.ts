@@ -50,10 +50,10 @@ export interface ResponseSearchGlobalType {
     id: number;
     nama_kebutuhan_dokumentasi: string;
   };
+  dokumentasi_borang_id: number;
   file: {
     id: number;
     nama_file: string;
-    keterangan: string;
     tipe_file: TipeDokumentasi;
   };
 }

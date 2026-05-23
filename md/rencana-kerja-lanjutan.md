@@ -48,9 +48,9 @@
 - [✅] Membuat api search file untuk mempercepat pencarian file , dengan response
 - [✅] Membuat api untuk dokumen panduan cara menyusun borang akreditasi
 
-- [ ] Membuat api download dan upload dokumen panduan
+- [✅] Membuat api download dan upload dokumen panduan
 
-- [ ] Menyesuaikan lagi data timeline -> tambahkan is active pada setiap deadline
+- [✅] Menyesuaikan lagi data timeline -> tambahkan is active pada setiap deadline
 
 - [ ] Membuat api service lupa password dengan email
 

@@ -55,7 +55,7 @@ export class GlobalValidation {
   // query only search
   static readonly QUERY_SEARCH = z
     .object({
-      search: z.string().trim().min(1).max(100),
+      search: z.string().trim().max(100),
     })
     .strict() satisfies z.ZodType<{ search: string }>;
 }

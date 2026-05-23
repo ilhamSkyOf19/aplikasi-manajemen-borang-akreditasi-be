@@ -252,7 +252,6 @@ export class FileDokumenService {
         id: true,
         nama_file: true,
         tipe_file: true,
-        keterangan: true,
         dokumentasi_borang_files: {
           where: {
             dokumentasi_borang: {
@@ -262,6 +261,7 @@ export class FileDokumenService {
           select: {
             dokumentasi_borang: {
               select: {
+                id: true,
                 kebutuhan_dokumentasi: {
                   select: {
                     id: true,
@@ -321,10 +321,10 @@ export class FileDokumenService {
               dokumentasiBorangFile.dokumentasi_borang.kebutuhan_dokumentasi
                 .pendekatan.keterangan,
           },
+          dokumentasi_borang_id: dokumentasiBorangFile.dokumentasi_borang.id,
           file: {
             id: file.id,
             nama_file: file.nama_file,
-            keterangan: file.keterangan,
             tipe_file: file.tipe_file as TipeDokumentasi,
           },
           kebutuhan_dokumentasi: {
