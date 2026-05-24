@@ -4,6 +4,7 @@ import { zodValidation } from "../middlewares/validation.middleware";
 import {
   CreateDosenType,
   LoginDosenType,
+  ResetPasswordType,
   UpdatePasswordType,
 } from "../models/dosen.model";
 import { authMiddleware } from "../middlewares/auth.middleware";
@@ -11,6 +12,7 @@ import { aclMiddleware } from "../middlewares/acl.middleware";
 import LimiterMiddleware from "../middlewares/limiter.middleware";
 import { DosenValidation } from "../validations/dosen.validation";
 import { DosenRole } from "../utils/contstanst";
+import { resetPasswordMiddleware } from "../middlewares/resetPassword.middleware";
 
 const authRoute: Router = Router();
 
@@ -36,6 +38,14 @@ authRoute.put(
   authMiddleware,
   zodValidation<UpdatePasswordType>(DosenValidation.UPDATE_PASSWORD),
   AuthController.updatePassword,
+);
+
+// reset password
+authRoute.put(
+  "/reset-password",
+  resetPasswordMiddleware,
+  zodValidation<ResetPasswordType>(DosenValidation.RESET_PASSWORD),
+  AuthController.resetPassword,
 );
 
 // // me

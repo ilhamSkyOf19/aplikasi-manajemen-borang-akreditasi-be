@@ -22,6 +22,7 @@ import statistikRoute from "./statistik.route";
 import periodeRoute from "./periode.route";
 import timelineRoute from "./timeline.route";
 import dokumenPanduanRoute from "./dokumenPanduan.route";
+import activationCodeRoute from "./activationCode.route";
 
 const appRoute: Router = Router();
 
@@ -82,11 +83,8 @@ appRoute.use("/api/timeline", timelineRoute);
 // dokumen panduan route
 appRoute.use("/api/dokumen-panduan", dokumenPanduanRoute);
 
-// // tim akreditasi router
-// appRoute.use("/api/tim-akreditasi", timAkreditasiRoute);
-
-// // pic router
-// appRoute.use("/api/pic", picRouter);
+// activation route
+appRoute.use("/api/activation-code", activationCodeRoute);
 
 // riwayat router
 appRoute.use("/api/riwayat", riwayatRouter);

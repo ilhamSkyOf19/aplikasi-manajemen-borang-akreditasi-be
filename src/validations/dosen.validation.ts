@@ -2,6 +2,7 @@ import z from "zod";
 import {
   CreateDosenType,
   LoginDosenType,
+  ResetPasswordType,
   UpdateDosenType,
   UpdatePasswordType,
   UpdateSelfDataType,
@@ -169,4 +170,21 @@ export class DosenValidation {
       role: z.enum(DosenRole),
     })
     .strict() satisfies z.ZodType<{ role: DosenRole }>;
+
+  // reset password
+  static readonly RESET_PASSWORD = z
+    .object({
+      password: this.passwordSchema(),
+      confirmPassword: this.passwordSchema(),
+    })
+    .superRefine((data, ctx) => {
+      if (data.password !== data.confirmPassword) {
+        ctx.addIssue({
+          code: "custom",
+          message: "password tidak sama",
+          path: ["confirmPassword"],
+        });
+      }
+    })
+    .strict() satisfies z.ZodType<ResetPasswordType>;
 }

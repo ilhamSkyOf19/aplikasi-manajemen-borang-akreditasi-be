@@ -4,6 +4,7 @@ import {
   LoginDosenType,
   PayloadDosenForAuthMeType,
   PayloadDosenType,
+  ResetPasswordType,
   ResponseDosenType,
   UpdatePasswordType,
 } from "../models/dosen.model";
@@ -13,6 +14,7 @@ import argon2 from "argon2";
 import { generateAccessToken } from "../utils/jwt";
 import { AuthRequest } from "../types/authRequest";
 import { COOKIE_MAX_AGE, DosenRole, rolePriority } from "../utils/contstanst";
+import { ActivationCodeService } from "../services/activationCode.service";
 
 export class AuthController {
   // register
@@ -208,7 +210,7 @@ export class AuthController {
 
       return ResponseResult.success<PayloadDosenType | null>(
         {
-          id: dosen?.id!,
+          id: dosen.id,
           nama: dosen?.nama!,
           nidn: dosen?.nidn!,
           email: dosen?.email!,
@@ -270,6 +272,88 @@ export class AuthController {
         res,
         200,
         "success update password",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // reset password
+  static async resetPassword(
+    req: AuthRequest<{}, {}, ResetPasswordType>,
+    res: Response<ResponseStructure<ResponseDosenType | null>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get body
+      const { confirmPassword, password } = req.body;
+
+      // check
+      if (password !== confirmPassword)
+        return ResponseResult.error(res, 400, "Password tidak sama");
+
+      // get req data
+      const id = req?.data?.id;
+
+      // check id
+      if (!id) return ResponseResult.error(res, 400, "Data tidak tersedia");
+
+      // hash password
+      // hash password
+      const hashedPassword = await argon2.hash(password.trim(), {
+        type: argon2.argon2id,
+        hashLength: 64,
+      });
+
+      // reset password
+      const service = await DosenServices.updatePassword({
+        id,
+        password: hashedPassword,
+      });
+
+      // check service
+      if (!service)
+        return ResponseResult.error(res, 400, "Reset password gagal");
+
+      // clear cookie reset token
+      res.clearCookie("reset_token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict" as const,
+        path: "/api",
+      });
+
+      // get payload
+      const { roles, ...payloadDosen } = service;
+
+      // default role
+      const defaultRole = rolePriority.find((role) => roles.includes(role))!;
+
+      // generate token
+      const token = generateAccessToken({
+        ...payloadDosen,
+        role: defaultRole,
+      });
+
+      // set cookie
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict" as const,
+        maxAge: COOKIE_MAX_AGE,
+        path: "/api",
+      });
+
+      console.log("dosen_id", id);
+
+      // delete row reset password by dosen id
+      await ActivationCodeService.delete({ dosen_id: id });
+
+      return ResponseResult.success<ResponseDosenType | null>(
+        service,
+        res,
+        200,
+        "success reset password",
       );
     } catch (error) {
       next(error);

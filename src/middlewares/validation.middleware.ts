@@ -11,7 +11,7 @@ export const zodValidation = <T>(schema: ZodType<T>) => {
     try {
       // cek body
       if (!req.body) {
-        return ResponseResult.error(res, 400, "Bad request");
+        return ResponseResult.error(res, 400, "body not found");
       }
 
       // cek validasi

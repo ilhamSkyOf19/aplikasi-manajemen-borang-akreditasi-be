@@ -112,3 +112,12 @@ export const getPriorityStatusTimAkreditasi = (
   // 4. Terakhir: approved
   return Status.APPROVED;
 };
+
+// expired date
+export const ExpiredMinutesAgo = new Date(Date.now() + 5 * 60 * 1000);
+
+// generate code
+export const generateCode = (): number => {
+  const code = Math.floor(100000 + Math.random() * 900000);
+  return code;
+};

@@ -577,4 +577,34 @@ export class DosenServices {
       },
     });
   }
+
+  // find by email
+  static async findByEmail(email: string): Promise<ResponseDosenType | null> {
+    const dosen = await prisma.dosen.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        nidn: true,
+        dosenRole: {
+          select: {
+            role: true,
+          },
+        },
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    // check
+    if (!dosen) return null;
+
+    return toDosenResponse({
+      ...dosen,
+      roles: dosen.dosenRole.map((dr) => dr.role) as DosenRole[],
+    });
+  }
 }

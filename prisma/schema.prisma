@@ -33,9 +33,25 @@ model Dosen {
 
   // dokumen borang
   // dokumentasi_borang DokumentasiBorang[]
-  riwayats Riwayat[]
+  riwayats       Riwayat[]
+  activationCode ActivationCode?
 
   @@map("dosen")
+}
+
+// activation code 
+model ActivationCode {
+  id          Int      @id @default(autoincrement())
+  dosen_id    Int      @unique
+  code        String
+  reset_token String?
+  expired_at  DateTime
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  dosen Dosen @relation(fields: [dosen_id], references: [id], onDelete: Cascade)
+
+  @@map("activation_code")
 }
 
 // dosen role 

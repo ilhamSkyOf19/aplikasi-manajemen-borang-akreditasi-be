@@ -84,3 +84,9 @@ export interface ResponseDosenChooseWithMetaType {
   data: Pick<IDosen, "id" | "nama">[];
   meta: MetaType;
 }
+
+// reset password
+export interface ResetPasswordType {
+  password: string;
+  confirmPassword: string;
+}
