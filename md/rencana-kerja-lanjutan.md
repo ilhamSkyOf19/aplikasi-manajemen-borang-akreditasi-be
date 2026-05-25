@@ -52,8 +52,8 @@
 
 - [✅] Menyesuaikan lagi data timeline -> tambahkan is active pada setiap deadline
 
-- [ ] Filter role tim akreditasi terhadap service search all file agar mencari file berdasarkan kriteria yang menjadi tanggung jawab nya
+- [✅] Membuat api service lupa password dengan email
 
-- [ ] Membuat api service lupa password dengan email
+- [ ] Filter role tim akreditasi terhadap service search all file agar mencari file berdasarkan kriteria yang menjadi tanggung jawab nya
 
 - [ ] Membuat api service ganti file pada service file dokumen

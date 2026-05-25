@@ -2,19 +2,22 @@ import { Router } from "express";
 import { zodValidation } from "../middlewares/validation.middleware";
 import { ActivationCodeValidation } from "../validations/activationCode.validation";
 import { ActivationCodeController } from "../controllers/activationCode.controller";
+import LimiterMiddleware from "../middlewares/limiter.middleware";
 
 const activationCodeRoute: Router = Router();
 
 // create
 activationCodeRoute.post(
-  "/reset-password",
+  "/send-code",
+  LimiterMiddleware.activation(),
   zodValidation<{ email: string }>(ActivationCodeValidation.CREATE),
   ActivationCodeController.create,
 );
 
 // resend
 activationCodeRoute.post(
-  "/resend",
+  "/resend-code",
+  LimiterMiddleware.activation(),
   zodValidation<{ email: string }>(ActivationCodeValidation.CREATE),
   ActivationCodeController.resend,
 );
@@ -22,6 +25,7 @@ activationCodeRoute.post(
 // verify
 activationCodeRoute.post(
   "/verify",
+  LimiterMiddleware.activation(),
   zodValidation<{ email: string; code: number }>(
     ActivationCodeValidation.VERIFY,
   ),

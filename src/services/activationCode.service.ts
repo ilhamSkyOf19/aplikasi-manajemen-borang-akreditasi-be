@@ -4,7 +4,6 @@ import {
   ResponseActivationType,
   toResponseActivationType,
 } from "../models/activationCode.model";
-import { ExpiredMinutesAgo } from "../utils/utils";
 import { DosenRole } from "../utils/contstanst";
 
 export class ActivationCodeService {
@@ -15,6 +14,8 @@ export class ActivationCodeService {
   }): Promise<ResponseActivationType | null> {
     const { code, dosen_id } = params;
 
+    const AddFiveMinutes = new Date(Date.now() + 5 * 60 * 1000);
+
     //  upsert
     const result = await prisma.activationCode.upsert({
       where: {
@@ -23,7 +24,7 @@ export class ActivationCodeService {
       create: {
         code: code.toString(),
         dosen_id,
-        expired_at: new Date(),
+        expired_at: AddFiveMinutes,
       },
       update: {
         code: code.toString(),
@@ -61,14 +62,15 @@ export class ActivationCodeService {
       where: {
         dosen_id,
         expired_at: {
-          gte: ExpiredMinutesAgo,
+          gte: new Date(),
         },
       },
     });
 
     // check result
-    if (!result) return true;
-    return false;
+    if (!result) return false;
+
+    return true;
   }
 
   //   resend
@@ -77,13 +79,17 @@ export class ActivationCodeService {
     code: number;
   }): Promise<ResponseActivationType | null> {
     const { dosen_id, code } = params;
+
+    // add 5 minutes
+    const AddFiveMinutes = new Date(Date.now() + 5 * 60 * 1000);
+
     const result = await prisma.activationCode.update({
       where: {
         dosen_id,
       },
       data: {
         code: code.toString(),
-        expired_at: new Date(),
+        expired_at: AddFiveMinutes,
       },
       select: {
         id: true,
@@ -113,9 +119,8 @@ export class ActivationCodeService {
   static async findActivationCode(params: {
     code: number;
     dosen_id: number;
-    gte?: boolean;
   }): Promise<ResponseActivationType | null> {
-    const { code, dosen_id, gte } = params;
+    const { code, dosen_id } = params;
 
     // call db
     const result = await prisma.activationCode.findFirst({
@@ -123,8 +128,7 @@ export class ActivationCodeService {
         code: code.toString(),
         dosen_id,
         expired_at: {
-          ...(gte && { gte: ExpiredMinutesAgo }),
-          ...(!gte && { lte: ExpiredMinutesAgo }),
+          gte: new Date(),
         },
       },
       select: {

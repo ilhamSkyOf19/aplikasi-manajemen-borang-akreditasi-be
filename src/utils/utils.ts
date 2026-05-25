@@ -114,7 +114,6 @@ export const getPriorityStatusTimAkreditasi = (
 };
 
 // expired date
-export const ExpiredMinutesAgo = new Date(Date.now() + 5 * 60 * 1000);
 
 // generate code
 export const generateCode = (): number => {

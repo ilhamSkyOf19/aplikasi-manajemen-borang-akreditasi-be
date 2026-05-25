@@ -24,7 +24,9 @@ export class ActivationCodeController {
 
       // chekc
       if (!findDosen) {
-        return ResponseResult.error(res, 400, "email tidak ditemukan");
+        return ResponseResult.error(res, 400, "email tidak ditemukan", [
+          "email",
+        ]);
       }
 
       //   check activation code
@@ -33,8 +35,10 @@ export class ActivationCodeController {
       });
 
       //   check service
-      if (!checkExpired) {
-        return ResponseResult.error(res, 400, "activation code not expired");
+      if (checkExpired) {
+        return ResponseResult.error(res, 400, "activation code not expired", [
+          "not-expired",
+        ]);
       }
 
       //   code
@@ -106,7 +110,7 @@ export class ActivationCodeController {
       });
 
       //   check service
-      if (!checkExpired) {
+      if (checkExpired) {
         return ResponseResult.error(res, 400, "activation code not expired");
       }
 
@@ -177,7 +181,6 @@ export class ActivationCodeController {
       const findActivation = await ActivationCodeService.findActivationCode({
         code,
         dosen_id: findDosen.id,
-        gte: false,
       });
 
       // check

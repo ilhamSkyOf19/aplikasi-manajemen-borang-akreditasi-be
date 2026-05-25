@@ -28,6 +28,17 @@ app.use(cookieParser());
 // static
 app.use(express.static("public"));
 
+// cek waktu sudah deploy
+// app.use((req, res, next) => {
+//   console.log({
+//     ip: req.ip,
+//     forwarded: req.headers["x-forwarded-for"],
+//     remote: req.socket.remoteAddress,
+//   });
+
+//   next();
+// });
+
 // routes
 app.use("/", appRoute);
 
