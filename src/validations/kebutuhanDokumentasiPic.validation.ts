@@ -140,6 +140,17 @@ export class KebutuhanDokumentasiPicValidation {
     })
     .strict() satisfies z.ZodType<PaginationType>;
 
+  // non status and sort
+  static readonly QUERY_NON_STATUS_AND_SORT = z
+    .object({
+      page: z.coerce.number().min(1).max(2147483647).catch(1),
+
+      limit: z.coerce.number().min(1).max(2147483647).catch(8),
+
+      search: z.string().min(1).max(1000).optional(),
+    })
+    .strict() satisfies z.ZodType<Omit<PaginationType, "sort">>;
+
   // params
   static readonly PARAMS = z
     .object({

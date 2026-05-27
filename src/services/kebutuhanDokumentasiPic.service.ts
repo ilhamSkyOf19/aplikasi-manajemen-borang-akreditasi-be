@@ -144,13 +144,13 @@ export class KebutuhanDokumentasiPicServices {
   // find all by kriteria pic
   static async findAllByKriteriaPic(params: {
     periode_id: number;
-    query: PaginationType & {
+    query: Omit<PaginationType, "sort"> & {
       role: DosenRole;
     };
   }): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
     const {
       periode_id,
-      query: { limit = 8, page = 1, search, sort, role },
+      query: { limit = 8, page = 1, search, role },
     } = params;
 
     const currentPage = page < 1 ? 1 : page;
@@ -183,7 +183,7 @@ export class KebutuhanDokumentasiPicServices {
       skip: (currentPage - 1) * limit,
       take: limit,
       orderBy: {
-        kode_kriteria: sort ? (sort as SortOrder) : "asc",
+        kode_kriteria: "asc",
       },
       select: {
         id: true,

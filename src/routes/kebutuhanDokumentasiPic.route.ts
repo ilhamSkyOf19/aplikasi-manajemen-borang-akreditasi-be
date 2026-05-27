@@ -49,7 +49,7 @@ kebutuhanDokumentasiPicRoute.get(
     aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1]),
     periodeMiddleware,
   ],
-  zodValidationQuery<PaginationType>(
+  zodValidationQuery<Omit<PaginationType, "sort">>(
     KebutuhanDokumentasiPicValidation.QUERY_NON_STATUS,
   ),
   KebutuhanDokumentasiPicController.findAllByKriteriaPic,

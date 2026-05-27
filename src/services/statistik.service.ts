@@ -6,6 +6,7 @@ import {
   PendekatanType,
   ResponseStatistikTimAkreditasiType,
   ResponseStatistikType,
+  toResponseStatistikType,
 } from "../models/statistik.model";
 import { Status } from "../utils/contstanst";
 
@@ -51,15 +52,7 @@ export class StatistikService {
             OR: [
               {
                 dokumentasi_borang: {
-                  is: null,
-                },
-              },
-
-              {
-                dokumentasi_borang: {
-                  status: {
-                    in: [Status.PENDING, Status.REVISION],
-                  },
+                  status: Status.APPROVED,
                 },
               },
             ],
@@ -67,7 +60,27 @@ export class StatistikService {
         })
       : null;
 
-    console.log(total_dokumentasi_borang_selesai);
+    const total_kebutuhan_dokumentasi = periode_id
+      ? await prisma.kebutuhanDokumentasi.count({
+          where: {
+            kriteria: {
+              periode_id,
+            },
+          },
+        })
+      : null;
+
+    // total kebutuhan dokumentasi selesai
+    const total_kebutuhan_dokumentasi_selesai = periode_id
+      ? await prisma.kebutuhanDokumentasi.count({
+          where: {
+            status: Status.APPROVED,
+            kriteria: {
+              periode_id,
+            },
+          },
+        })
+      : null;
 
     // total file selesai count
     const total_file_selesai = periode_id
@@ -228,9 +241,16 @@ export class StatistikService {
       groupedPendekatan.values(),
     );
 
-    return {
+    // return response
+    return toResponseStatistikType({
       total_kriteria,
       total_dosen,
+      total_kebutuhan_dokumentasi,
+      total_kebutuhan_dokumentasi_selesai,
+      total_kebutuhan_dokumentasi_belum_selesai: periode_id
+        ? (total_kebutuhan_dokumentasi ?? 0) -
+          (total_kebutuhan_dokumentasi_selesai ?? 0)
+        : null,
       total_dokumentasi,
       total_dokumentasi_borang_selesai,
       total_dokumentasi_borang_belum_selesai: periode_id
@@ -239,7 +259,7 @@ export class StatistikService {
       total_file_selesai,
       //   get_grafik_kriteria
       grafik_kriteria: finalGrafikKriteria,
-    };
+    });
   }
 
   // get statistik for tim akreditasi

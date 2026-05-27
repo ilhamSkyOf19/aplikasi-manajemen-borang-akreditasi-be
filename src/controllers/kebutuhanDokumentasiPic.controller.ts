@@ -146,14 +146,14 @@ export class KebutuhanDokumentasiPicController {
     res: Response<
       ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
       {
-        validatedQuery: PaginationType;
+        validatedQuery: Omit<PaginationType, "sort">;
       }
     >,
     next: NextFunction,
   ) {
     try {
       // get query
-      const { limit, page, search, sort } = res.locals.validatedQuery;
+      const { limit, page, search } = res.locals.validatedQuery;
 
       // get periode
       const periode_id = req?.periode?.id;
@@ -175,7 +175,6 @@ export class KebutuhanDokumentasiPicController {
             limit,
             page,
             search,
-            sort,
           },
         });
 
