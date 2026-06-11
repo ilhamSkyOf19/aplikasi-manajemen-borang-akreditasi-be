@@ -193,7 +193,7 @@ model KebutuhanDokumentasi {
 
   nama_kebutuhan_dokumentasi NamaKebutuhanDokumentasi @relation(fields: [nama_kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
 
-  kebutuhan_dokumentasi_pic KebutuhanDokumentasiPic[]
+  kebutuhan_dokumentasi_lokasi KebutuhanDokumentasiLokasi[]
 
   riwayat Riwayat[]
 
@@ -203,30 +203,30 @@ model KebutuhanDokumentasi {
   @@map("kebutuhan_dokumentasi")
 }
 
-model Pic {
+model Lokasi {
   id   Int    @id @default(autoincrement())
   nama String @unique
 
-  kebutuhan_dokumentasi_pic KebutuhanDokumentasiPic[]
+  kebutuhan_dokumentasi_lokasi KebutuhanDokumentasiLokasi[]
 
-  @@map("pic")
+  @@map("lokasi")
 }
 
 // pivot 
-model KebutuhanDokumentasiPic {
+model KebutuhanDokumentasiLokasi {
   id                       Int      @id @default(autoincrement())
   kebutuhan_dokumentasi_id Int
-  pic_id                   Int
+  lokasi_id                Int
   created_at               DateTime @default(now())
   updated_at               DateTime @updatedAt
 
   kebutuhan_dokumentasi KebutuhanDokumentasi @relation(fields: [kebutuhan_dokumentasi_id], references: [id], onDelete: Cascade)
-  pic                   Pic                  @relation(fields: [pic_id], references: [id], onDelete: Cascade)
+  lokasi                Lokasi               @relation(fields: [lokasi_id], references: [id], onDelete: Cascade)
 
-  @@unique([kebutuhan_dokumentasi_id, pic_id])
+  @@unique([kebutuhan_dokumentasi_id, lokasi_id])
   @@index([kebutuhan_dokumentasi_id])
-  @@index([pic_id])
-  @@map("kebutuhan_dokumentasi_pic")
+  @@index([lokasi_id])
+  @@map("kebutuhan_dokumentasi_lokasi")
 }
 
 model NamaKebutuhanDokumentasi {

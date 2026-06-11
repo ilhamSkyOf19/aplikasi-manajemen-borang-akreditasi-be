@@ -1,18 +1,17 @@
 import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
 import {
-  CreateKebutuhanDokumentasiPic,
-  ResponseCreateUpdateKebutuhanDokumentasiPicType,
-  ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType,
-  ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
-  ResponseKebutuhanDokumentasiPicType,
-  toResponseCreateUpdateKebutuhanDokumentasiPicType,
-  toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType,
-  toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
-  toResponseKebutuhanDokumentasiPicType,
-  UpdateKebutuhanDokumentasiPicType,
-} from "../models/kebutuhanDokumentasiPic.model";
-import { ResponseKriteriaPicType } from "../models/kriteriaPic.model";
+  CreateKebutuhanDokumentasi,
+  ResponseCreateUpdateKebutuhanDokumentasiType,
+  ResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType,
+  ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType,
+  ResponseKebutuhanDokumentasiType,
+  toResponseCreateUpdateKebutuhanDokumentasiType,
+  toResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType,
+  toResponseKebutuhanDokumentasiNonKriteriPendekatanWithPaginationType,
+  toResponseKebutuhanDokumentasiType,
+  UpdateKebutuhanDokumentasiType,
+} from "../models/kebutuhanDokumentasi.model";
 import { IPendekatan } from "../models/pendekatan.model";
 import { namaPendekatanArray } from "../models/statistik.model";
 import { PaginationType } from "../types/pagination";
@@ -29,11 +28,11 @@ import {
   getPriorityStatusWakilDekan,
 } from "../utils/utils";
 
-export class KebutuhanDokumentasiPicServices {
+export class KebutuhanDokumentasiServices {
   // create
   static async create(
-    data: CreateKebutuhanDokumentasiPic,
-  ): Promise<ResponseCreateUpdateKebutuhanDokumentasiPicType | null> {
+    data: CreateKebutuhanDokumentasi,
+  ): Promise<ResponseCreateUpdateKebutuhanDokumentasiType | null> {
     // get data
     const {
       kriteria_id,
@@ -41,26 +40,26 @@ export class KebutuhanDokumentasiPicServices {
       nama_dokumentasi_id,
       tipe_dokumentasi,
       keterangan,
-      pic,
+      lokasi,
     } = data;
 
     const result = await prisma.$transaction(async (tx) => {
       // pic result
-      const picResult: number[] = [];
+      const lokasiResult: number[] = [];
 
       // pic looping
-      for (const item of pic) {
-        if (item.pic_old) {
+      for (const item of lokasi) {
+        if (item.lokasi_old) {
           // push to pic result
-          picResult.push(item.pic_old);
+          lokasiResult.push(item.lokasi_old);
 
           // continue
           continue;
-        } else if (item.pic_new) {
+        } else if (item.lokasi_new) {
           // create pic
-          const picCreated = await tx.pic.create({
+          const lokasiCreated = await tx.lokasi.create({
             data: {
-              nama: item.pic_new,
+              nama: item.lokasi_new,
             },
             select: {
               id: true,
@@ -68,10 +67,10 @@ export class KebutuhanDokumentasiPicServices {
           });
 
           // check
-          if (!picCreated) throw new Error("Failed to create pic");
+          if (!lokasiCreated) throw new Error("Failed to create lokasi");
 
           // push
-          picResult.push(picCreated.id);
+          lokasiResult.push(lokasiCreated.id);
         }
       }
 
@@ -83,9 +82,9 @@ export class KebutuhanDokumentasiPicServices {
           nama_kebutuhan_dokumentasi_id: nama_dokumentasi_id,
           tipe_dokumentasi,
           keterangan,
-          kebutuhan_dokumentasi_pic: {
-            create: picResult.map((item) => ({
-              pic_id: item,
+          kebutuhan_dokumentasi_lokasi: {
+            create: lokasiResult.map((item) => ({
+              lokasi_id: item,
             })),
           },
         },
@@ -107,9 +106,9 @@ export class KebutuhanDokumentasiPicServices {
             },
           },
           tipe_dokumentasi: true,
-          kebutuhan_dokumentasi_pic: {
+          kebutuhan_dokumentasi_lokasi: {
             select: {
-              pic: {
+              lokasi: {
                 select: {
                   id: true,
                   nama: true,
@@ -127,11 +126,13 @@ export class KebutuhanDokumentasiPicServices {
       return kebutuhanDokumentasiCreated;
     });
 
-    return toResponseCreateUpdateKebutuhanDokumentasiPicType({
+    return toResponseCreateUpdateKebutuhanDokumentasiType({
       id: result.id,
       kriteria_id: result.kriteria.id,
       pendekatan_id: result.pendekatan.id,
-      pic_id: result.kebutuhan_dokumentasi_pic.map((item) => item.pic.id),
+      lokasi_id: result.kebutuhan_dokumentasi_lokasi.map(
+        (item) => item.lokasi.id,
+      ),
       nama_dokumentasi_id: result.nama_kebutuhan_dokumentasi.id,
       tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
       keterangan: result.keterangan,
@@ -142,12 +143,12 @@ export class KebutuhanDokumentasiPicServices {
   }
 
   // find all by kriteria pic
-  static async findAllByKriteriaPic(params: {
+  static async findAllByKriteriaLokasi(params: {
     periode_id: number;
     query: Omit<PaginationType, "sort"> & {
       role: DosenRole;
     };
-  }): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
+  }): Promise<ResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType | null> {
     const {
       periode_id,
       query: { limit = 8, page = 1, search, role },
@@ -312,7 +313,7 @@ export class KebutuhanDokumentasiPicServices {
       };
     });
 
-    return toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType({
+    return toResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType({
       meta: {
         currentPage,
         totalPage,
@@ -331,7 +332,7 @@ export class KebutuhanDokumentasiPicServices {
     query: PaginationType & {
       status?: Status;
     };
-  }): Promise<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null> {
+  }): Promise<ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType | null> {
     // get data
 
     const {
@@ -361,9 +362,9 @@ export class KebutuhanDokumentasiPicServices {
             },
           },
           {
-            kebutuhan_dokumentasi_pic: {
+            kebutuhan_dokumentasi_lokasi: {
               some: {
-                pic: {
+                lokasi: {
                   nama: {
                     contains: search,
                   },
@@ -401,9 +402,9 @@ export class KebutuhanDokumentasiPicServices {
           },
         },
         tipe_dokumentasi: true,
-        kebutuhan_dokumentasi_pic: {
+        kebutuhan_dokumentasi_lokasi: {
           select: {
-            pic: {
+            lokasi: {
               select: {
                 id: true,
                 nama: true,
@@ -418,7 +419,7 @@ export class KebutuhanDokumentasiPicServices {
       },
     });
 
-    return toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType(
+    return toResponseKebutuhanDokumentasiNonKriteriPendekatanWithPaginationType(
       {
         data: result.map((item) => ({
           id: item.id,
@@ -428,9 +429,9 @@ export class KebutuhanDokumentasiPicServices {
           },
           tipe_dokumentasi: item.tipe_dokumentasi as TipeDokumentasi,
           keterangan: item.keterangan,
-          pic: item.kebutuhan_dokumentasi_pic.map((item) => ({
-            id: item.pic.id,
-            nama: item.pic.nama,
+          lokasi: item.kebutuhan_dokumentasi_lokasi.map((item) => ({
+            id: item.lokasi.id,
+            nama: item.lokasi.nama,
           })),
           status: item.status as Status,
           created_at: item.created_at,
@@ -449,7 +450,7 @@ export class KebutuhanDokumentasiPicServices {
   // find by id
   static async findById(
     id: number,
-  ): Promise<ResponseKebutuhanDokumentasiPicType | null> {
+  ): Promise<ResponseKebutuhanDokumentasiType | null> {
     // call db
     const result = await prisma.kebutuhanDokumentasi.findUnique({
       where: {
@@ -496,9 +497,9 @@ export class KebutuhanDokumentasiPicServices {
           },
         },
         tipe_dokumentasi: true,
-        kebutuhan_dokumentasi_pic: {
+        kebutuhan_dokumentasi_lokasi: {
           select: {
-            pic: {
+            lokasi: {
               select: {
                 id: true,
                 nama: true,
@@ -516,7 +517,7 @@ export class KebutuhanDokumentasiPicServices {
     // check
     if (!result) return null;
 
-    return toResponseKebutuhanDokumentasiPicType({
+    return toResponseKebutuhanDokumentasiType({
       id: result.id,
       periode: {
         id: result.kriteria.periode.id,
@@ -532,9 +533,9 @@ export class KebutuhanDokumentasiPicServices {
       },
       pendekatan: result.pendekatan,
       tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
-      pic: result.kebutuhan_dokumentasi_pic.map((item) => ({
-        id: item.pic.id,
-        nama: item.pic.nama,
+      lokasi: result.kebutuhan_dokumentasi_lokasi.map((item) => ({
+        id: item.lokasi.id,
+        nama: item.lokasi.nama,
       })),
       nama_kebutuhan_dokumentasi: {
         id: result.nama_kebutuhan_dokumentasi.id,
@@ -580,7 +581,7 @@ export class KebutuhanDokumentasiPicServices {
     query: PaginationType;
     dosen_id: number;
     role: DosenRole;
-  }): Promise<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null> {
+  }): Promise<ResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType | null> {
     const {
       periode_id,
       dosen_id,
@@ -753,7 +754,7 @@ export class KebutuhanDokumentasiPicServices {
 
     // return result;
 
-    return toResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType({
+    return toResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType({
       meta: {
         currentPage,
         totalPage,
@@ -776,7 +777,7 @@ export class KebutuhanDokumentasiPicServices {
     query: PaginationType & {
       status?: Status;
     };
-  }): Promise<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null> {
+  }): Promise<ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType | null> {
     // get data
 
     const {
@@ -817,9 +818,9 @@ export class KebutuhanDokumentasiPicServices {
             },
           },
           {
-            kebutuhan_dokumentasi_pic: {
+            kebutuhan_dokumentasi_lokasi: {
               some: {
-                pic: {
+                lokasi: {
                   nama: {
                     contains: search,
                   },
@@ -862,9 +863,9 @@ export class KebutuhanDokumentasiPicServices {
           },
         },
         tipe_dokumentasi: true,
-        kebutuhan_dokumentasi_pic: {
+        kebutuhan_dokumentasi_lokasi: {
           select: {
-            pic: {
+            lokasi: {
               select: {
                 id: true,
                 nama: true,
@@ -883,7 +884,7 @@ export class KebutuhanDokumentasiPicServices {
       },
     });
 
-    return toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType(
+    return toResponseKebutuhanDokumentasiNonKriteriPendekatanWithPaginationType(
       {
         data: result.map((item) => ({
           id: item.id,
@@ -893,9 +894,9 @@ export class KebutuhanDokumentasiPicServices {
           },
           tipe_dokumentasi: item.tipe_dokumentasi as TipeDokumentasi,
           keterangan: item.keterangan,
-          pic: item.kebutuhan_dokumentasi_pic.map((item) => ({
-            id: item.pic.id,
-            nama: item.pic.nama,
+          lokasi: item.kebutuhan_dokumentasi_lokasi.map((item) => ({
+            id: item.lokasi.id,
+            nama: item.lokasi.nama,
           })),
           status: item.dokumentasi_borang?.status
             ? (item.dokumentasi_borang.status as Status)
@@ -919,7 +920,7 @@ export class KebutuhanDokumentasiPicServices {
     kriteria_id: number;
     pendekatan_id: number;
     query: PaginationType;
-  }): Promise<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null> {
+  }): Promise<ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType | null> {
     // get data
 
     const {
@@ -950,9 +951,9 @@ export class KebutuhanDokumentasiPicServices {
             },
           },
           {
-            kebutuhan_dokumentasi_pic: {
+            kebutuhan_dokumentasi_lokasi: {
               some: {
-                pic: {
+                lokasi: {
                   nama: {
                     contains: search,
                   },
@@ -989,9 +990,9 @@ export class KebutuhanDokumentasiPicServices {
           },
         },
         tipe_dokumentasi: true,
-        kebutuhan_dokumentasi_pic: {
+        kebutuhan_dokumentasi_lokasi: {
           select: {
-            pic: {
+            lokasi: {
               select: {
                 id: true,
                 nama: true,
@@ -1010,7 +1011,7 @@ export class KebutuhanDokumentasiPicServices {
       },
     });
 
-    return toResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPaginationType(
+    return toResponseKebutuhanDokumentasiNonKriteriPendekatanWithPaginationType(
       {
         data: result.map((item) => ({
           id: item.id,
@@ -1020,9 +1021,9 @@ export class KebutuhanDokumentasiPicServices {
           },
           tipe_dokumentasi: item.tipe_dokumentasi as TipeDokumentasi,
           keterangan: item.keterangan,
-          pic: item.kebutuhan_dokumentasi_pic.map((item) => ({
-            id: item.pic.id,
-            nama: item.pic.nama,
+          lokasi: item.kebutuhan_dokumentasi_lokasi.map((item) => ({
+            id: item.lokasi.id,
+            nama: item.lokasi.nama,
           })),
           status: item.dokumentasi_borang?.status
             ? (item.dokumentasi_borang.status as Status)
@@ -1043,46 +1044,46 @@ export class KebutuhanDokumentasiPicServices {
   // update
   static async update(
     kebutuhan_dokumentasi_id: number,
-    data: UpdateKebutuhanDokumentasiPicType,
-  ): Promise<ResponseCreateUpdateKebutuhanDokumentasiPicType | null> {
+    data: UpdateKebutuhanDokumentasiType,
+  ): Promise<ResponseCreateUpdateKebutuhanDokumentasiType | null> {
     // get data
     const {
       kriteria_id,
       pendekatan_id,
       nama_dokumentasi_id,
-      pic,
+      lokasi,
       tipe_dokumentasi,
       keterangan,
     } = data;
 
     const result = await prisma.$transaction(async (tx) => {
-      const picResult: number[] = [];
+      const lokasiResult: number[] = [];
 
       // 1. Selalu hapus semua relasi PIC lama
-      await tx.kebutuhanDokumentasiPic.deleteMany({
+      await tx.kebutuhanDokumentasiLokasi.deleteMany({
         where: {
           kebutuhan_dokumentasi_id,
         },
       });
 
       // 2. Proses PIC baru jika ada
-      for (const item of pic ?? []) {
-        if (item.pic_old) {
-          picResult.push(item.pic_old);
+      for (const item of lokasi ?? []) {
+        if (item.lokasi_old) {
+          lokasiResult.push(item.lokasi_old);
           continue;
         }
 
-        if (item.pic_new) {
-          const picCreated = await tx.pic.create({
+        if (item.lokasi_new) {
+          const lokasiCreated = await tx.lokasi.create({
             data: {
-              nama: item.pic_new,
+              nama: item.lokasi_new,
             },
             select: {
               id: true,
             },
           });
 
-          picResult.push(picCreated.id);
+          lokasiResult.push(lokasiCreated.id);
         }
       }
 
@@ -1099,10 +1100,10 @@ export class KebutuhanDokumentasiPicServices {
           keterangan,
 
           // 4. Buat relasi PIC baru jika ada
-          ...(picResult.length > 0 && {
-            kebutuhan_dokumentasi_pic: {
-              create: picResult.map((picId) => ({
-                pic_id: picId,
+          ...(lokasiResult.length > 0 && {
+            kebutuhan_dokumentasi_lokasi: {
+              create: lokasiResult.map((lokasiId) => ({
+                lokasi_id: lokasiId,
               })),
             },
           }),
@@ -1125,9 +1126,9 @@ export class KebutuhanDokumentasiPicServices {
             },
           },
           tipe_dokumentasi: true,
-          kebutuhan_dokumentasi_pic: {
+          kebutuhan_dokumentasi_lokasi: {
             select: {
-              pic: {
+              lokasi: {
                 select: {
                   id: true,
                   nama: true,
@@ -1145,11 +1146,13 @@ export class KebutuhanDokumentasiPicServices {
       return kebutuhanDokumentasiUpdated;
     });
 
-    return toResponseCreateUpdateKebutuhanDokumentasiPicType({
+    return toResponseCreateUpdateKebutuhanDokumentasiType({
       id: result.id,
       kriteria_id: result.kriteria.id,
       pendekatan_id: result.pendekatan.id,
-      pic_id: result.kebutuhan_dokumentasi_pic.map((item) => item.pic.id),
+      lokasi_id: result.kebutuhan_dokumentasi_lokasi.map(
+        (item) => item.lokasi.id,
+      ),
       nama_dokumentasi_id: result.nama_kebutuhan_dokumentasi.id,
       tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
       keterangan: result.keterangan,

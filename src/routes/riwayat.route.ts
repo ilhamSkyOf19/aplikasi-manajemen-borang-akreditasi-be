@@ -10,7 +10,7 @@ const riwayatRouter: Router = Router();
 
 // find all by kebutuhan dokumentasi id
 riwayatRouter.get(
-  "/by-kebutuhan-dokumentasi-pic-or-dokumentasi-borang/:id/tipe-riwayat/:tipe_riwayat",
+  "/by-kebutuhan-dokumentasi-or-dokumentasi-borang/:id/tipe-riwayat/:tipe_riwayat",
   authMiddleware,
   [
     authMiddleware,

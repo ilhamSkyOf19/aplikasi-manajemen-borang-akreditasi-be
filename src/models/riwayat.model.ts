@@ -16,7 +16,7 @@ export interface CreateRiwayatKebutuhanDokumentasiPicType {
   status: Status;
   dosen_id: number;
   tipe_riwayat: TipeRiwayat;
-  kebutuhan_dokumentasi_pic_id: number;
+  kebutuhan_dokumentasi_id: number;
   keterangan: string;
 }
 export interface UpdateRiwayatKebutuhanDokumentasiPicType extends Partial<

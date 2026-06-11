@@ -1,42 +1,53 @@
 import z from "zod";
-import {
-  CreateKebutuhanDokumentasiPicRequestType,
-  PicRequestType,
-  UpdateKebutuhanDokumentasiPicRequestType,
-} from "../models/kebutuhanDokumentasiPic.model";
 import { Status, TipeDokumentasi } from "../utils/contstanst";
 import { PaginationType } from "../types/pagination";
+import {
+  CreateKebutuhanDokumentasiRequestType,
+  LokasiRequestType,
+  UpdateKebutuhanDokumentasiRequestType,
+} from "../models/kebutuhanDokumentasi.model";
 
-export class KebutuhanDokumentasiPicValidation {
-  // schema pic
-  private static readonly picSchema = z
+export class KebutuhanDokumentasiValidation {
+  // schema
+  private static readonly lokasiSchema = z
     .object({
-      pic_old: z.number().int().min(1).max(2147483647).optional(),
-      pic_new: z.string().min(1).max(100).optional(),
+      lokasi_old: z.number().int().min(1).max(2147483647).optional(),
+      lokasi_new: z.string().min(1).max(100).optional(),
     })
     .superRefine((data, ctx) => {
-      const hasPicId = data.pic_old !== undefined && data.pic_old !== null;
-      const hasPicNew =
-        data.pic_new !== undefined && data.pic_new.trim() !== "";
+      const hasLokasiOld =
+        data.lokasi_old !== undefined && data.lokasi_old !== null;
+      const hasLokasiNew =
+        data.lokasi_new !== undefined && data.lokasi_new.trim() !== "";
 
       // check pic id & pic new
-      if (!hasPicId && !hasPicNew) {
+      if (!hasLokasiOld && !hasLokasiNew) {
         ctx.addIssue({
           code: "custom",
-          path: ["pic_id"],
-          message: "pic_id atau pic_new harus diisi",
+          path: ["lokasi_new"],
+          message: "lokasi new atau lokasi old harus diisi",
+        });
+        ctx.addIssue({
+          code: "custom",
+          path: ["lokasi_old"],
+          message: "lokasi old atau lokasi new harus diisi",
         });
       }
 
-      if (hasPicId && hasPicNew) {
+      if (hasLokasiOld && hasLokasiNew) {
         ctx.addIssue({
           code: "custom",
-          path: ["pic_id"],
-          message: "pic_id atau pic_new tidak boleh diisi bersamaan",
+          path: ["lokasi_new"],
+          message: "lokasi old atau lokasi new tidak boleh diisi bersamaan",
+        });
+        ctx.addIssue({
+          code: "custom",
+          path: ["lokasi_old"],
+          message: "lokasi old atau lokasi new harus diisi",
         });
       }
     })
-    .strict() satisfies z.ZodType<PicRequestType>;
+    .strict() satisfies z.ZodType<LokasiRequestType>;
 
   // create
   static readonly CREATE = z
@@ -44,7 +55,7 @@ export class KebutuhanDokumentasiPicValidation {
       kriteria_id: z.number().int().min(1).max(2147483647),
       pendekatan_id: z.number().int().min(1).max(2147483647),
       nama_dokumentasi_id: z.number().int().min(1).max(2147483647).optional(),
-      pic: z.array(this.picSchema).min(1),
+      lokasi: z.array(this.lokasiSchema).min(1),
       nama_dokumentasi_new: z.string().min(1).max(200).optional(),
       tipe_dokumentasi: z.enum(["DEFAULT", "PENELITIAN"] as TipeDokumentasi[]),
       keterangan: z.string().min(1).max(1000),
@@ -75,7 +86,7 @@ export class KebutuhanDokumentasiPicValidation {
             "nama_dokumentasi_id dan nama_dokumentasi_new tidak boleh diisi bersamaan",
         });
       }
-    }) satisfies z.ZodType<CreateKebutuhanDokumentasiPicRequestType>;
+    }) satisfies z.ZodType<CreateKebutuhanDokumentasiRequestType>;
 
   // update
   static readonly UPDATE = z
@@ -83,7 +94,7 @@ export class KebutuhanDokumentasiPicValidation {
       kriteria_id: z.number().int().min(1).max(2147483647).optional(),
       pendekatan_id: z.number().int().min(1).max(2147483647).optional(),
       nama_dokumentasi_id: z.number().int().min(1).max(2147483647).optional(),
-      pic: z.array(this.picSchema).min(1).optional(),
+      pic: z.array(this.lokasiSchema).min(1).optional(),
       nama_dokumentasi_new: z.string().min(1).max(200).optional(),
       tipe_dokumentasi: z
         .enum(["DEFAULT", "PENELITIAN"] as TipeDokumentasi[])
@@ -109,7 +120,7 @@ export class KebutuhanDokumentasiPicValidation {
             "nama_dokumentasi_id dan nama_dokumentasi_new tidak boleh diisi bersamaan",
         });
       }
-    }) satisfies z.ZodType<UpdateKebutuhanDokumentasiPicRequestType>;
+    }) satisfies z.ZodType<UpdateKebutuhanDokumentasiRequestType>;
 
   // query
   static readonly QUERY = z

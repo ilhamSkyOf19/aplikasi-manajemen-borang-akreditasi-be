@@ -3,46 +3,45 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import { DosenRole, Status } from "../utils/contstanst";
 import { zodValidation } from "../middlewares/validation.middleware";
-import {
-  CreateKebutuhanDokumentasiPicRequestType,
-  UpdateKebutuhanDokumentasiPicRequestType,
-} from "../models/kebutuhanDokumentasiPic.model";
-import { KebutuhanDokumentasiPicValidation } from "../validations/kebutuhanDokumentasiPic.validation";
-import { KebutuhanDokumentasiPicController } from "../controllers/kebutuhanDokumentasiPic.controller";
 import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
 import { PaginationType } from "../types/pagination";
 import { zodValidationParams } from "../middlewares/validationParams.middleware";
-import { GlobalValidation } from "../validations/global.validation";
 import { periodeMiddleware } from "../middlewares/periode.middleware";
 import { distribusiMiddleware } from "../middlewares/distribusi.middleware";
+import {
+  CreateKebutuhanDokumentasiRequestType,
+  UpdateKebutuhanDokumentasiRequestType,
+} from "../models/kebutuhanDokumentasi.model";
+import { KebutuhanDokumentasiValidation } from "../validations/kebutuhanDokumentasi.validation";
+import { KebutuhanDokumentasiController } from "../controllers/kebutuhanDokumentasi.controller";
 
-const kebutuhanDokumentasiPicRoute: Router = Router();
+const kebutuhanDokumentasiRoute: Router = Router();
 
 // create
-kebutuhanDokumentasiPicRoute.post(
+kebutuhanDokumentasiRoute.post(
   "/",
   [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
-  zodValidation<CreateKebutuhanDokumentasiPicRequestType>(
-    KebutuhanDokumentasiPicValidation.CREATE,
+  zodValidation<CreateKebutuhanDokumentasiRequestType>(
+    KebutuhanDokumentasiValidation.CREATE,
   ),
-  KebutuhanDokumentasiPicController.create,
+  KebutuhanDokumentasiController.create,
 );
 
 // update
-kebutuhanDokumentasiPicRoute.patch(
-  "/:kebutuhan_dokumentasi_pic_id",
+kebutuhanDokumentasiRoute.patch(
+  "/:kebutuhan_dokumentasi_id",
   [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
   zodValidationParams<{ kebutuhan_dokumentasi_pic_id: number }>(
-    KebutuhanDokumentasiPicValidation.PARAMS_UPDATE,
+    KebutuhanDokumentasiValidation.PARAMS_UPDATE,
   ),
-  zodValidation<UpdateKebutuhanDokumentasiPicRequestType>(
-    KebutuhanDokumentasiPicValidation.UPDATE,
+  zodValidation<UpdateKebutuhanDokumentasiRequestType>(
+    KebutuhanDokumentasiValidation.UPDATE,
   ),
-  KebutuhanDokumentasiPicController.update,
+  KebutuhanDokumentasiController.update,
 );
 
 // find all
-kebutuhanDokumentasiPicRoute.get(
+kebutuhanDokumentasiRoute.get(
   "/by-kriteria-pic",
   [
     authMiddleware,
@@ -50,13 +49,13 @@ kebutuhanDokumentasiPicRoute.get(
     periodeMiddleware,
   ],
   zodValidationQuery<Omit<PaginationType, "sort">>(
-    KebutuhanDokumentasiPicValidation.QUERY_NON_STATUS,
+    KebutuhanDokumentasiValidation.QUERY_NON_STATUS,
   ),
-  KebutuhanDokumentasiPicController.findAllByKriteriaPic,
+  KebutuhanDokumentasiController.findAllByKriteriaPic,
 );
 
 // find all
-kebutuhanDokumentasiPicRoute.get(
+kebutuhanDokumentasiRoute.get(
   "/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
   [
     authMiddleware,
@@ -66,15 +65,15 @@ kebutuhanDokumentasiPicRoute.get(
   zodValidationParams<{
     kriteria_id: number;
     pendekatan_id: number;
-  }>(KebutuhanDokumentasiPicValidation.PARAMS),
+  }>(KebutuhanDokumentasiValidation.PARAMS),
   zodValidationQuery<PaginationType & { status?: Status }>(
-    KebutuhanDokumentasiPicValidation.QUERY,
+    KebutuhanDokumentasiValidation.QUERY,
   ),
-  KebutuhanDokumentasiPicController.findAllByKriteriaPendekatan,
+  KebutuhanDokumentasiController.findAllByKriteriaPendekatan,
 );
 
 // find all by dosen id
-kebutuhanDokumentasiPicRoute.get(
+kebutuhanDokumentasiRoute.get(
   "/for-dokumentasi-borang",
   [
     authMiddleware,
@@ -82,13 +81,13 @@ kebutuhanDokumentasiPicRoute.get(
     periodeMiddleware,
   ],
   zodValidationQuery<PaginationType>(
-    KebutuhanDokumentasiPicValidation.QUERY_NON_STATUS,
+    KebutuhanDokumentasiValidation.QUERY_NON_STATUS,
   ),
-  KebutuhanDokumentasiPicController.findAllForDokumentasiBorang,
+  KebutuhanDokumentasiController.findAllForDokumentasiBorang,
 );
 
 // find all
-kebutuhanDokumentasiPicRoute.get(
+kebutuhanDokumentasiRoute.get(
   "/for-dokumentasi-borang/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
   [
     authMiddleware,
@@ -99,43 +98,39 @@ kebutuhanDokumentasiPicRoute.get(
   zodValidationParams<{
     kriteria_id: number;
     pendekatan_id: number;
-  }>(KebutuhanDokumentasiPicValidation.PARAMS),
+  }>(KebutuhanDokumentasiValidation.PARAMS),
   zodValidationQuery<PaginationType & { status?: Status }>(
-    KebutuhanDokumentasiPicValidation.QUERY,
+    KebutuhanDokumentasiValidation.QUERY,
   ),
-  KebutuhanDokumentasiPicController.findAllForDokumentasiBorangByKriteriaPendekatan,
+  KebutuhanDokumentasiController.findAllForDokumentasiBorangByKriteriaPendekatan,
 );
 
 // find all
-kebutuhanDokumentasiPicRoute.get(
+kebutuhanDokumentasiRoute.get(
   "/for-dokumentasi-borang-complated/by-kriteria/:kriteria_id/pendekatan/:pendekatan_id",
   [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1]), periodeMiddleware],
   zodValidationParams<{
     kriteria_id: number;
     pendekatan_id: number;
-  }>(KebutuhanDokumentasiPicValidation.PARAMS),
-  zodValidationQuery<PaginationType>(KebutuhanDokumentasiPicValidation.QUERY),
-  KebutuhanDokumentasiPicController.findAllForDokumentasiBorangComplated,
+  }>(KebutuhanDokumentasiValidation.PARAMS),
+  zodValidationQuery<PaginationType>(KebutuhanDokumentasiValidation.QUERY),
+  KebutuhanDokumentasiController.findAllForDokumentasiBorangComplated,
 );
 
 // find by id
-kebutuhanDokumentasiPicRoute.get(
+kebutuhanDokumentasiRoute.get(
   "/:id",
   [authMiddleware, aclMiddleware([DosenRole.kaprodi, DosenRole.wakil_dekan_1])],
-  zodValidationParams<{ id: number }>(
-    KebutuhanDokumentasiPicValidation.PARAMS_ID,
-  ),
-  KebutuhanDokumentasiPicController.findById,
+  zodValidationParams<{ id: number }>(KebutuhanDokumentasiValidation.PARAMS_ID),
+  KebutuhanDokumentasiController.findById,
 );
 
 // delete
-kebutuhanDokumentasiPicRoute.delete(
+kebutuhanDokumentasiRoute.delete(
   "/:id",
   [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
-  zodValidationParams<{ id: number }>(
-    KebutuhanDokumentasiPicValidation.PARAMS_ID,
-  ),
-  KebutuhanDokumentasiPicController.delete,
+  zodValidationParams<{ id: number }>(KebutuhanDokumentasiValidation.PARAMS_ID),
+  KebutuhanDokumentasiController.delete,
 );
 
-export default kebutuhanDokumentasiPicRoute;
+export default kebutuhanDokumentasiRoute;

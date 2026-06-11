@@ -251,7 +251,6 @@ export class DokumentasiBorangServices {
           id: true,
           kode_kriteria: true,
           nama_kriteria: true,
-
           kriteriaPic: {
             select: {
               dosen: {
@@ -285,9 +284,9 @@ export class DokumentasiBorangServices {
             nama_kebutuhan_dokumentasi: true,
           },
         },
-        kebutuhan_dokumentasi_pic: {
+        kebutuhan_dokumentasi_lokasi: {
           select: {
-            pic: {
+            lokasi: {
               select: {
                 id: true,
                 nama: true,
@@ -449,7 +448,7 @@ export class DokumentasiBorangServices {
 
     return {
       dokumentasi_borang_id: result.dokumentasi_borang?.id || null,
-      kebutuhan_dokumentasi_pic: {
+      kebutuhan_dokumentasi: {
         nama_kebutuhan_dokumentasi: {
           id: result.nama_kebutuhan_dokumentasi.id,
           nama: result.nama_kebutuhan_dokumentasi.nama_kebutuhan_dokumentasi,
@@ -460,9 +459,9 @@ export class DokumentasiBorangServices {
         pendekatan: result.pendekatan,
         keterangan: result.keterangan,
         tipe_dokumentasi: result.tipe_dokumentasi as TipeDokumentasi,
-        pic: result.kebutuhan_dokumentasi_pic.map((item) => ({
-          id: item.pic.id,
-          nama: item.pic.nama,
+        lokasi: result.kebutuhan_dokumentasi_lokasi.map((item) => ({
+          id: item.lokasi.id,
+          nama: item.lokasi.nama,
         })),
       },
       kriteria_pic: result.kriteria.kriteriaPic?.map((item) => ({

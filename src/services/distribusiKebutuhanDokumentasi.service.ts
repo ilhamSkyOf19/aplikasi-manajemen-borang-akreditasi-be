@@ -95,7 +95,7 @@ export class DistribusiKebutuhanDokumentasiService {
   }
 
   // handle distribusi an active
-  static async anActive(params: {
+  static async deactive(params: {
     id: number;
     periode_id: number;
   }): Promise<ResponseDistribusiKebutuhanDokumentasiType | null> {

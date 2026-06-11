@@ -1,7 +1,7 @@
 import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 import { IDosen } from "./dosen.model";
 import { IDokumentasiBorangDefault } from "./fileDokumenDefault.model";
-import { IKebutuhanDokumentsiPic } from "./kebutuhanDokumentasiPic.model";
+import { IKebutuhanDokumentsi } from "./kebutuhanDokumentasi.model";
 
 // verifikasi request
 export interface VerifikasiDokumentasiBorangType {
@@ -59,12 +59,12 @@ export const toResponseFoldersAndFilesType = (
 // response dokumnetasi borang with kebutuhan dokumentasi
 export interface ResponseDokumentasiBorangWithKebutuhanDokumentasiType {
   dokumentasi_borang_id: number | null;
-  kebutuhan_dokumentasi_pic: Pick<
-    IKebutuhanDokumentsiPic,
+  kebutuhan_dokumentasi: Pick<
+    IKebutuhanDokumentsi,
     | "kriteria"
     | "pendekatan"
     | "tipe_dokumentasi"
-    | "pic"
+    | "lokasi"
     | "keterangan"
     | "nama_kebutuhan_dokumentasi"
   >;

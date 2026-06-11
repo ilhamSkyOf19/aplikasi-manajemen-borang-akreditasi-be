@@ -111,4 +111,18 @@ export class FolderService {
 
     return result?.id ?? 0;
   }
+
+  // buat delete folder
+
+  // delete by id
+  static async delete(id: number): Promise<boolean> {
+    // call db
+    const result = await prisma.folderDokumen.delete({
+      where: {
+        id,
+      },
+    });
+
+    return result ? true : false;
+  }
 }

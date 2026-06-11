@@ -62,8 +62,16 @@ export class PeriodeController {
       // get body
       const { end_date, start_date } = req.body;
 
-      // call service
-      const service = await PeriodeServices.create({ end_date, start_date });
+      const startDate = new Date(start_date);
+      startDate.setUTCHours(0, 0, 0, 0);
+
+      const endDate = new Date(end_date);
+      endDate.setUTCHours(23, 59, 59, 999);
+
+      const service = await PeriodeServices.create({
+        start_date: startDate,
+        end_date: endDate,
+      });
 
       // chekc
       if (!service) {

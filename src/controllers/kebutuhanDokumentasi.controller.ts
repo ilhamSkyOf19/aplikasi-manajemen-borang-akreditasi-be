@@ -1,28 +1,29 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  CreateKebutuhanDokumentasiPicRequestType,
-  ResponseCreateUpdateKebutuhanDokumentasiPicType,
-  ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType,
-  ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType,
-  ResponseKebutuhanDokumentasiPicType,
-  UpdateKebutuhanDokumentasiPicRequestType,
-} from "../models/kebutuhanDokumentasiPic.model";
+
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { NamaDokumentasiServices } from "../services/namaDokumentasi.service";
-import { KebutuhanDokumentasiPicServices } from "../services/kebutuhanDokumentasiPic.service";
 import { PaginationType } from "../types/pagination";
 import { DosenRole, Status, TipeRiwayat } from "../utils/contstanst";
 import { RiwayatService } from "../services/riwayat.service";
 import { PicKebutuhanDokumentasiServices } from "../services/picKebutuhanDokumentasi.service";
 import { AuthRequest } from "../types/authRequest";
 import { NamaKebutuhanDokumentasiServices } from "../services/namaKebutuhanDokumentasi.service";
+import {
+  CreateKebutuhanDokumentasiRequestType,
+  ResponseCreateUpdateKebutuhanDokumentasiType,
+  ResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType,
+  ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType,
+  ResponseKebutuhanDokumentasiType,
+  UpdateKebutuhanDokumentasiRequestType,
+} from "../models/kebutuhanDokumentasi.model";
+import { KebutuhanDokumentasiServices } from "../services/kebutuhanDokumentasi.service";
 
-export class KebutuhanDokumentasiPicController {
+export class KebutuhanDokumentasiController {
   // create
   static async create(
-    req: AuthRequest<{}, {}, CreateKebutuhanDokumentasiPicRequestType>,
+    req: AuthRequest<{}, {}, CreateKebutuhanDokumentasiRequestType>,
     res: Response<
-      ResponseStructure<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>
+      ResponseStructure<ResponseCreateUpdateKebutuhanDokumentasiType | null>
     >,
     next: NextFunction,
   ) {
@@ -35,7 +36,7 @@ export class KebutuhanDokumentasiPicController {
         nama_dokumentasi_id,
         tipe_dokumentasi,
         keterangan,
-        pic,
+        lokasi,
       } = req.body;
 
       // get dosen id
@@ -77,17 +78,17 @@ export class KebutuhanDokumentasiPicController {
         }
       }
 
-      if (pic.some((pic) => pic.pic_old)) {
+      if (lokasi.some((lokasi) => lokasi.lokasi_old)) {
         // find pic
-        const getPicOld = pic
-          .map((pic) => pic.pic_old!)
+        const getLokasiOld = lokasi
+          .map((lokasi) => lokasi.lokasi_old!)
           .filter((item) => item !== null && item !== undefined);
 
-        const getPic =
-          await PicKebutuhanDokumentasiServices.findByIds(getPicOld);
+        const getLokasi =
+          await PicKebutuhanDokumentasiServices.findByIds(getLokasiOld);
 
         // check pic
-        if (getPic === 0) {
+        if (getLokasi === 0) {
           return ResponseResult.error(res, 400, "pic tidak ditemukan");
         }
       }
@@ -96,11 +97,11 @@ export class KebutuhanDokumentasiPicController {
       const finalNamaDokumentasiId =
         nama_dokumentasi_id ?? namaKebutuhanDokumentasiNew;
       //   call service
-      const service = await KebutuhanDokumentasiPicServices.create({
+      const service = await KebutuhanDokumentasiServices.create({
         kriteria_id,
         pendekatan_id,
         nama_dokumentasi_id: finalNamaDokumentasiId as number,
-        pic,
+        lokasi,
         tipe_dokumentasi,
         keterangan,
       });
@@ -110,16 +111,16 @@ export class KebutuhanDokumentasiPicController {
         return ResponseResult.error(
           res,
           400,
-          "kebutuhan dokumentasi pic gagal dibuat",
+          "kebutuhan dokumentasi lokasi gagal dibuat",
         );
       }
 
       // create riwayat
-      const riwayat = await RiwayatService.createForKebutuhanDokumentasiPic({
+      const riwayat = await RiwayatService.createForKebutuhanDokumentasi({
         dosen_id: dosenId ?? 0,
         tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
         keterangan: "Membuat kebutuhan dokumentasi pic",
-        kebutuhan_dokumentasi_pic_id: service.id,
+        kebutuhan_dokumentasi_id: service.id,
         status: Status.PENDING,
       });
 
@@ -129,11 +130,11 @@ export class KebutuhanDokumentasiPicController {
       }
 
       //   service succes
-      return ResponseResult.success<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>(
+      return ResponseResult.success<ResponseCreateUpdateKebutuhanDokumentasiType | null>(
         service,
         res,
         201,
-        "success create kebutuhan dokumentasi pic",
+        "success create kebutuhan dokumentasi lokasi",
       );
     } catch (error) {
       next(error);
@@ -144,7 +145,7 @@ export class KebutuhanDokumentasiPicController {
   static async findAllByKriteriaPic(
     req: AuthRequest,
     res: Response<
-      ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
+      ResponseStructure<ResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType | null>,
       {
         validatedQuery: Omit<PaginationType, "sort">;
       }
@@ -168,7 +169,7 @@ export class KebutuhanDokumentasiPicController {
 
       // call service
       const service =
-        await KebutuhanDokumentasiPicServices.findAllByKriteriaPic({
+        await KebutuhanDokumentasiServices.findAllByKriteriaLokasi({
           periode_id,
           query: {
             role,
@@ -188,11 +189,11 @@ export class KebutuhanDokumentasiPicController {
       }
 
       // return success
-      return ResponseResult.success<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType>(
+      return ResponseResult.success<ResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType>(
         service,
         res,
         200,
-        "success read all kebutuhan dokumentasi pic",
+        "success read all kebutuhan dokumentasi lokasi",
       );
     } catch (error) {
       next(error);
@@ -203,7 +204,7 @@ export class KebutuhanDokumentasiPicController {
   static async findAllByKriteriaPendekatan(
     req: AuthRequest,
     res: Response<
-      ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
+      ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType | null>,
       {
         validatedQuery: PaginationType & { status?: Status };
         validatedParams: {
@@ -231,7 +232,7 @@ export class KebutuhanDokumentasiPicController {
 
       // call service
       const service =
-        await KebutuhanDokumentasiPicServices.findAllByKriteriaAndPendekatan({
+        await KebutuhanDokumentasiServices.findAllByKriteriaAndPendekatan({
           periode_id,
           kriteria_id,
           pendekatan_id,
@@ -254,11 +255,11 @@ export class KebutuhanDokumentasiPicController {
       }
 
       // return success
-      return ResponseResult.success<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>(
+      return ResponseResult.success<ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType | null>(
         service,
         res,
         200,
-        "success read all kebutuhan dokumentasi pic",
+        "success read all kebutuhan dokumentasi lokasi",
       );
     } catch (error) {
       next(error);
@@ -269,7 +270,7 @@ export class KebutuhanDokumentasiPicController {
   static async findById(
     _req: Request,
     res: Response<
-      ResponseStructure<ResponseKebutuhanDokumentasiPicType | null>,
+      ResponseStructure<ResponseKebutuhanDokumentasiType | null>,
       {
         validatedParams: { id: number };
       }
@@ -281,22 +282,22 @@ export class KebutuhanDokumentasiPicController {
       const { id } = res.locals.validatedParams;
 
       // call service
-      const service = await KebutuhanDokumentasiPicServices.findById(id);
+      const service = await KebutuhanDokumentasiServices.findById(id);
 
       // check service
       if (!service)
         return ResponseResult.error(
           res,
           400,
-          "kebutuhan dokumentasi pic not found",
+          "kebutuhan dokumentasi lokasi not found",
         );
 
       // return result
-      return ResponseResult.success<ResponseKebutuhanDokumentasiPicType | null>(
+      return ResponseResult.success<ResponseKebutuhanDokumentasiType | null>(
         service,
         res,
         200,
-        "success read kebutuhan dokumentasi pic by id",
+        "success read kebutuhan dokumentasi lokasi by id",
       );
     } catch (error) {
       next(error);
@@ -307,7 +308,7 @@ export class KebutuhanDokumentasiPicController {
   static async findAllForDokumentasiBorang(
     req: AuthRequest,
     res: Response<
-      ResponseStructure<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>,
+      ResponseStructure<ResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType | null>,
       {
         validatedQuery: PaginationType;
       }
@@ -329,7 +330,7 @@ export class KebutuhanDokumentasiPicController {
 
       // call service
       const service =
-        await KebutuhanDokumentasiPicServices.findAllForDokumentasiBorang({
+        await KebutuhanDokumentasiServices.findAllForDokumentasiBorang({
           periode_id,
           dosen_id: id,
           role,
@@ -351,11 +352,11 @@ export class KebutuhanDokumentasiPicController {
       }
 
       // return success
-      return ResponseResult.success<ResponseKebutuhanDokumentasiPicByKriteriaPicWithMetaType | null>(
+      return ResponseResult.success<ResponseKebutuhanDokumentasiByKriteriaLokasiWithMetaType | null>(
         service,
         res,
         200,
-        "success read all kebutuhan dokumentasi pic",
+        "success read all kebutuhan dokumentasi lokasi",
       );
     } catch (error) {
       next(error);
@@ -366,7 +367,7 @@ export class KebutuhanDokumentasiPicController {
   static async findAllForDokumentasiBorangByKriteriaPendekatan(
     req: AuthRequest,
     res: Response<
-      ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
+      ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType | null>,
       {
         validatedQuery: PaginationType & { status?: Status };
         validatedParams: {
@@ -397,7 +398,7 @@ export class KebutuhanDokumentasiPicController {
 
       // call service
       const service =
-        await KebutuhanDokumentasiPicServices.findAllforDokumentasiBorangByKriteriaAndPendekatan(
+        await KebutuhanDokumentasiServices.findAllforDokumentasiBorangByKriteriaAndPendekatan(
           {
             periode_id,
             dosen: {
@@ -426,11 +427,11 @@ export class KebutuhanDokumentasiPicController {
       }
 
       // return success
-      return ResponseResult.success<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>(
+      return ResponseResult.success<ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType | null>(
         service,
         res,
         200,
-        "success read all kebutuhan dokumentasi pic",
+        "success read all kebutuhan dokumentasi lokasi",
       );
     } catch (error) {
       next(error);
@@ -441,7 +442,7 @@ export class KebutuhanDokumentasiPicController {
   static async findAllForDokumentasiBorangComplated(
     req: AuthRequest,
     res: Response<
-      ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>,
+      ResponseStructure<ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType | null>,
       {
         validatedQuery: PaginationType;
         validatedParams: {
@@ -467,7 +468,7 @@ export class KebutuhanDokumentasiPicController {
 
       // call service
       const service =
-        await KebutuhanDokumentasiPicServices.findAllforDokumentasiBorangComplated(
+        await KebutuhanDokumentasiServices.findAllforDokumentasiBorangComplated(
           {
             periode_id,
             kriteria_id,
@@ -487,11 +488,11 @@ export class KebutuhanDokumentasiPicController {
       }
 
       // return success
-      return ResponseResult.success<ResponseKebutuhanDokumentasiNonKriteriPicPendekatanWithPagenationType | null>(
+      return ResponseResult.success<ResponseKebutuhanDokumentasiNonKriteriPendekatanWithPagenationType | null>(
         service,
         res,
         200,
-        "success read all ",
+        "success read all",
       );
     } catch (error) {
       next(error);
@@ -500,9 +501,9 @@ export class KebutuhanDokumentasiPicController {
 
   // update
   static async update(
-    req: AuthRequest<{}, {}, UpdateKebutuhanDokumentasiPicRequestType>,
+    req: AuthRequest<{}, {}, UpdateKebutuhanDokumentasiRequestType>,
     res: Response<
-      ResponseStructure<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>,
+      ResponseStructure<ResponseCreateUpdateKebutuhanDokumentasiType | null>,
       { validatedParams: { kebutuhan_dokumentasi_pic_id: number } }
     >,
     next: NextFunction,
@@ -513,7 +514,7 @@ export class KebutuhanDokumentasiPicController {
 
       // find kebutuhan dokumentasi by id
       const findKebutuhanDokumentasi =
-        await KebutuhanDokumentasiPicServices.findById(
+        await KebutuhanDokumentasiServices.findById(
           kebutuhan_dokumentasi_pic_id,
         );
 
@@ -522,7 +523,7 @@ export class KebutuhanDokumentasiPicController {
         return ResponseResult.error(
           res,
           400,
-          "kebutuhan dokumentasi pic not found",
+          "kebutuhan dokumentasi lokasi not found",
         );
       }
 
@@ -535,7 +536,7 @@ export class KebutuhanDokumentasiPicController {
         kriteria_id,
         pendekatan_id,
         nama_dokumentasi_id,
-        pic,
+        lokasi,
         tipe_dokumentasi,
         keterangan,
         keterangan_update,
@@ -577,19 +578,19 @@ export class KebutuhanDokumentasiPicController {
         }
       }
 
-      if (pic && pic.length > 0) {
-        if (pic?.some((pic) => pic.pic_old)) {
+      if (lokasi && lokasi.length > 0) {
+        if (lokasi?.some((lokasi) => lokasi.lokasi_old)) {
           // find pic
-          const getPicOld = pic
-            .map((pic) => pic.pic_old!)
+          const getLokasiOld = lokasi
+            .map((pic) => pic.lokasi_old!)
             .filter((item) => item !== null && item !== undefined);
 
-          const getPic =
-            await PicKebutuhanDokumentasiServices.findByIds(getPicOld);
+          const getLokasi =
+            await PicKebutuhanDokumentasiServices.findByIds(getLokasiOld);
 
           // check pic
-          if (getPic === 0) {
-            return ResponseResult.error(res, 400, "pic tidak ditemukan");
+          if (getLokasi === 0) {
+            return ResponseResult.error(res, 400, "lokasi tidak ditemukan");
           }
         }
       }
@@ -599,13 +600,13 @@ export class KebutuhanDokumentasiPicController {
         nama_dokumentasi_id ?? namaKebutuhanDokumentasiNew;
 
       //   call service
-      const service = await KebutuhanDokumentasiPicServices.update(
+      const service = await KebutuhanDokumentasiServices.update(
         kebutuhan_dokumentasi_pic_id,
         {
           kriteria_id,
           pendekatan_id,
           nama_dokumentasi_id: finalNamaDokumentasiId ?? undefined,
-          pic,
+          lokasi,
           tipe_dokumentasi,
           keterangan,
         },
@@ -616,7 +617,7 @@ export class KebutuhanDokumentasiPicController {
         return ResponseResult.error(
           res,
           400,
-          "kebutuhan dokumentasi pic gagal dibuat",
+          "kebutuhan dokumentasi lokasi gagal dibuat",
         );
       }
 
@@ -635,11 +636,11 @@ export class KebutuhanDokumentasiPicController {
       }
 
       // create riwayat
-      const riwayat = await RiwayatService.createForKebutuhanDokumentasiPic({
+      const riwayat = await RiwayatService.createForKebutuhanDokumentasi({
         dosen_id: dosenId ?? 0,
         tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
         keterangan: keterangan_update,
-        kebutuhan_dokumentasi_pic_id: service.id,
+        kebutuhan_dokumentasi_id: service.id,
         status: Status.PENDING,
       });
 
@@ -649,11 +650,11 @@ export class KebutuhanDokumentasiPicController {
       }
 
       //   service succes
-      return ResponseResult.success<ResponseCreateUpdateKebutuhanDokumentasiPicType | null>(
+      return ResponseResult.success<ResponseCreateUpdateKebutuhanDokumentasiType | null>(
         service,
         res,
         201,
-        "success update kebutuhan dokumentasi pic",
+        "success update kebutuhan dokumentasi lokasi",
       );
     } catch (error) {
       next(error);
@@ -668,7 +669,7 @@ export class KebutuhanDokumentasiPicController {
   ) {
     try {
       // call db
-      const service = await KebutuhanDokumentasiPicServices.delete(
+      const service = await KebutuhanDokumentasiServices.delete(
         res.locals.validatedParams.id,
       );
 
@@ -677,13 +678,13 @@ export class KebutuhanDokumentasiPicController {
         return ResponseResult.error(
           res,
           400,
-          "kebutuhan dokumentasi pic gagal dihapus",
+          "kebutuhan dokumentasi lokasi gagal dihapus",
         );
       }
 
       return ResponseResult.successNoContent(
         res,
-        "success delete kebutuhan dokumentasi pic",
+        "success delete kebutuhan dokumentasi lokasi",
       );
     } catch (error) {
       next(error);

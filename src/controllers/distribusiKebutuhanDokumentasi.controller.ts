@@ -132,7 +132,7 @@ export class DistribusiKebutuhanDokumentasiController {
       // get id from params
       const { id } = res.locals.validatedParams;
       // call service
-      const service = await DistribusiKebutuhanDokumentasiService.anActive({
+      const service = await DistribusiKebutuhanDokumentasiService.deactive({
         id,
         periode_id,
       });

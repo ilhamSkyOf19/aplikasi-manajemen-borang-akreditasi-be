@@ -13,7 +13,6 @@ import { FileService } from "../services/file.service";
 import { DokumentasiBorangServices } from "../services/dokumentasiBorang.service";
 import { validation } from "../validations/validation";
 import { DokumentasiBorangValidation } from "../validations/dokumentasiBorang.validationn";
-import { KebutuhanDokumentasiPicServices } from "../services/kebutuhanDokumentasiPic.service";
 import { FolderService } from "../services/folder.service";
 import {
   Status,
@@ -27,6 +26,7 @@ import { CreateDokumentasiBorangDefaultRequestType } from "../models/fileDokumen
 import { FileDokumenDefaultValidation } from "../validations/fileDokumenDefault.validation";
 import { CreateDokumentasiBorangPenelitianRequestType } from "../models/fileDokumenPenelitian.model";
 import { FileDokumenPenelitianValidation } from "../validations/fileDokumenPenelitian.validation";
+import { KebutuhanDokumentasiServices } from "../services/kebutuhanDokumentasi.service";
 
 export class DokumentasiBorangController {
   // create
@@ -77,7 +77,7 @@ export class DokumentasiBorangController {
 
       // check kebutuhan dokumentasi id
       const checkKebutuhanDokumentasi =
-        await KebutuhanDokumentasiPicServices.getExistAndTipeDokumenAndStatus(
+        await KebutuhanDokumentasiServices.getExistAndTipeDokumenAndStatus(
           kebutuhan_dokumentasi_id,
         );
 
@@ -275,7 +275,7 @@ export class DokumentasiBorangController {
 
       // check kebutuhan dokumentasi id
       const checkKebutuhanDokumentasi =
-        await KebutuhanDokumentasiPicServices.getExistAndTipeDokumenAndStatus(
+        await KebutuhanDokumentasiServices.getExistAndTipeDokumenAndStatus(
           kebutuhan_dokumentasi_id,
         );
 

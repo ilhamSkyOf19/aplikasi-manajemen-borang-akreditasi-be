@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
-import { PayloadUserType } from "../models/dosen.model";
 import { ENV } from "./env";
+import { PayloadDosenType } from "../models/dosen.model";
 
 // access token
-export const generateAccessToken = (payload: PayloadUserType) => {
+export const generateAccessToken = (payload: PayloadDosenType) => {
   return jwt.sign(payload, ENV.SECRET_KEY, { expiresIn: "1d" });
 };
 
