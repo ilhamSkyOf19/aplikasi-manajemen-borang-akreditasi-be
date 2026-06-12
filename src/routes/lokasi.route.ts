@@ -2,19 +2,19 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { aclMiddleware } from "../middlewares/acl.middleware";
 import { DosenRole } from "../utils/contstanst";
-import { PicKebutuhanDokumentasiController } from "../controllers/picKebutuhanDokumentasi.controller";
 import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
 import { PaginationType } from "../types/pagination";
 import { PicKebutuhanDokumentasiValidation } from "../validations/picKebutuhanValidation";
+import { LokasiController } from "../controllers/lokasi.controller";
 
-const picKebutuhanDokumentasiRoute: Router = Router();
+const lokasiRoute: Router = Router();
 
 // find all
-picKebutuhanDokumentasiRoute.get(
+lokasiRoute.get(
   "/",
   [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
   zodValidationQuery<PaginationType>(PicKebutuhanDokumentasiValidation.QUERY),
-  PicKebutuhanDokumentasiController.findAll,
+  LokasiController.findAll,
 );
 
-export default picKebutuhanDokumentasiRoute;
+export default lokasiRoute;

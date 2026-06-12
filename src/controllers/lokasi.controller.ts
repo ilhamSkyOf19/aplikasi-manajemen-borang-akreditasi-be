@@ -1,15 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { ResponsePicKebutuhanDokumentasiWithPaginationType } from "../models/picKebutuhanDokumentasi.model";
-import { PicKebutuhanDokumentasiServices } from "../services/picKebutuhanDokumentasi.service";
 import { PaginationType } from "../types/pagination";
+import { ResponseLokasiWithPaginationType } from "../models/lokasi.model";
+import { LokasiServices } from "../services/lokasi.service";
 
-export class PicKebutuhanDokumentasiController {
+export class LokasiController {
   // find all
   static async findAll(
     _req: Request,
     res: Response<
-      ResponseStructure<ResponsePicKebutuhanDokumentasiWithPaginationType | null>,
+      ResponseStructure<ResponseLokasiWithPaginationType | null>,
       { validatedQuery: PaginationType }
     >,
     next: NextFunction,
@@ -19,7 +19,7 @@ export class PicKebutuhanDokumentasiController {
       const { limit, page, search, sort } = res.locals.validatedQuery;
 
       // call service
-      const service = await PicKebutuhanDokumentasiServices.findAll({
+      const service = await LokasiServices.findAll({
         query: {
           limit,
           page,
@@ -28,11 +28,11 @@ export class PicKebutuhanDokumentasiController {
         },
       });
 
-      return ResponseResult.success<ResponsePicKebutuhanDokumentasiWithPaginationType>(
+      return ResponseResult.success<ResponseLokasiWithPaginationType>(
         service,
         res,
         200,
-        "Berhasil mendapatkan data PIC kebutuhan dokumentasi",
+        "Berhasil mendapatkan data Lokasi",
       );
     } catch (error) {
       next(error);

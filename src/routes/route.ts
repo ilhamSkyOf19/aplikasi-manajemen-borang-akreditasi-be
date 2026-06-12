@@ -12,7 +12,6 @@ import dosenRoute from "./dosen.route";
 import kriteriaPicRouter from "./kriteriaPic.route";
 import verifikasiRoute from "./verifikasi.route";
 import dokumentasiBorangRoute from "./dokumentasiBorang.route";
-import picKebutuhanDokumentasiRoute from "./picKebutuhanDokumentasi.route";
 import namaKebutuhanDokumentasiRouter from "./namaKebutuhanDokumentasi.route";
 import folderRouter from "./folder.route";
 import fileDokumenRouter from "./fileDokumen.route";
@@ -23,6 +22,7 @@ import timelineRoute from "./timeline.route";
 import dokumenPanduanRoute from "./dokumenPanduan.route";
 import activationCodeRoute from "./activationCode.route";
 import kebutuhanDokumentasiRoute from "./kebutuhanDokumentasi.route";
+import lokasiRoute from "./lokasi.route";
 
 const appRoute: Router = Router();
 
@@ -57,7 +57,7 @@ appRoute.use("/api/verifikasi", verifikasiRoute);
 appRoute.use("/api/dokumentasi-borang", dokumentasiBorangRoute);
 
 // pic kebutuhan dokumentasi route
-appRoute.use("/api/pic-kebutuhan-dokumentasi", picKebutuhanDokumentasiRoute);
+appRoute.use("/api/lokasi", lokasiRoute);
 
 // nama kebutuhan route
 appRoute.use("/api/nama-kebutuhan-dokumentasi", namaKebutuhanDokumentasiRouter);

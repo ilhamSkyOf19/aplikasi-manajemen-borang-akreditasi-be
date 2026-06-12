@@ -5,7 +5,6 @@ import { NamaDokumentasiServices } from "../services/namaDokumentasi.service";
 import { PaginationType } from "../types/pagination";
 import { DosenRole, Status, TipeRiwayat } from "../utils/contstanst";
 import { RiwayatService } from "../services/riwayat.service";
-import { PicKebutuhanDokumentasiServices } from "../services/picKebutuhanDokumentasi.service";
 import { AuthRequest } from "../types/authRequest";
 import { NamaKebutuhanDokumentasiServices } from "../services/namaKebutuhanDokumentasi.service";
 import {
@@ -17,6 +16,7 @@ import {
   UpdateKebutuhanDokumentasiRequestType,
 } from "../models/kebutuhanDokumentasi.model";
 import { KebutuhanDokumentasiServices } from "../services/kebutuhanDokumentasi.service";
+import { LokasiServices } from "../services/lokasi.service";
 
 export class KebutuhanDokumentasiController {
   // create
@@ -84,8 +84,7 @@ export class KebutuhanDokumentasiController {
           .map((lokasi) => lokasi.lokasi_old!)
           .filter((item) => item !== null && item !== undefined);
 
-        const getLokasi =
-          await PicKebutuhanDokumentasiServices.findByIds(getLokasiOld);
+        const getLokasi = await LokasiServices.findByIds(getLokasiOld);
 
         // check pic
         if (getLokasi === 0) {
@@ -585,8 +584,7 @@ export class KebutuhanDokumentasiController {
             .map((pic) => pic.lokasi_old!)
             .filter((item) => item !== null && item !== undefined);
 
-          const getLokasi =
-            await PicKebutuhanDokumentasiServices.findByIds(getLokasiOld);
+          const getLokasi = await LokasiServices.findByIds(getLokasiOld);
 
           // check pic
           if (getLokasi === 0) {

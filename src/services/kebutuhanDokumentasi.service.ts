@@ -159,16 +159,8 @@ export class KebutuhanDokumentasiServices {
     const conditional: Prisma.KriteriaWhereInput = {
       periode_id,
       ...(search && {
-        kriteriaPic: {
-          some: {
-            dosen: {
-              OR: [
-                { nama: { contains: search } },
-                { email: { contains: search } },
-                { nidn: { contains: search } },
-              ],
-            },
-          },
+        nama_kriteria: {
+          contains: search,
         },
       }),
     };

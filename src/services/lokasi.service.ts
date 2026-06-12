@@ -1,17 +1,17 @@
 import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
 import {
-  ResponsePicKebutuhanDokumentasiWithPaginationType,
-  toResponsePicKebutuhanDokumentasiWithPaginationType,
-} from "../models/picKebutuhanDokumentasi.model";
+  ResponseLokasiWithPaginationType,
+  toResponseLokasiWithPaginationType,
+} from "../models/lokasi.model";
 import { PaginationType } from "../types/pagination";
 import { SortOrder } from "../utils/contstanst";
 
-export class PicKebutuhanDokumentasiServices {
+export class LokasiServices {
   // create
   static async create(nama: string): Promise<{ id: number; nama: string }> {
     // call db
-    const result = await prisma.pic.create({
+    const result = await prisma.lokasi.create({
       data: {
         nama,
       },
@@ -25,7 +25,7 @@ export class PicKebutuhanDokumentasiServices {
 
   //   find by id
   static async findByIds(id: number[]): Promise<number> {
-    const result = await prisma.pic.findMany({
+    const result = await prisma.lokasi.findMany({
       where: {
         id: {
           in: id,
@@ -37,7 +37,7 @@ export class PicKebutuhanDokumentasiServices {
   }
   static async findAll(params: {
     query: PaginationType;
-  }): Promise<ResponsePicKebutuhanDokumentasiWithPaginationType> {
+  }): Promise<ResponseLokasiWithPaginationType> {
     // get params
     const { page = 1, limit = 8, search, sort } = params.query;
 
@@ -45,7 +45,7 @@ export class PicKebutuhanDokumentasiServices {
     const currentPage = page < 1 ? 1 : page;
 
     // conditional
-    const conditional: Prisma.PicWhereInput = {
+    const conditional: Prisma.LokasiWhereInput = {
       ...(search && {
         nama: {
           contains: search,
@@ -54,13 +54,13 @@ export class PicKebutuhanDokumentasiServices {
     };
 
     // get count data
-    const totalData = await prisma.pic.count({ where: conditional });
+    const totalData = await prisma.lokasi.count({ where: conditional });
 
     // get total page
     const totalPage = Math.ceil(totalData / limit);
 
     // call db
-    const result = await prisma.pic.findMany({
+    const result = await prisma.lokasi.findMany({
       where: conditional,
       skip: (currentPage - 1) * limit,
       take: limit,
@@ -69,7 +69,7 @@ export class PicKebutuhanDokumentasiServices {
       },
     });
 
-    return toResponsePicKebutuhanDokumentasiWithPaginationType({
+    return toResponseLokasiWithPaginationType({
       data: result.map((item) => ({
         id: item.id,
         nama: item.nama,
