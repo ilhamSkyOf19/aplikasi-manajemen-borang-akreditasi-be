@@ -125,7 +125,7 @@ export class FileDokumenService {
     storage_provider: StorageProvider;
     file_id: string;
     nama_file: string;
-    uploaded_by_id: number;
+    uploaded_by_id?: number | null;
     tipe_file: TipeDokumentasi;
   } | null> {
     const result = await prisma.fileDokumen.findUnique({

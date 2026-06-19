@@ -106,7 +106,32 @@ export class DosenValidation {
       identifier: this.stringSchema(),
       password: this.passwordSchema(),
     })
-    .strict() satisfies z.ZodType<LoginDosenType>;
+    .strict()
+    .superRefine((data, ctx) => {
+      const { identifier } = data;
+
+      const isNidn = /^\d+$/.test(identifier);
+
+      if (isNidn) {
+        if (identifier.length !== 10) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["identifier"],
+            message: "NIDN harus terdiri dari 10 digit",
+          });
+        }
+      } else {
+        const emailValidation = z.string().email().safeParse(identifier);
+
+        if (!emailValidation.success) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["identifier"],
+            message: "Format email tidak valid",
+          });
+        }
+      }
+    }) satisfies z.ZodType<LoginDosenType>;
 
   // update
   static readonly UPDATE = z

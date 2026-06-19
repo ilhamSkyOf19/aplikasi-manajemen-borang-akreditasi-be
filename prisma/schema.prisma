@@ -282,14 +282,14 @@ model FileDokumen {
   file_id          String          @unique
   nama_file        String          @unique
   storage_provider StorageProvider @default(SISTEM)
-  uploaded_by_id   Int
+  uploaded_by_id   Int?
   keterangan       String          @db.VarChar(1000)
   tipe_file        TipeDokumentasi
   created_at       DateTime        @default(now())
   updated_at       DateTime        @updatedAt
   is_active        Boolean         @default(false)
 
-  uploaded_by Dosen @relation(fields: [uploaded_by_id], references: [id])
+  uploaded_by Dosen? @relation(fields: [uploaded_by_id], references: [id])
 
   dokumentasi_borang_files DokumentasiBorangFile[]
 

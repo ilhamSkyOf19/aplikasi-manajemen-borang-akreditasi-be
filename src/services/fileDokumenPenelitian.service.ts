@@ -1,23 +1,10 @@
-import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
-import { ResponseFileDokumenForChooseWithMetaType } from "../models/fileDokumen.model";
-import {
-  ResponseFileDokumenDefaultForDetailType,
-  ResponseUpdateFileDefaultType,
-  UpdateFileDefaultType,
-} from "../models/fileDokumenDefault.model";
 import {
   ResponseFileDokumenPenelitianForDetailType,
   ResponseUpdateFilePenelitanType,
   UpdateFilePenelitianType,
 } from "../models/fileDokumenPenelitian.model";
-import { PaginationType } from "../types/pagination";
-import {
-  SortOrder,
-  Status,
-  StorageProvider,
-  TipeDokumentasi,
-} from "../utils/contstanst";
+import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 
 export class FileDokumenPenelitianService {
   // find by id

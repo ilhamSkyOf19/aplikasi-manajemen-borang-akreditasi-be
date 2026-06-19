@@ -28,6 +28,7 @@ export class ActivationCodeService {
       },
       update: {
         code: code.toString(),
+        expired_at: AddFiveMinutes,
       },
       select: {
         id: true,

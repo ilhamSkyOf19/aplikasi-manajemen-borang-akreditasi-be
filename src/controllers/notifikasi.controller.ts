@@ -21,6 +21,7 @@ export class NotifikasiController {
     try {
       // get role
       const role = req.data?.role;
+      const dosenId = req.data?.id;
 
       // get query
       const { limit, page, search, sort, isRead } = res.locals.validatedQuery;
@@ -28,6 +29,7 @@ export class NotifikasiController {
       // call service
       const service = await NotifikasiService.getNotifikasiByRole({
         role: role!,
+        dosenId,
         query: {
           limit,
           page,

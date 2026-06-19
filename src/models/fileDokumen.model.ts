@@ -23,12 +23,12 @@ export interface IDataFileGlobalType {
   };
   storage_provider: StorageProvider;
   file_id: string;
-  uploaded_by: {
+  uploaded_by?: {
     id: number;
     nama: string;
     email: string;
     nidn: string;
-  };
+  } | null;
   keterangan: string;
   tipe_file: TipeDokumentasi;
   total_digunakan: number;

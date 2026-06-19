@@ -20,7 +20,7 @@ export class ActivationCodeController {
       const email = req.body.email;
 
       // find dosen by email
-      const findDosen = await DosenServices.findByEmail(email);
+      const findDosen = await DosenServices.findByEmail(email.trim());
 
       // chekc
       if (!findDosen) {
@@ -68,7 +68,7 @@ export class ActivationCodeController {
 
       // send
       await sendEmail({
-        from: `"Aplikasi Manajemen Borang Akreditasi" <${ENV.EMAIL_SMTP_USER}>`,
+        from: `"Aplikasi Manajemen Borang Akreditasi" <noreplay>`,
         to: findDosen.email,
         html: contentEmail,
         subject: "Reset Password",
@@ -206,13 +206,11 @@ export class ActivationCodeController {
         path: "/api",
       });
 
-      console.log(req?.cookies);
-
       return ResponseResult.success<ResponseActivationType | null>(
         findActivation,
         res,
         200,
-        "success create activation code",
+        "success  activation code",
       );
     } catch (error) {
       next(error);

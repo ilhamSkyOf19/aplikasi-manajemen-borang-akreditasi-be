@@ -9,6 +9,7 @@ import { VerifikasiDokumentasiBorangType } from "../models/dokumentasiBorang.mod
 import { RiwayatService } from "../services/riwayat.service";
 import { DosenRole, TipeRiwayat } from "../utils/contstanst";
 import { AuthRequest } from "../types/authRequest";
+import { NotifikasiService } from "../services/notifikasi.service";
 
 export class VerifikasiController {
   // verifikasi kebutuhan dokumentasi pic
@@ -33,10 +34,10 @@ export class VerifikasiController {
 
       // call service
       if (kebutuhan_dokumentasi_pic_id && role === DosenRole.wakil_dekan_1) {
-        result = await RiwayatService.createForKebutuhanDokumentasiPic({
+        result = await RiwayatService.createForKebutuhanDokumentasi({
           dosen_id: dosenId,
           tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
-          kebutuhan_dokumentasi_pic_id,
+          kebutuhan_dokumentasi_id: kebutuhan_dokumentasi_pic_id,
           keterangan: keterangan_verifikasi,
           status,
         });

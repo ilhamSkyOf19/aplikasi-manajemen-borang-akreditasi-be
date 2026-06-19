@@ -323,29 +323,6 @@ export class AuthController {
         path: "/api",
       });
 
-      // get payload
-      const { roles, ...payloadDosen } = service;
-
-      // default role
-      const defaultRole = rolePriority.find((role) => roles.includes(role))!;
-
-      // generate token
-      const token = generateAccessToken({
-        ...payloadDosen,
-        role: defaultRole,
-      });
-
-      // set cookie
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict" as const,
-        maxAge: COOKIE_MAX_AGE,
-        path: "/api",
-      });
-
-      console.log("dosen_id", id);
-
       // delete row reset password by dosen id
       await ActivationCodeService.delete({ dosen_id: id });
 

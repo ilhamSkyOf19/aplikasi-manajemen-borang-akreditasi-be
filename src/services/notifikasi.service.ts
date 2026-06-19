@@ -15,6 +15,7 @@ export class NotifikasiService {
   static async getNotifikasiByRole(params: {
     query: PaginationType & { isRead?: boolean };
     role: DosenRole;
+    dosenId?: number;
   }): Promise<ResponseNotifikasiWithMetaType | null> {
     const {
       role,
@@ -27,7 +28,18 @@ export class NotifikasiService {
     // conditional
     const conditional: Prisma.RiwayatWhereInput = {
       ...(isRead && { isRead: isRead }),
+      ...(search && { dosen: { nama: { contains: search } } }),
       ...(role === DosenRole.kaprodi && {
+        // riwayat dibuat oleh kaprodi
+        dosen: {
+          dosenRole: {
+            some: {
+              role: {
+                in: [DosenRole.wakil_dekan_1, DosenRole.tim_akreditasi],
+              },
+            },
+          },
+        },
         OR: [
           {
             tipe_riwayat: TipeRiwayat.DOKUMENTASI_BORANG,
@@ -46,13 +58,43 @@ export class NotifikasiService {
         AND: [
           {
             tipe_riwayat: TipeRiwayat.DOKUMENTASI_BORANG,
-            status: { in: [Status.REVISION, Status.APPROVED] },
+            status: {
+              in: [Status.REVISION, Status.APPROVED],
+            },
+
+            // riwayat dibuat oleh kaprodi
+            dosen: {
+              dosenRole: {
+                some: {
+                  role: DosenRole.kaprodi,
+                },
+              },
+            },
+
+            dokumentasi_borang: {
+              kebutuhan_dokumentasi: {
+                kriteria: {
+                  kriteriaPic: {
+                    some: {
+                      dosen_id: params.dosenId,
+                    },
+                  },
+                },
+              },
+            },
           },
         ],
       }),
 
       // wakil dekan
       ...(role === DosenRole.wakil_dekan_1 && {
+        dosen: {
+          dosenRole: {
+            some: {
+              role: DosenRole.kaprodi,
+            },
+          },
+        },
         tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
         status: Status.PENDING,
       }),
@@ -193,4 +235,22 @@ export class NotifikasiService {
 
     return result;
   }
+
+  // static async isReadFalse(id: number): Promise<ResponseNotifikasiType | null> {
+  //   // call db
+  //   const result = await prisma.riwayat.update({
+  //     where: {
+  //       id,
+  //     },
+  //     data: {
+  //       isRead: false,
+  //     },
+  //     select: {
+  //       id: true,
+  //       isRead: true,
+  //     },
+  //   });
+
+  //   return result;
+  // }
 }
