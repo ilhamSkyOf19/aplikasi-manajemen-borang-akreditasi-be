@@ -13,6 +13,7 @@ import {
   StorageProvider,
   TipeDokumentasi,
 } from "../utils/contstanst";
+import { FileDokumenService } from "./fileDokumen.service";
 
 export class FileDokumenDefaultService {
   // find by id
@@ -87,11 +88,10 @@ export class FileDokumenDefaultService {
     if (!result) return null;
 
     // get jumlah file
-    const getJumlahFileDigunakan = await prisma.dokumentasiBorangFile.count({
-      where: {
-        file_dokumen_id: result.file_dokumen.id,
-      },
-    });
+    const getJumlahFileDigunakan =
+      await FileDokumenService.findCountInDokumentasiBorang(
+        result.file_dokumen.id,
+      );
 
     return {
       id: result.file_dokumen.id,

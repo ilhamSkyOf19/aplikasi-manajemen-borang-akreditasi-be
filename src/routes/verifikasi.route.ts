@@ -11,6 +11,7 @@ import {
   VerifikasiUpdateType,
 } from "../models/verifikasi.model";
 import { zodValidationParams } from "../middlewares/validationParams.middleware";
+import { periodeMiddleware } from "../middlewares/periode.middleware";
 
 const verifikasiRoute: Router = Router();
 
@@ -25,7 +26,11 @@ verifikasiRoute.post(
 // update verifikasi kebutuhan dokumentasi pic
 verifikasiRoute.patch(
   "/:id",
-  [authMiddleware, aclMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi])],
+  [
+    authMiddleware,
+    aclMiddleware([DosenRole.wakil_dekan_1, DosenRole.kaprodi]),
+    periodeMiddleware,
+  ],
   zodValidationParams<{ id: number }>(VerifikasiValidation.PARAMS_ID),
   zodValidation<VerifikasiUpdateType>(VerifikasiValidation.UPDATE_VERIFIKASI),
   VerifikasiController.updateVerifikasi,

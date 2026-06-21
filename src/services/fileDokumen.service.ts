@@ -350,4 +350,15 @@ export class FileDokumenService {
 
     return finalGroupedFile;
   }
+
+  // find count
+  static async findCountInDokumentasiBorang(id: number): Promise<number> {
+    const getJumlahFileDigunakan = await prisma.dokumentasiBorangFile.count({
+      where: {
+        file_dokumen_id: id,
+      },
+    });
+
+    return getJumlahFileDigunakan;
+  }
 }

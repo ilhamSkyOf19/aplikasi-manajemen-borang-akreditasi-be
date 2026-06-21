@@ -10,6 +10,7 @@ import { RiwayatService } from "../services/riwayat.service";
 import { DosenRole, TipeRiwayat } from "../utils/contstanst";
 import { AuthRequest } from "../types/authRequest";
 import { NotifikasiService } from "../services/notifikasi.service";
+import { DistribusiKebutuhanDokumentasiService } from "../services/distribusiKebutuhanDokumentasi.service";
 
 export class VerifikasiController {
   // verifikasi kebutuhan dokumentasi pic
@@ -85,6 +86,21 @@ export class VerifikasiController {
     try {
       // get id parmas
       const { id } = res.locals.validatedParams;
+
+      // get periode
+      const idPeriode = req?.periode?.id;
+
+      // check distribusi
+      if (!idPeriode) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
+      const isDistribusi =
+        await DistribusiKebutuhanDokumentasiService.findByPeriode(idPeriode);
+
+      if (isDistribusi?.is_active) {
+        return ResponseResult.error(res, 404, "distribusi sedang aktif");
+      }
 
       // get role
       const { role, id: dosenId } = req.data as { role: DosenRole; id: number };

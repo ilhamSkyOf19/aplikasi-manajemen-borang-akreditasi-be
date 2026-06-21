@@ -242,34 +242,6 @@ export class DokumentasiBorangServices {
     // get params
     const { kebutuhan_dokumentasi_id, role } = params;
 
-    // role wd
-    const isWd1 = role === DosenRole.wakil_dekan_1;
-
-    // select kriteria
-    const kriteriaSelect = isWd1
-      ? {
-          id: true,
-          kode_kriteria: true,
-          nama_kriteria: true,
-          kriteriaPic: {
-            select: {
-              dosen: {
-                select: {
-                  id: true,
-                  nama: true,
-                  email: true,
-                  nidn: true,
-                },
-              },
-            },
-          },
-        }
-      : {
-          id: true,
-          kode_kriteria: true,
-          nama_kriteria: true,
-        };
-
     // call db
     const result = await prisma.kebutuhanDokumentasi.findUnique({
       where: {

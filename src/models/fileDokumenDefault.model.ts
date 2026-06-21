@@ -7,11 +7,11 @@ export interface IDokumentasiBorangDefault {
   file_id: string;
   nama_file: string;
   nomor_dokumen?: string;
-  uploaded_by: {
+  uploaded_by?: {
     id: number;
     nama: string;
     nidn: string;
-  };
+  } | null;
   keterangan: string;
   created_at: Date;
   updated_at: Date;

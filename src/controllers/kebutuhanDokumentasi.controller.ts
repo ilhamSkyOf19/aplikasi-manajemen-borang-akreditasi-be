@@ -3,7 +3,12 @@ import { NextFunction, Request, Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { NamaDokumentasiServices } from "../services/namaDokumentasi.service";
 import { PaginationType } from "../types/pagination";
-import { DosenRole, Status, TipeRiwayat } from "../utils/contstanst";
+import {
+  DosenRole,
+  Status,
+  StorageProvider,
+  TipeRiwayat,
+} from "../utils/contstanst";
 import { RiwayatService } from "../services/riwayat.service";
 import { AuthRequest } from "../types/authRequest";
 import { NamaKebutuhanDokumentasiServices } from "../services/namaKebutuhanDokumentasi.service";
@@ -17,6 +22,10 @@ import {
 } from "../models/kebutuhanDokumentasi.model";
 import { KebutuhanDokumentasiServices } from "../services/kebutuhanDokumentasi.service";
 import { LokasiServices } from "../services/lokasi.service";
+import { DokumenBorangService } from "../services/dokumenBorang.service";
+import { FileService } from "../services/file.service";
+import { DokumentasiBorangServices } from "../services/dokumentasiBorang.service";
+import { FileDokumenService } from "../services/fileDokumen.service";
 
 export class KebutuhanDokumentasiController {
   // create
@@ -88,7 +97,7 @@ export class KebutuhanDokumentasiController {
 
         // check pic
         if (getLokasi === 0) {
-          return ResponseResult.error(res, 400, "pic tidak ditemukan");
+          return ResponseResult.error(res, 400, "lokasi tidak ditemukan");
         }
       }
 
@@ -118,7 +127,7 @@ export class KebutuhanDokumentasiController {
       const riwayat = await RiwayatService.createForKebutuhanDokumentasi({
         dosen_id: dosenId ?? 0,
         tipe_riwayat: TipeRiwayat.KEBUTUHAN_DOKUMENTASI,
-        keterangan: "Membuat kebutuhan dokumentasi pic",
+        keterangan: "Mengajukan kebutuhan dokumentasi",
         kebutuhan_dokumentasi_id: service.id,
         status: Status.PENDING,
       });
@@ -661,15 +670,74 @@ export class KebutuhanDokumentasiController {
 
   // delete
   static async delete(
-    _req: Request,
+    req: AuthRequest,
     res: Response<ResponseStructure<null>, { validatedParams: { id: number } }>,
     next: NextFunction,
   ) {
     try {
+      // get id
+      const id = res.locals.validatedParams.id;
+
+      // get role
+      const role = req?.data?.role;
+
+      // check kebutuhan dokumentasi
+      const findKebutuhanDokumentasi =
+        await KebutuhanDokumentasiServices.findById(id);
+
+      // check
+      if (!findKebutuhanDokumentasi) {
+        return ResponseResult.error(
+          res,
+          400,
+          "kebutuhan dokumentasi not found",
+        );
+      }
+
+      // check dokumentasi
+      const findDokumentasiBorang =
+        await DokumentasiBorangServices.findByKebutuhanDokumentasiId({
+          kebutuhan_dokumentasi_id: findKebutuhanDokumentasi.id,
+          role: role!,
+        });
+
+      // check
+      if (findDokumentasiBorang) {
+        // check dokumen
+        findDokumentasiBorang.files.forEach(async (item) => {
+          // find file
+          const findFile = await FileDokumenService.findById(item.id);
+
+          // check
+          if (findFile) {
+            const findCount =
+              await FileDokumenService.findCountInDokumentasiBorang(
+                findFile.id,
+              );
+
+            if (findCount === 1) {
+              // delete file
+              if (findFile.storage_provider === StorageProvider.SISTEM) {
+                await FileService.deleteFormPath({
+                  fileName: findFile.file_id,
+                  tipe_file: findFile.tipe_file,
+                });
+              } else {
+                await FileService.deleteFileFormGDrive(findFile.file_id);
+              }
+
+              // hapus file dokumen
+              await FileDokumenService.delete({
+                idFileDokumen: findFile.id,
+                tipe_file: findFile.tipe_file,
+              });
+            }
+          }
+        });
+      }
+
       // call db
-      const service = await KebutuhanDokumentasiServices.delete(
-        res.locals.validatedParams.id,
-      );
+      const service = await KebutuhanDokumentasiServices.delete(id);
 
       // check
       if (!service) {
