@@ -10,11 +10,11 @@ import {
 } from "../models/dosen.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { DosenServices } from "../services/dosen.service";
-import argon2 from "argon2";
 import { generateAccessToken } from "../utils/jwt";
 import { AuthRequest } from "../types/authRequest";
 import { COOKIE_MAX_AGE, DosenRole, rolePriority } from "../utils/contstanst";
 import { ActivationCodeService } from "../services/activationCode.service";
+import bcrypt from "bcryptjs";
 
 export class AuthController {
   // register
@@ -41,10 +41,7 @@ export class AuthController {
       }
 
       // hash password
-      const hashedPassword = await argon2.hash(body.password.trim(), {
-        type: argon2.argon2id,
-        hashLength: 64,
-      });
+      const hashedPassword = await bcrypt.hash(body.password.trim(), 10);
 
       // call service
       const service = await DosenServices.create({
@@ -86,7 +83,7 @@ export class AuthController {
       if (!service) return ResponseResult.error(res, 400, "Data tidak valid");
 
       // compare password
-      const isMatch = await argon2.verify(
+      const isMatch = await bcrypt.compare(
         service.password,
         body.password.trim(),
       );
@@ -242,7 +239,7 @@ export class AuthController {
       const getPassword = await DosenServices.findByIdForGetPassword({ id });
 
       // check old password
-      const isMatch = await argon2.verify(
+      const isMatch = await bcrypt.compare(
         getPassword ?? "",
         oldPassword.trim(),
       );
@@ -252,10 +249,7 @@ export class AuthController {
         return ResponseResult.error(res, 400, "Password lama tidak valid");
 
       // hash password
-      const hashedNewPassword = await argon2.hash(newPassword.trim(), {
-        type: argon2.argon2id,
-        hashLength: 64,
-      });
+      const hashedNewPassword = await bcrypt.hash(newPassword.trim(), 10);
 
       // find dosen by id and role
       const dosen = await DosenServices.updatePassword({
@@ -300,10 +294,7 @@ export class AuthController {
 
       // hash password
       // hash password
-      const hashedPassword = await argon2.hash(password.trim(), {
-        type: argon2.argon2id,
-        hashLength: 64,
-      });
+      const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
       // reset password
       const service = await DosenServices.updatePassword({

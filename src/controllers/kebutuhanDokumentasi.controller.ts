@@ -22,7 +22,6 @@ import {
 } from "../models/kebutuhanDokumentasi.model";
 import { KebutuhanDokumentasiServices } from "../services/kebutuhanDokumentasi.service";
 import { LokasiServices } from "../services/lokasi.service";
-import { DokumenBorangService } from "../services/dokumenBorang.service";
 import { FileService } from "../services/file.service";
 import { DokumentasiBorangServices } from "../services/dokumentasiBorang.service";
 import { FileDokumenService } from "../services/fileDokumen.service";

@@ -1,4 +1,3 @@
-import { MetaType } from "../utils/contstanst";
 import { IDosen } from "./dosen.model";
 import { IKriteria } from "./kriteria.model";
 

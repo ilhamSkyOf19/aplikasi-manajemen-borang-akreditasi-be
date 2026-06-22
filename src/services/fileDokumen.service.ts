@@ -3,7 +3,6 @@ import prisma from "../libs/prisma";
 import {
   ResponseFileDokumenForChooseWithMetaType,
   ResponseSearchGlobalType,
-  toResponseSearchGlobalType,
 } from "../models/fileDokumen.model";
 import { PaginationType } from "../types/pagination";
 import {

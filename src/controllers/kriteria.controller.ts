@@ -10,7 +10,6 @@ import {
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { KriteriaServices } from "../services/kriteria.service";
 import { PaginationType } from "../types/pagination";
-import { DistribusiKebutuhanDokumentasiService } from "../services/distribusiKebutuhanDokumentasi.service";
 import { AuthRequest } from "../types/authRequest";
 
 export class KriteriaController {

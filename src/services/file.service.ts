@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import multer, { FileFilterCallback, Multer } from "multer";
+import multer, { FileFilterCallback } from "multer";
 import fs from "fs";
 import path from "path";
 import fsAsync from "fs/promises";

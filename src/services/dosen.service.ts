@@ -1,9 +1,7 @@
-import { startsWith } from "zod";
 import prisma from "../libs/prisma";
 import {
   CreateDosenType,
   LoginDosenType,
-  PayloadDosenType,
   ResponseDosenChooseWithMetaType,
   ResponseDosenType,
   ResponseDosenWithMetaType,
@@ -12,10 +10,8 @@ import {
   UpdateSelfDataType,
 } from "../models/dosen.model";
 import { PaginationType } from "../types/pagination";
-import { DosenRole } from "../utils/contstanst";
-import { SortOrder } from "../../generated/prisma/internal/prismaNamespaceBrowser";
+import { DosenRole, SortOrder } from "../utils/contstanst";
 import { Prisma } from "../../generated/prisma/client";
-import { argon2 } from "node:crypto";
 
 export class DosenServices {
   // create

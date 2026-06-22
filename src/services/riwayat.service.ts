@@ -1,5 +1,4 @@
 import prisma from "../libs/prisma";
-import { ResponseKriteriaPicType } from "../models/kriteriaPic.model";
 import {
   CreateRiwayatDokumentasiBorangType,
   CreateRiwayatKebutuhanDokumentasiPicType,
@@ -8,12 +7,7 @@ import {
   UpdateRiwayatDokumentasiBorangType,
   UpdateRiwayatKebutuhanDokumentasiPicType,
 } from "../models/riwayat.model";
-import {
-  TipeDokumentasi,
-  Status,
-  DosenRole,
-  TipeRiwayat,
-} from "../utils/contstanst";
+import { Status, TipeRiwayat } from "../utils/contstanst";
 
 export class RiwayatService {
   // create

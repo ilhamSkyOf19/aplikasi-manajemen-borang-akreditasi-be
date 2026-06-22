@@ -1,4 +1,3 @@
-import { gte } from "zod";
 import prisma from "../libs/prisma";
 import {
   ResponseActivationType,

@@ -6,7 +6,6 @@ import { zodValidation } from "../middlewares/validation.middleware";
 import { AddPicToKriteriaType } from "../models/kriteriaPic.model";
 import { KriteriaPicValidation } from "../validations/kriteriaPic.validation";
 import { KriteriaPicController } from "../controllers/kriteriaPic.controller";
-import { zodValidationParams } from "../middlewares/validationParams.middleware";
 
 const kriteriaPicRouter: Router = Router();
 

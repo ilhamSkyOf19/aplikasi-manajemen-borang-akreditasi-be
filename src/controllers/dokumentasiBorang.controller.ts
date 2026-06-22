@@ -4,7 +4,6 @@ import {
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
   ResponseDokumentasiBorangWithKebutuhanDokumentasiType,
-  ResponseFoldersAndFilesType,
 } from "../models/dokumentasiBorang.model";
 import { ResponseResult, ResponseStructure } from "../types/response";
 import { AuthRequest } from "../types/authRequest";
@@ -12,7 +11,6 @@ import { FileDokumenService } from "../services/fileDokumen.service";
 import { FileService } from "../services/file.service";
 import { DokumentasiBorangServices } from "../services/dokumentasiBorang.service";
 import { validation } from "../validations/validation";
-import { DokumentasiBorangValidation } from "../validations/dokumentasiBorang.validationn";
 import { FolderService } from "../services/folder.service";
 import {
   Status,

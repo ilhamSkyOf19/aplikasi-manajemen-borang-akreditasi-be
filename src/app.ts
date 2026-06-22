@@ -15,7 +15,7 @@ const app = express();
 // global origin
 app.use(
   cors({
-    origin: true,
+    origin: ["https://borangfikom.my.id", "http://localhost:5173"],
     credentials: true,
     exposedHeaders: ["Content-Disposition"],
   }),

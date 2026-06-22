@@ -3,7 +3,6 @@ import {
   CreateKriteriaType,
   UpdateKriteriaType,
 } from "../models/kriteria.model";
-import { Status } from "../../generated/prisma/enums";
 import { PaginationType } from "../types/pagination";
 
 export class KriteriaValidation {

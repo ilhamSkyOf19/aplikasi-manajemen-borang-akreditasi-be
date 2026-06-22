@@ -5,7 +5,6 @@ import { DosenRole } from "../utils/contstanst";
 import { zodValidation } from "../middlewares/validation.middleware";
 import { VerifikasiValidation } from "../validations/verifikasi.validation";
 import { VerifikasiController } from "../controllers/verifikasi.controller";
-import { VerifikasiDokumentasiBorangType } from "../models/dokumentasiBorang.model";
 import {
   VerifikasiType,
   VerifikasiUpdateType,

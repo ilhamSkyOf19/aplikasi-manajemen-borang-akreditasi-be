@@ -6,7 +6,6 @@ import { ActivationCodeService } from "../services/activationCode.service";
 import { generateCode } from "../utils/utils";
 import { renderMailHtml, sendEmail } from "../utils/mail/mail";
 import { ENV } from "../utils/env";
-import { COOKIE_MAX_AGE } from "../utils/contstanst";
 
 export class ActivationCodeController {
   // create

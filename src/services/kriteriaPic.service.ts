@@ -1,12 +1,9 @@
-import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
 import {
   AddPicToKriteriaType,
   ResponseCreateUpdateKriteriaPicType,
   toResponseCreateUpdateKriteriaPic,
 } from "../models/kriteriaPic.model";
-import { PaginationType } from "../types/pagination";
-import { DosenRole, SortOrder } from "../utils/contstanst";
 
 export class KriteriaPicServices {
   // create

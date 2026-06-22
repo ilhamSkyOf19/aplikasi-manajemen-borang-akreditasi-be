@@ -1,18 +1,10 @@
-import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
-import { ResponseFileDokumenForChooseWithMetaType } from "../models/fileDokumen.model";
 import {
   ResponseFileDokumenDefaultForDetailType,
   ResponseUpdateFileDefaultType,
   UpdateFileDefaultType,
 } from "../models/fileDokumenDefault.model";
-import { PaginationType } from "../types/pagination";
-import {
-  SortOrder,
-  Status,
-  StorageProvider,
-  TipeDokumentasi,
-} from "../utils/contstanst";
+import { Status, StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 import { FileDokumenService } from "./fileDokumen.service";
 
 export class FileDokumenDefaultService {

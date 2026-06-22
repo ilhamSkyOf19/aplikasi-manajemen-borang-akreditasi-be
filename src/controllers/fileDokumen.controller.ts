@@ -12,16 +12,7 @@ import {
 import { PaginationType } from "../types/pagination";
 import { FileDokumenService } from "../services/fileDokumen.service";
 import { AuthRequest } from "../types/authRequest";
-import path from "node:path";
-import fsSync from "fs";
-import { DriveApiService } from "../services/driveapi.service";
-import { meta } from "zod/v4/core";
-import {
-  Status,
-  StorageProvider,
-  TipeDokumentasi,
-  TipeRiwayat,
-} from "../utils/contstanst";
+import { StorageProvider, TipeDokumentasi } from "../utils/contstanst";
 import { FileService } from "../services/file.service";
 import { FileDokumenDefaultService } from "../services/fileDokumenDefault.service";
 import {
@@ -31,7 +22,6 @@ import {
 } from "../models/fileDokumenPenelitian.model";
 import { FileDokumenPenelitianService } from "../services/fileDokumenPenelitian.service";
 import { DokumentasiBorangServices } from "../services/dokumentasiBorang.service";
-import { RiwayatService } from "../services/riwayat.service";
 
 export class FileDokumenController {
   // find all for choose

@@ -239,7 +239,7 @@ export class StatistikService {
     // get grafik kriteria
     const finalGrafikKriteria: GrafikKriteriaType[] = Array.from(
       groupedPendekatan.values(),
-    );
+    ).sort((a, b) => a.kode_kriteria - b.kode_kriteria);
 
     // return response
     return toResponseStatistikType({
@@ -400,7 +400,7 @@ export class StatistikService {
     // get grafik kriteria
     const finalGrafikKriteria: GrafikKriteriaType[] = Array.from(
       groupedPendekatan.values(),
-    );
+    ).sort((a, b) => a.kode_kriteria - b.kode_kriteria);
 
     return finalGrafikKriteria;
   }

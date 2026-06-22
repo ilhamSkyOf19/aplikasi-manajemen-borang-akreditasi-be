@@ -1,7 +1,6 @@
 import { Response } from "express";
 import { ResponseResult, ResponseStructure } from "../types/response";
-import { SortOrder } from "../../generated/prisma/internal/prismaNamespace";
-import { DosenRole, Status } from "./contstanst";
+import { Status } from "./contstanst";
 
 // check exist same data
 const isFilled = (value: unknown): boolean => {

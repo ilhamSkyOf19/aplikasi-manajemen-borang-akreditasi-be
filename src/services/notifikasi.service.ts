@@ -5,8 +5,6 @@ import {
   ResponseNotifikasiWithMetaType,
   toResponseNotifikasiWithMetaType,
 } from "../models/notifikasi.model";
-import { toResponseRiwayatType } from "../models/riwayat.model";
-import dosenRoute from "../routes/dosen.route";
 import { PaginationType } from "../types/pagination";
 import { DosenRole, SortOrder, Status, TipeRiwayat } from "../utils/contstanst";
 

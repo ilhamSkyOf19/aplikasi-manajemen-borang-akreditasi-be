@@ -1,29 +1,18 @@
-import { Prisma } from "../../generated/prisma/client";
 import prisma from "../libs/prisma";
 import {
   IFolderDokumentasiBorang,
   ResponseCreateUpdateDokumentasiBorangType,
   ResponseDokumentasiBorangType,
   ResponseDokumentasiBorangWithKebutuhanDokumentasiType,
-  ResponseFoldersAndFilesType,
   toResponseCreateUpdateDokumentasiBorangType,
   toResponseDokumentasiBorangType,
-  toResponseFoldersAndFilesType,
 } from "../models/dokumentasiBorang.model";
 import {
   CreateDokumentasiBorangDefaultType,
   IDokumentasiBorangDefault,
 } from "../models/fileDokumenDefault.model";
 import { CreateDokumentasiBorangPenelitianType } from "../models/fileDokumenPenelitian.model";
-import { ResponseResult } from "../types/response";
-import {
-  DosenRole,
-  Status,
-  StorageProvider,
-  TipeDokumentasi,
-} from "../utils/contstanst";
-import { FileService } from "./file.service";
-import { FileDokumenService } from "./fileDokumen.service";
+import { DosenRole, Status, TipeDokumentasi } from "../utils/contstanst";
 
 export class DokumentasiBorangServices {
   // create
