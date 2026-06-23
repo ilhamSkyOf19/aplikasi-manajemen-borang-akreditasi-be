@@ -7,7 +7,7 @@ export default class LimiterMiddleware {
   static login() {
     return rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 6,
+      max: 15,
       skipSuccessfulRequests: true,
       standardHeaders: true,
       legacyHeaders: false,

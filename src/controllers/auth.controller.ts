@@ -84,8 +84,8 @@ export class AuthController {
 
       // compare password
       const isMatch = await bcrypt.compare(
-        service.password,
         body.password.trim(),
+        service.password,
       );
 
       // cek

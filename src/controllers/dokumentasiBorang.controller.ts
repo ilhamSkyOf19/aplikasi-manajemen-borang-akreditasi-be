@@ -530,4 +530,37 @@ export class DokumentasiBorangController {
       next(error);
     }
   }
+
+  static async findByKebutuhanDokumentasiIdForPublic(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseDokumentasiBorangWithKebutuhanDokumentasiType | null>,
+      {
+        validatedParams: {
+          kebutuhan_dokumentasi_id: number;
+        };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get params
+      const { kebutuhan_dokumentasi_id } = res.locals.validatedParams;
+
+      // call service
+      const service =
+        await DokumentasiBorangServices.findByKebutuhanDokumentasiId({
+          kebutuhan_dokumentasi_id,
+        });
+
+      return ResponseResult.success<ResponseDokumentasiBorangWithKebutuhanDokumentasiType | null>(
+        service,
+        res,
+        200,
+        "success",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }

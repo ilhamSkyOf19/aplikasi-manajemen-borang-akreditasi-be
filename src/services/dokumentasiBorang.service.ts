@@ -225,7 +225,7 @@ export class DokumentasiBorangServices {
 
   // find by id with kebutuhan dokumentasi
   static async findByKebutuhanDokumentasiId(params: {
-    role: DosenRole;
+    role?: DosenRole;
     kebutuhan_dokumentasi_id: number;
   }): Promise<ResponseDokumentasiBorangWithKebutuhanDokumentasiType | null> {
     // get params

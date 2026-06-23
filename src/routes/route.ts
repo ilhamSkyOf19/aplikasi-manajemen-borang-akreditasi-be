@@ -20,6 +20,7 @@ import dokumenPanduanRoute from "./dokumenPanduan.route";
 import activationCodeRoute from "./activationCode.route";
 import kebutuhanDokumentasiRoute from "./kebutuhanDokumentasi.route";
 import lokasiRoute from "./lokasi.route";
+import publicRoute from "./public.route";
 
 const appRoute: Router = Router();
 
@@ -28,6 +29,9 @@ appRoute.use("/", globalRoute);
 
 // middleate limiter
 appRoute.use(LimiterMiddleware.apiRegular());
+
+// public
+appRoute.use("/api/public", publicRoute);
 
 // auth router
 appRoute.use("/api/auth", authRoute);

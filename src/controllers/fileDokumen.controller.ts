@@ -189,6 +189,50 @@ export class FileDokumenController {
     }
   }
 
+  static async findFileDefaultForDetailForPublic(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseFileDokumenDefaultForDetailType | null>,
+      {
+        validatedParams: {
+          dokumentasi_borang_id: number;
+          file_dokumen_id: number;
+        };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get id
+      const { dokumentasi_borang_id, file_dokumen_id } =
+        res.locals.validatedParams;
+
+      // call service
+      const service = await FileDokumenDefaultService.findByIdForDetail({
+        dokumentasi_borang_id,
+        file_dokumen_id,
+      });
+
+      // check
+      if (!service) {
+        return ResponseResult.error(res, 400, "data not found");
+      }
+
+      // final res
+      const finalRes = { ...service, uploaded_by: null };
+
+      // return
+      return ResponseResult.success<ResponseFileDokumenDefaultForDetailType | null>(
+        finalRes,
+        res,
+        200,
+        "berhasil mendapatkan data file dokumen",
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // update file default
   static async updateFileDefault(
     req: AuthRequest<{}, {}, UpdateFileDefaultType>,
@@ -274,6 +318,47 @@ export class FileDokumenController {
         200,
         "berhasil mendapatkan data file dokumen",
       );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async findFilePenelitianForDetailForPublic(
+    _req: Request,
+    res: Response<
+      ResponseStructure<ResponseFileDokumenPenelitianForDetailType | null>,
+      {
+        validatedParams: {
+          file_dokumen_id: number;
+          dokumentasi_borang_id: number;
+        };
+      }
+    >,
+    next: NextFunction,
+  ) {
+    try {
+      // get id
+      const { dokumentasi_borang_id, file_dokumen_id } =
+        res.locals.validatedParams;
+
+      // call service
+      const service = await FileDokumenPenelitianService.findByIdForDetail({
+        dokumentasi_borang_id,
+        file_dokumen_id,
+      });
+
+      // check
+      if (!service) {
+        return ResponseResult.error(res, 400, "data not found");
+      }
+
+      const finalRes = { ...service, uploaded_by: null };
+
+      // return
+      return ResponseResult.success<Omit<
+        ResponseFileDokumenPenelitianForDetailType,
+        "uploaded_by"
+      > | null>(finalRes, res, 200, "berhasil mendapatkan data file dokumen");
     } catch (error) {
       next(error);
     }
