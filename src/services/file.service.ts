@@ -50,7 +50,7 @@ export class FileService {
     const uploader = multer({
       storage,
       fileFilter,
-      limits: { fileSize: 10 * 1024 * 1024 },
+      limits: { fileSize: 20 * 1024 * 1024 },
     });
 
     return {
@@ -338,6 +338,14 @@ export class FileService {
 
       return result;
     } catch (error) {
+      console.error("===== GOOGLE DRIVE ERROR =====");
+      console.error(error);
+
+      if (error instanceof Error) {
+        console.error(error.message);
+        console.error(error.stack);
+      }
+
       // delete file
       if (uploadedGDriveId) {
         await DriveApiService.deleteFile(uploadedGDriveId);
@@ -448,7 +456,7 @@ export class FileService {
 
     res.setHeader(
       "Content-Disposition",
-      `inline; filename="${encodeURIComponent(fileName ?? metadata.name)}"; `,
+      `inline; filename="${encodeURIComponent(fileName ?? metadata.name)}.pdf"; `,
     );
 
     res.setHeader("Cache-Control", "private, max-age=0");

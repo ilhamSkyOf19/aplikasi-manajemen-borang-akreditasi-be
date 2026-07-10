@@ -14,9 +14,12 @@ export class NotifikasiService {
     query: PaginationType & { isRead?: boolean };
     role: DosenRole;
     dosenId?: number;
+    periodeId?: number;
   }): Promise<ResponseNotifikasiWithMetaType | null> {
     const {
       role,
+      periodeId,
+      dosenId,
       query: { limit = 8, page = 1, search, sort, isRead },
     } = params;
 
@@ -25,6 +28,13 @@ export class NotifikasiService {
 
     // conditional
     const conditional: Prisma.RiwayatWhereInput = {
+      ...(periodeId && {
+        kebutuhan_dokumentasi_pic: {
+          kriteria: {
+            periode_id: periodeId,
+          },
+        },
+      }),
       ...(isRead && { isRead: isRead }),
       ...(search && { dosen: { nama: { contains: search } } }),
       ...(role === DosenRole.kaprodi && {
@@ -74,7 +84,7 @@ export class NotifikasiService {
                 kriteria: {
                   kriteriaPic: {
                     some: {
-                      dosen_id: params.dosenId,
+                      dosen_id: dosenId,
                     },
                   },
                 },

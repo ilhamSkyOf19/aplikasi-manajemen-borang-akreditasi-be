@@ -60,7 +60,9 @@ export const errorMiddleware = (
   if (err instanceof multer.MulterError) {
     switch (err.code) {
       case "LIMIT_FILE_SIZE":
-        return ResponseResult.error(res, 400, "file terlalu besar");
+        return ResponseResult.error(res, 400, "file terlalu besar", [
+          "file_to_large",
+        ]);
 
       case "LIMIT_FILE_COUNT":
         return ResponseResult.error(res, 400, "file terlalu banyak");

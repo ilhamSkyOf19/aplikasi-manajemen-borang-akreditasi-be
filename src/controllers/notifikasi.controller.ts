@@ -23,6 +23,14 @@ export class NotifikasiController {
       const role = req.data?.role;
       const dosenId = req.data?.id;
 
+      // get periode
+      const periodeId = req?.periode?.id;
+
+      // check periode
+      if (!periodeId) {
+        return ResponseResult.error(res, 404, "tidak ada periode aktif");
+      }
+
       // get query
       const { limit, page, search, sort, isRead } = res.locals.validatedQuery;
 
@@ -30,6 +38,7 @@ export class NotifikasiController {
       const service = await NotifikasiService.getNotifikasiByRole({
         role: role!,
         dosenId,
+        periodeId,
         query: {
           limit,
           page,

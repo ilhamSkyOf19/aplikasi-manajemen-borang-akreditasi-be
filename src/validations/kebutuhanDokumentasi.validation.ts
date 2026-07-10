@@ -94,7 +94,7 @@ export class KebutuhanDokumentasiValidation {
       kriteria_id: z.number().int().min(1).max(2147483647).optional(),
       pendekatan_id: z.number().int().min(1).max(2147483647).optional(),
       nama_dokumentasi_id: z.number().int().min(1).max(2147483647).optional(),
-      pic: z.array(this.lokasiSchema).min(1).optional(),
+      lokasi: z.array(this.lokasiSchema).min(1).optional(),
       nama_dokumentasi_new: z.string().min(1).max(200).optional(),
       tipe_dokumentasi: z
         .enum(["DEFAULT", "PENELITIAN"] as TipeDokumentasi[])

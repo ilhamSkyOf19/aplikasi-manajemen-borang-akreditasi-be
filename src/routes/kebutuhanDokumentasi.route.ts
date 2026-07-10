@@ -29,7 +29,7 @@ kebutuhanDokumentasiRoute.post(
 
 // update
 kebutuhanDokumentasiRoute.patch(
-  "/:kebutuhan_dokumentasi_id",
+  "/:kebutuhan_dokumentasi_pic_id",
   [authMiddleware, aclMiddleware([DosenRole.kaprodi])],
   zodValidationParams<{ kebutuhan_dokumentasi_pic_id: number }>(
     KebutuhanDokumentasiValidation.PARAMS_UPDATE,

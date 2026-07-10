@@ -6,6 +6,7 @@ import { GlobalValidation } from "../validations/global.validation";
 import { zodValidationQuery } from "../middlewares/validationQuery.middleware";
 import { NotifikasiValidation } from "../validations/notifikasi.validation";
 import { zodValidationParams } from "../middlewares/validationParams.middleware";
+import { periodeMiddleware } from "../middlewares/periode.middleware";
 // notifikasi route
 const notifikasiRoute: Router = Router();
 
@@ -13,6 +14,7 @@ const notifikasiRoute: Router = Router();
 notifikasiRoute.get(
   "/",
   authMiddleware,
+  periodeMiddleware,
   zodValidationQuery<PaginationType & { isRead?: boolean }>(
     NotifikasiValidation.QUERY,
   ),
