@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+
+  <style>
+    :root {
+      --navy: #101828;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      --red: #dc2626;
+
+      --gray-500: #6b7280;
+      --gray-200: #e5e7eb;
+      --gray-100: #f3f4f6;
+      --gray-50: #f9fafb;
+
+      --line: #e7e9ee;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 16mm 15mm;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #111827;
+    }
+
+    .doc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--navy);
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: 20px;
+      color: var(--navy);
+    }
+
+    /* KPI */
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      padding: 12px 14px;
+      background: var(--gray-50);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .kpi-card .label {
+      margin-bottom: 6px;
+      font-size: 10px;
+      color: var(--gray-500);
+      text-transform: uppercase;
+    }
+
+    .kpi-card .value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    /* Kriteria */
+
+    .kriteria-card {
+      margin-bottom: 14px;
+      overflow: hidden;
+      page-break-inside: avoid;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .kriteria-head {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .kriteria-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .kriteria-pic {
+      margin-top: 2px;
+      font-size: 10.5px;
+      color: var(--gray-500);
+    }
+
+    .pct {
+      font-size: 17px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .pct.good {
+      color: var(--green);
+    }
+
+    .pct.mid {
+      color: var(--amber);
+    }
+
+    .pct.low {
+      color: var(--red);
+    }
+
+    /* Progress */
+
+    .mini-track {
+      width: calc(100% - 32px);
+      height: 6px;
+      margin: 12px 16px;
+      overflow: hidden;
+      background: var(--gray-200);
+      border-radius: 999px;
+    }
+
+    .mini-fill {
+      width: var(--progress);
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .mini-fill.good {
+      background: var(--green);
+    }
+
+    .mini-fill.mid {
+      background: var(--amber);
+    }
+
+    .mini-fill.low {
+      background: var(--red);
+    }
+
+    /* Table */
+
+    table {
+      width: 100%;
+      margin-bottom: 12px;
+      border-collapse: collapse;
+      font-size: 10.5px;
+    }
+
+    table th {
+      padding: 6px 16px;
+      font-size: 9px;
+      text-align: left;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      border-bottom: 1px solid var(--line);
+    }
+
+    table td {
+      padding: 6px 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    th.num,
+    td.num {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="doc-header">
+    <div>
+      <strong>Laporan Statistik Dokumentasi Akreditasi</strong>
+    </div>
+
+    <div style="font-size:11px;color:var(--gray-500);">
+      Dicetak pada <%= generatedAt %>
+    </div>
+  </div>
+
+  <h1>Ringkasan Umum</h1>
+
+  <div class="kpi-grid">
+
+    <div class="kpi-card">
+      <div class="label">Total Kriteria</div>
+      <div class="value"><%= summary.totalKriteria %></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="label">Kebutuhan Dokumen</div>
+      <div class="value"><%= summary.totalKebutuhan %></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="label">Borang Disetujui</div>
+      <div class="value">
+        <%= summary.totalApprove %> / <%= summary.totalKebutuhan %>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="label">Menunggu / Revisi</div>
+      <div class="value"><%= summary.totalBelum %></div>
+    </div>
+
+  </div>
+
+  <h1>Detail per Kriteria</h1>
+
+  <% kriteriaList.forEach(function(k){ %>
+
+    <div class="kriteria-card">
+
+      <div class="kriteria-head">
+
+        <div>
+          <div class="kriteria-name">
+            <%= k.kode_kriteria %>. <%= k.nama_kriteria %>
+          </div>
+
+          <div class="kriteria-pic">
+            PIC:
+            <%= k.dosen_pic.map(function(d){ return d.nama }).join(" · ") %>
+          </div>
+        </div>
+
+        <div style="text-align:right;">
+          <div class="pct <%= k.statusClass %>">
+            <%= k.persen %>%
+          </div>
+
+          <div style="font-size:10px;color:var(--gray-500);">
+            <%= k.total_dokumentasi_selesai_in_kriteria %> /
+            <%= k.total_dokumentasi_in_kriteria %> dokumen
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mini-track">
+        <div
+          class="mini-fill <%= k.statusClass %>"
+          style="--progress:<%= k.persen %>%;">
+        </div>
+      </div>
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Pendekatan</th>
+            <th class="num">Approve</th>
+            <th class="num">Total</th>
+            <th class="num">Pending</th>
+            <th class="num">Revisi</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <% k.pendekatan.forEach(function(p){ %>
+
+            <tr>
+              <td><%= p.nama_pendekatan %></td>
+              <td class="num"><%= p.dokumentasi_borang_approve %></td>
+              <td class="num"><%= p.dokumentasi_borang_total %></td>
+              <td class="num"><%= p.dokumentasi_pending %></td>
+              <td class="num"><%= p.dokumentasi_revisi %></td>
+            </tr>
+
+          <% }) %>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  <% }) %>
+
+</body>
+
+</html>

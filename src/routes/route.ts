@@ -21,6 +21,7 @@ import activationCodeRoute from "./activationCode.route";
 import kebutuhanDokumentasiRoute from "./kebutuhanDokumentasi.route";
 import lokasiRoute from "./lokasi.route";
 import publicRoute from "./public.route";
+import laporanRoute from "./laporan.route";
 
 const appRoute: Router = Router();
 
@@ -92,6 +93,9 @@ appRoute.use("/api/riwayat", riwayatRouter);
 
 // notifikasi router
 appRoute.use("/api/notifikasi", notifikasiRoute);
+
+// notifikasi router
+appRoute.use("/api/laporan", laporanRoute);
 
 // // dokumen borang router
 // appRoute.use("/api/dokumen-borang", dokumenBorangRoute);
