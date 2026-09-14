@@ -363,7 +363,6 @@ export class LaporanServices {
       );
 
       doc.y = rowY + rowHeight;
-
       doc
         .moveTo(PAGE_MARGIN, doc.y)
         .lineTo(PAGE_MARGIN + pageWidth, doc.y)

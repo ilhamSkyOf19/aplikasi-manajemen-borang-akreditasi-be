@@ -28,12 +28,10 @@ export class FileService {
 
     // file filter
     const fileFilter = (
-      req: Request,
+      _req: Request,
       file: Express.Multer.File,
       cb: FileFilterCallback,
     ) => {
-      console.log(req.body);
-
       const extname = allowedMimeTypes.test(
         path.extname(file.originalname).toLowerCase(),
       );

@@ -161,8 +161,6 @@ export class DokumenPanduanController {
           uploadedFile: req.file,
         });
 
-        console.log(uploadFiles);
-
         //   check upload files
         if (!uploadFiles) {
           return ResponseResult.error(res, 400, "gagal upload file");
@@ -284,8 +282,6 @@ export class DokumenPanduanController {
           "dokumen_panduan",
           findDokumenPanduan.id_file,
         );
-
-        console.log(filePath);
 
         if (!fs.existsSync(filePath)) {
           return ResponseResult.error(res, 404, "file tidak ditemukan");

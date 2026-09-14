@@ -19,8 +19,10 @@ export class LaporanController {
         throw new Error("periode not found");
       }
 
-      const data = await StatistikService.getStatistik({
+      const data = await StatistikService.getStatistikForDownload({
         periode_id: periodeId,
+        dosen_id: req?.data?.id,
+        role: req?.data?.role,
       });
 
       //   chekc data
